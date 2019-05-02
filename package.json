@@ -1,0 +1,27 @@
+{
+    "name": "threelet",
+    "version": "0.9.0",
+    "description": "A portable standalone viewer for THREE objects",
+    "main": "dist/threelet.js",
+    "directories": {
+        "example": "examples",
+        "test": "test"
+    },
+    "scripts": {},
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/w3reality/threelet.git"
+    },
+    "keywords": [
+        "three",
+        "viewer"
+    ],
+    "author": "j-devel",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/w3reality/threelet/issues"
+    },
+    "homepage": "https://github.com/w3reality/threelet",
+    "dependencies": {},
+    "devDependencies": {}
+}
