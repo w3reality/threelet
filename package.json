@@ -1,6 +1,6 @@
 {
     "name": "threelet",
-    "version": "0.9.0",
+    "version": "0.9.1",
     "description": "A portable standalone viewer for THREE objects",
     "main": "dist/threelet.js",
     "directories": {
