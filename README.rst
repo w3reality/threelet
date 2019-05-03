@@ -28,6 +28,7 @@ Usage
     <script src="../deps/three.min.js"></script>
     <script src="../deps/OrbitControls.js"></script>
     <script src="../deps/stats.min.js"></script>
+
     <script type="module">
     import Threelet from '../../dist/threelet.js';
 

@@ -23,5 +23,7 @@
     },
     "homepage": "https://github.com/w3reality/threelet",
     "dependencies": {},
-    "devDependencies": {}
+    "devDependencies": {
+        "three": "^0.104.0"
+    }
 }
