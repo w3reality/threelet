@@ -74,7 +74,7 @@ class Threelet {
         // TODO ??
     }
 
-    enterVR(tryCountMax, delay) {
+    enterVR(tryCountMax, delay, onError) {
         // try entering VR for at most tryCountMax * delay (ms)
         let tryCount = 0;
         const _enterVR = () => {
@@ -87,10 +87,9 @@ class Threelet {
                     console.log(`@@ vr not ready after: ${tryCount*delay} ms (tryCount: ${tryCount})`);
                     if (tryCount < tryCountMax) {
                         _enterVR(tryCountMax, delay); // try harder
-                    } else {
-                        // give up; restore the desktop loop
-                        console.error('@@ enterVR(): failed!!')
-                        this.updateLoop(this.fpsDesktopLast);
+                    } else if (onError) {
+                        console.error('@@ enter vr failed!!')
+                        onError();
                     }
                 }
             }, delay); // need some delay for this.renderer.vr.isPresenting() to become true
@@ -109,6 +108,28 @@ class Threelet {
         if (fps === 0) {
             return; // stop the loop
         } else if (fps < 0) { // start the vr loop
+            // https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
+            const controller0 = this.renderer.vr.getController(0);
+            const controller1 = this.renderer.vr.getController(1);
+            console.log('@@ controllers:', controller0, controller1);
+
+            // controller0.addEventListener('selectstart', onSelectStart);
+            // controller0.addEventListener('selectend', onSelectEnd);
+            this.scene.add(controller0);
+            // controller1.addEventListener('selectstart', onSelectStart);
+            // controller1.addEventListener('selectend', onSelectEnd);
+            this.scene.add(controller1);
+
+            const walls = new THREE.LineSegments(
+                new THREE.EdgesGeometry(new THREE.BoxBufferGeometry(1, 1, 1)),
+                new THREE.LineBasicMaterial({color: 0xcccccc}));
+            walls.position.set(Math.random()*2, Math.random()*2, -4);
+            this.scene.add(walls);
+
+            // https://github.com/mrdoob/three.js/blob/master/examples/webvr_paint.html
+            controller0.add(walls.clone());
+            controller1.add(walls.clone());
+
             this.renderer.setAnimationLoop(() => {
                 if (! this.renderer.vr.isPresenting()) {
                     this.renderer.setAnimationLoop(null); // stop the vr loop
@@ -118,6 +139,9 @@ class Threelet {
 
                 // TODO update!!!!!!!!!!!!!!!!!!!
 
+                // controllers TODO
+                // intersectObjects( controller0 );
+                // intersectObjects( controller1 );
 
                 this.render(true);
             });
@@ -206,7 +230,12 @@ class Threelet {
             btn.style.bottom = '';
             if (hasVR) {
                 btn.addEventListener('click', ev => {
-                    this.enterVR(10, 400);
+                    this.enterVR(10, 400, () => { // onError
+                        console.log('@@ device:', renderer.vr.getDevice());
+                        console.log('@@ controller:', renderer.vr.getController(0));
+                        // TODO (how to exit the VR session????)
+                        // this.updateLoop(this.fpsDesktopLast); // wanna call this after exiting the vr session...
+                    });
                 });
             }
             document.body.appendChild(btn);
@@ -327,7 +356,7 @@ class Threelet {
         if (mat.map) mat.map.dispose();
         mat.dispose();
     }
-    static disposeObject(obj) { // cf. https://gist.github.com/j-devel/6d0323264b6a1e47e2ee38bc8647c726
+    static disposeObject(obj) { // https://gist.github.com/j-devel/6d0323264b6a1e47e2ee38bc8647c726
         if (obj.geometry) obj.geometry.dispose();
         if (obj.material) Threelet.disposeMaterial(obj.material);
         if (obj.texture) obj.texture.dispose();
