@@ -134,6 +134,7 @@ class Threelet {
                 if (! this.renderer.vr.isPresenting()) {
                     this.renderer.setAnimationLoop(null); // stop the vr loop
                     console.log('@@ transition back to desktop');
+                    // console.log('fps last:', this.fpsDesktopLast);
                     return this.updateLoop(this.fpsDesktopLast);
                 }
 
@@ -230,12 +231,15 @@ class Threelet {
             btn.style.bottom = '';
             if (hasVR) {
                 btn.addEventListener('click', ev => {
-                    this.enterVR(10, 400, () => { // onError
-                        console.log('@@ device:', renderer.vr.getDevice());
-                        console.log('@@ controller:', renderer.vr.getController(0));
-                        // TODO (how to exit the VR session????)
-                        // this.updateLoop(this.fpsDesktopLast); // wanna call this after exiting the vr session...
-                    });
+                    console.log('@@ btn.textContent:', btn.textContent);
+                    if (btn.textContent.startsWith('ENTER')) {
+                        this.enterVR(10, 400, () => { // onError
+                            console.log('@@ device:', renderer.vr.getDevice());
+                            console.log('@@ controller:', renderer.vr.getController(0));
+                            // TODO (how to exit the VR session????)
+                            // this.updateLoop(this.fpsDesktopLast); // wanna call this after exiting the vr session...
+                        });
+                    }
                 });
             }
             document.body.appendChild(btn);
