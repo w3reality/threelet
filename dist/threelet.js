@@ -3,7 +3,7 @@
 
 class Threelet {
     constructor(params) {
-        this.version = "0.9.1"
+        this.version = "0.9.2dev"
         const defaults = {
             canvas: null,
             optScene: null,
@@ -74,9 +74,32 @@ class Threelet {
         // TODO ??
     }
 
-    updateLoopVR() {
-        this.updateLoop(-1);
+    enterVR(tryCountMax, delay) {
+        // try entering VR for at most tryCountMax * delay (ms)
+        let tryCount = 0;
+        const _enterVR = () => {
+            setTimeout(() => {
+                tryCount++;
+                if (this.renderer.vr.isPresenting()) {
+                    console.log(`@@ transition to vr loop!! (tryCount: ${tryCount})`);
+                    this.updateLoop(-1);
+                } else {
+                    console.log(`@@ vr not ready after: ${tryCount*delay} ms (tryCount: ${tryCount})`);
+                    if (tryCount < tryCountMax) {
+                        _enterVR(tryCountMax, delay); // try harder
+                    } else {
+                        // give up; restore the desktop loop
+                        console.error('@@ enterVR(): failed!!')
+                        this.updateLoop(this.fpsDesktopLast);
+                    }
+                }
+            }, delay); // need some delay for this.renderer.vr.isPresenting() to become true
+        };
+
+        this.updateLoop(0); // first, make sure desktop loop is stopped
+        _enterVR(tryCountMax, delay);
     }
+
     updateLoop(fps) {
         if (this.iid !== null) {
             // console.log('@@ updateLoop(): clearing interval:', this.iid);
@@ -157,8 +180,6 @@ class Threelet {
         }
         const render = (isPresenting=false) => {
             // console.log('@@ render(): isPresenting:', isPresenting);
-            renderer.vr.enabled = isPresenting;
-
             if (stats) { stats.update(); }
             if (! isPresenting) { resizeCanvas(); }
             renderer.render(scene, camera);
@@ -167,7 +188,7 @@ class Threelet {
         if (optClassControls) {
             if (Threelet.isVrSupported()) {
                 // FIXME - OrbitControl breaks _initMouseListeners() on Oculus Go
-                console.error('warning: OrbitControls set but not enabling on this VR-capable browser.');
+                console.error('note: OrbitControls set but not enabling on this VR-capable browser.');
             } else {
                 new optClassControls(camera, renderer.domElement)
                     .addEventListener('change', render.bind(null, false));
@@ -175,30 +196,28 @@ class Threelet {
         }
 
         if (optClassWebVR) {
+            const hasVR = Threelet.isVrSupported();
             // console.log('@@ optClassWebVR:', optClassWebVR);
             // https://threejs.org/docs/manual/en/introduction/How-to-create-VR-content.html
+            renderer.vr.enabled = hasVR;
+
             const btn = optClassWebVR.createButton(renderer);
             btn.style.top = btn.style.bottom;
             btn.style.bottom = '';
-            btn.addEventListener('click', ev => {
-                // https://github.com/mrdoob/three.js/blob/dev/examples/js/vr/WebVR.js
-                if (Threelet.isVrSupported()) {
-                    const delay = 1000; // need some delay for this.renderer.vr.isPresenting() to become true
-                    setTimeout(() => {
-                        if (this.renderer.vr.isPresenting()) {
-                            this.updateLoopVR(); // transition to vr loop
-                        } else {
-                            console.error(`@@ woops: nop; vr not ready with delay: ${delay} ms`);
-                        }
-                    }, delay);
-                }
-            });
+            if (hasVR) {
+                btn.addEventListener('click', ev => {
+                    this.enterVR(10, 400);
+                });
+            }
             document.body.appendChild(btn);
         }
 
         return [camera, scene, renderer, render];
     }
-    static isVrSupported() { return 'getVRDisplays' in navigator }
+    static isVrSupported() {
+        // https://github.com/mrdoob/three.js/blob/dev/examples/js/vr/WebVR.js
+        return 'getVRDisplays' in navigator;
+    }
 
     // log with time splits
     log(...args) {
