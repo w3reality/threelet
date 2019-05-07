@@ -1,6 +1,9 @@
 // Threelet - https://github.com/w3reality/threelet
 // A portable standalone viewer for THREE objects (MIT License)
 
+// const __controllerArmLength = 0;
+const __controllerArmLength = 0.25;
+
 class Threelet {
     constructor(params) {
         this.version = "0.9.2dev"
@@ -24,11 +27,6 @@ class Threelet {
         // basics
         [this.camera, this.scene, this.renderer, this.render, this.controls] =
             Threelet._initBasics(canvas, actual);
-
-        // WebVR
-        if (actual.optClassWebVR) {
-            this._initVR(actual.optClassWebVR);
-        }
 
         // mouse interaction
         this.onClickLeft = null;
@@ -65,8 +63,59 @@ class Threelet {
 
         // WebVR related stuff
         this.fpsDesktopLast = 0;
-        this.vrController0 = null;
-        this.vrController1 = null;
+        // // dragging with controllers ======================
+        this.vrControllers = [];
+        if (actual.optClassWebVR) {
+            this.vrControllers = this._initVR(actual.optClassWebVR);
+            this.vrControllers.forEach(cont => {
+                cont.addEventListener('selectstart', this.onSelectStart.bind(this));
+                cont.addEventListener('selectend', this.onSelectEnd.bind(this));
+                this.scene.add(cont);
+            });
+        }
+        this.group = new THREE.Group();
+        this.scene.add(this.group);
+
+        this.scene.add( new THREE.HemisphereLight( 0x808080, 0x606060 ) );
+        const light = new THREE.DirectionalLight( 0xffffff );
+        light.position.set( 0, 6, 0 );
+        light.castShadow = true;
+        light.shadow.camera.top = 2;
+        light.shadow.camera.bottom = - 2;
+        light.shadow.camera.right = 2;
+        light.shadow.camera.left = - 2;
+        light.shadow.mapSize.set( 4096, 4096 );
+        this.scene.add( light );
+
+        const geoms = [
+            new THREE.BoxBufferGeometry( 0.2, 0.2, 0.2 ),
+            new THREE.ConeBufferGeometry( 0.2, 0.2, 64 ),
+            new THREE.CylinderBufferGeometry( 0.2, 0.2, 0.2, 64 ),
+            new THREE.IcosahedronBufferGeometry( 0.2, 3 ),
+            new THREE.TorusBufferGeometry( 0.2, 0.04, 64, 32 )
+        ];
+        for (let geom of geoms) {
+            const object = new THREE.Mesh(geom,
+                new THREE.MeshStandardMaterial({
+                    color: Math.random() * 0xffffff,
+                    roughness: 0.7,
+                    metalness: 0.0
+                }));
+            object.position.set(2*Math.random(), 2*Math.random(), -1);
+            // console.log('@@ object:', object);
+            object.rotation.x = Math.random() * 2 * Math.PI;
+            object.rotation.y = Math.random() * 2 * Math.PI;
+            object.rotation.z = Math.random() * 2 * Math.PI;
+            object.scale.setScalar( Math.random() + 0.5 );
+            object.castShadow = true;
+            object.receiveShadow = true;
+            this.group.add(object);
+        }
+
+        this.tempMatrix = new THREE.Matrix4();
+        this.raycaster = new THREE.Raycaster();
+        this.intersected = [];
+
         // // https://stackoverflow.com/questions/49471653/in-three-js-while-using-webvr-how-do-i-move-the-camera-position
         // this.dolly = new THREE.Group();
         // this.dolly.add(this.camera);
@@ -104,32 +153,106 @@ class Threelet {
             });
         }
     }
-    _initControllersVR() {
+
+    //---- begin adaptation of the dragging example
+    // credits: https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
+    onSelectStart( event ) {
+        console.log('@@ onSelectStart(): hi');
+        // console.log('@@ onSelectStart(): this:', this);
+        var controller = event.target;
+        var intersections = this.getIntersections( controller );
+        if ( intersections.length > 0 ) {
+            var intersection = intersections[ 0 ];
+
+            this.tempMatrix.getInverse( controller.matrixWorld );
+
+            var object = intersection.object;
+            object.matrix.premultiply( this.tempMatrix );
+            object.matrix.decompose( object.position, object.quaternion, object.scale );
+            object.material.emissive.b = 1;
+            controller.add( object );
+
+            controller.userData.selected = object;
+        }
+    }
+
+    onSelectEnd( event ) {
+        console.log('@@ onSelectEnd(): hi');
+        var controller = event.target;
+        if ( controller.userData.selected !== undefined ) {
+            var object = controller.userData.selected;
+            object.matrix.premultiply( controller.matrixWorld );
+            object.matrix.decompose( object.position, object.quaternion, object.scale );
+            object.material.emissive.b = 0;
+            this.group.add( object );
+
+            controller.userData.selected = undefined;
+        }
+    }
+
+    getIntersections( controller ) {
+        // console.log('@@ getIntersections(): hi');
+        this.tempMatrix.identity().extractRotation( controller.matrixWorld );
+        this.raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
+        this.raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( this.tempMatrix );
+        return this.raycaster.intersectObjects( this.group.children );
+    }
+
+    intersectObjects( controller ) {
+        // console.log('@@ intersectObjects(): hi');
+        // Do not highlight when already selected
+        if ( controller.userData.selected !== undefined ) return;
+
+        const line = controller.getObjectByName( 'line' );
+        const intersections = this.getIntersections( controller );
+
+        if ( intersections.length > 0 ) {
+            const intersection = intersections[ 0 ];
+            const object = intersection.object;
+            object.material.emissive.r = 1;
+            this.intersected.push( object );
+            // console.log('@@ intersection.distance:', intersection.distance);
+            line.scale.z = intersection.distance - __controllerArmLength;
+        } else {
+            line.scale.z = 5 - __controllerArmLength;
+        }
+    }
+
+    cleanIntersected() {
+        // console.log('@@ cleanIntersected(): hi');
+        while ( this.intersected.length ) {
+            const object = this.intersected.pop();
+            object.material.emissive.r = 0;
+        }
+    }
+    //---- end adaptation of the dragging example
+
+    static _initControllersVR(renderer) {
         // https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
-        const cont0 = this.renderer.vr.getController(0);
-        const cont1 = this.renderer.vr.getController(1);
+        const cont0 = renderer.vr.getController(0);
+        const cont1 = renderer.vr.getController(1);
         console.log('@@ controllers:', cont0, cont1);
 
-        // cont0.addEventListener('selectstart', onSelectStart);
-        // cont0.addEventListener('selectend', onSelectEnd);
-        this.scene.add(cont0);
-        // cont1.addEventListener('selectstart', onSelectStart);
-        // cont1.addEventListener('selectend', onSelectEnd);
-        this.scene.add(cont1);
-
-        // TODO
+        // TODO load a 3D model instead of the box
         // https://github.com/mrdoob/three.js/blob/master/examples/webvr_paint.html
         const walls = new THREE.LineSegments(
             new THREE.EdgesGeometry(new THREE.BoxBufferGeometry(0.05, 0.025, 0.1)),
             new THREE.LineBasicMaterial({color: 0xcccccc}));
-        walls.position.set(0, 0, -0.25); // customize Z for "arm" length
+        walls.position.set(0, 0, - __controllerArmLength); // customize Z for "arm" length
         cont0.add(walls.clone());
         cont1.add(walls.clone());
 
-        this.scene.add(walls); // debug show
+        const line = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(0, 0, -1)]));
+        line.position.set(0, 0, - __controllerArmLength);
+        line.name = 'line';
+        line.scale.z = 5 - __controllerArmLength;
+        cont0.add(line.clone());
+        cont1.add(line.clone());
 
-        this.vrController0 = cont0;
-        this.vrController1 = cont1;
+        return [cont0, cont1];
     }
     _initVR(optClassWebVR) {
         const hasVR = Threelet.isVrSupported();
@@ -137,9 +260,7 @@ class Threelet {
         // https://threejs.org/docs/manual/en/introduction/How-to-create-VR-content.html
         this.renderer.vr.enabled = hasVR;
         this._initButtonVR(optClassWebVR);
-        if (hasVR) {
-            this._initControllersVR();
-        }
+        return hasVR ? Threelet._initControllersVR(this.renderer) : [];
     }
 
     enterVR(onError=null) {
@@ -187,9 +308,14 @@ class Threelet {
 
                 // TODO update!!!!!!!!!!!!!!!!!!!
 
-                // controllers TODO
-                // intersectObjects( this.vrController0 );
-                // intersectObjects( this.vrController1 );
+                // dragging with controllers
+                this.cleanIntersected();
+                if (this.vrControllers[0]) {
+                    this.intersectObjects(this.vrControllers[0]);
+                }
+                if (this.vrControllers[1]) {
+                    this.intersectObjects(this.vrControllers[1]);
+                }
 
                 this.render(true);
             });
