@@ -21,9 +21,9 @@ class Threelet {
         // kludge for mouse events and overlay
         canvas.style.display = 'block'; // https://stackoverflow.com/questions/8600393/there-is-a-4px-gap-below-canvas-video-audio-elements-in-html5
 
-        // basic rendering
-        [this.camera, this.scene, this.renderer, this.render] =
-            Threelet._init(canvas, actual);
+        // basics
+        [this.camera, this.scene, this.renderer, this.render, this.controls] =
+            Threelet._initBasics(canvas, actual);
 
         // WebVR
         if (actual.optClassWebVR) {
@@ -106,30 +106,30 @@ class Threelet {
     }
     _initControllersVR() {
         // https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
-        const controller0 = this.renderer.vr.getController(0);
-        const controller1 = this.renderer.vr.getController(1);
-        console.log('@@ controllers:', controller0, controller1);
+        const cont0 = this.renderer.vr.getController(0);
+        const cont1 = this.renderer.vr.getController(1);
+        console.log('@@ controllers:', cont0, cont1);
 
-        // controller0.addEventListener('selectstart', onSelectStart);
-        // controller0.addEventListener('selectend', onSelectEnd);
-        this.scene.add(controller0);
-        // controller1.addEventListener('selectstart', onSelectStart);
-        // controller1.addEventListener('selectend', onSelectEnd);
-        this.scene.add(controller1);
+        // cont0.addEventListener('selectstart', onSelectStart);
+        // cont0.addEventListener('selectend', onSelectEnd);
+        this.scene.add(cont0);
+        // cont1.addEventListener('selectstart', onSelectStart);
+        // cont1.addEventListener('selectend', onSelectEnd);
+        this.scene.add(cont1);
 
+        // TODO
+        // https://github.com/mrdoob/three.js/blob/master/examples/webvr_paint.html
         const walls = new THREE.LineSegments(
             new THREE.EdgesGeometry(new THREE.BoxBufferGeometry(0.05, 0.025, 0.1)),
             new THREE.LineBasicMaterial({color: 0xcccccc}));
+        walls.position.set(0, 0, -0.25); // customize Z for "arm" length
+        cont0.add(walls.clone());
+        cont1.add(walls.clone());
 
-        // https://github.com/mrdoob/three.js/blob/master/examples/webvr_paint.html
-        walls.position.set(0, 0, -0.25);
-        controller0.add(walls.clone());
-        controller1.add(walls.clone());
+        this.scene.add(walls); // debug show
 
-        this.scene.add(walls); // debug
-
-        this.vrController0 = controller0;
-        this.vrController1 = controller1;
+        this.vrController0 = cont0;
+        this.vrController1 = cont1;
     }
     _initVR(optClassWebVR) {
         const hasVR = Threelet.isVrSupported();
@@ -188,8 +188,8 @@ class Threelet {
                 // TODO update!!!!!!!!!!!!!!!!!!!
 
                 // controllers TODO
-                // intersectObjects( this.controller0 );
-                // intersectObjects( this.controller1 );
+                // intersectObjects( this.vrController0 );
+                // intersectObjects( this.vrController1 );
 
                 this.render(true);
             });
@@ -210,7 +210,7 @@ class Threelet {
         // console.log('@@ updateLoop(): new interval:', this.iid);
     }
 
-    static _init(canvas, opts) {
+    static _initBasics(canvas, opts) {
         const {optScene, optClassStats, optClassControls} = opts;
 
         const camera = new THREE.PerspectiveCamera(75, canvas.width/canvas.height, 0.001, 1000);
@@ -257,17 +257,18 @@ class Threelet {
             renderer.render(scene, camera);
         };
 
+        let controls = null;
         if (optClassControls) {
+            controls = new optClassControls(camera, renderer.domElement);
+            controls.addEventListener('change', render.bind(null, false));
             if (Threelet.isVrSupported()) {
                 // FIXME - OrbitControl breaks _initMouseListeners() on Oculus Go
                 console.error('note: OrbitControls set but not enabling on this VR-capable browser.');
-            } else {
-                new optClassControls(camera, renderer.domElement)
-                    .addEventListener('change', render.bind(null, false));
+                controls.enabled = false; // https://stackoverflow.com/questions/20058579/threejs-disable-orbit-camera-while-using-transform-control
             }
         }
 
-        return [camera, scene, renderer, render];
+        return [camera, scene, renderer, render, controls];
     }
 
     // log with time splits

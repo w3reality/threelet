@@ -55,9 +55,11 @@ auto/manual camera/scene/renderer configuration:
 .. code:: js
 
    const threelet = new Threelet();
-   threelet.camera
-   threelet.scene
-   threelet.renderer
+   // now the following objects are all set
+   // threelet.camera
+   // threelet.scene
+   // threelet.renderer
+   // threelet.controls
 
 object registration/custom scene:
 
