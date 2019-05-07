@@ -23,7 +23,12 @@ class Threelet {
 
         // basic rendering
         [this.camera, this.scene, this.renderer, this.render] =
-            this._init(canvas, actual);
+            Threelet._init(canvas, actual);
+
+        // WebVR
+        if (actual.optClassWebVR) {
+            this._initVR(actual.optClassWebVR);
+        }
 
         // mouse interaction
         this.onClickLeft = null;
@@ -60,6 +65,8 @@ class Threelet {
 
         // WebVR related stuff
         this.fpsDesktopLast = 0;
+        this.vrController0 = null;
+        this.vrController1 = null;
         // // https://stackoverflow.com/questions/49471653/in-three-js-while-using-webvr-how-do-i-move-the-camera-position
         // this.dolly = new THREE.Group();
         // this.dolly.add(this.camera);
@@ -74,8 +81,70 @@ class Threelet {
         // TODO ??
     }
 
-    enterVR(tryCountMax, delay, onError) {
+    static isVrSupported() {
+        // https://github.com/mrdoob/three.js/blob/dev/examples/js/vr/WebVR.js
+        return 'getVRDisplays' in navigator;
+    }
+    _initButtonVR(optClassWebVR) {
+        const btn = optClassWebVR.createButton(this.renderer);
+        btn.style.top = btn.style.bottom;
+        btn.style.bottom = '';
+        document.body.appendChild(btn);
+        if (Threelet.isVrSupported()) {
+            btn.addEventListener('click', ev => {
+                console.log('@@ btn.textContent:', btn.textContent);
+                if (btn.textContent.startsWith('ENTER')) {
+                    this.enterVR(() => { // onError
+                        console.log('@@ device:', this.renderer.vr.getDevice());
+                        console.log('@@ controller:', this.renderer.vr.getController(0));
+                        // TODO (how to programmatically exit the VR session????)
+                        // this.updateLoop(this.fpsDesktopLast); // wanna call this after exiting the vr session...
+                    });
+                }
+            });
+        }
+    }
+    _initControllersVR() {
+        // https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
+        const controller0 = this.renderer.vr.getController(0);
+        const controller1 = this.renderer.vr.getController(1);
+        console.log('@@ controllers:', controller0, controller1);
+
+        // controller0.addEventListener('selectstart', onSelectStart);
+        // controller0.addEventListener('selectend', onSelectEnd);
+        this.scene.add(controller0);
+        // controller1.addEventListener('selectstart', onSelectStart);
+        // controller1.addEventListener('selectend', onSelectEnd);
+        this.scene.add(controller1);
+
+        const walls = new THREE.LineSegments(
+            new THREE.EdgesGeometry(new THREE.BoxBufferGeometry(0.05, 0.025, 0.1)),
+            new THREE.LineBasicMaterial({color: 0xcccccc}));
+
+        // https://github.com/mrdoob/three.js/blob/master/examples/webvr_paint.html
+        walls.position.set(0, 0, -0.25);
+        controller0.add(walls.clone());
+        controller1.add(walls.clone());
+
+        this.scene.add(walls); // debug
+
+        this.vrController0 = controller0;
+        this.vrController1 = controller1;
+    }
+    _initVR(optClassWebVR) {
+        const hasVR = Threelet.isVrSupported();
+        // console.log('@@ optClassWebVR:', optClassWebVR);
+        // https://threejs.org/docs/manual/en/introduction/How-to-create-VR-content.html
+        this.renderer.vr.enabled = hasVR;
+        this._initButtonVR(optClassWebVR);
+        if (hasVR) {
+            this._initControllersVR();
+        }
+    }
+
+    enterVR(onError=null) {
         // try entering VR for at most tryCountMax * delay (ms)
+        const tryCountMax = 10, delay = 400;
         let tryCount = 0;
         const _enterVR = () => {
             setTimeout(() => {
@@ -108,28 +177,6 @@ class Threelet {
         if (fps === 0) {
             return; // stop the loop
         } else if (fps < 0) { // start the vr loop
-            // https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
-            const controller0 = this.renderer.vr.getController(0);
-            const controller1 = this.renderer.vr.getController(1);
-            console.log('@@ controllers:', controller0, controller1);
-
-            // controller0.addEventListener('selectstart', onSelectStart);
-            // controller0.addEventListener('selectend', onSelectEnd);
-            this.scene.add(controller0);
-            // controller1.addEventListener('selectstart', onSelectStart);
-            // controller1.addEventListener('selectend', onSelectEnd);
-            this.scene.add(controller1);
-
-            const walls = new THREE.LineSegments(
-                new THREE.EdgesGeometry(new THREE.BoxBufferGeometry(1, 1, 1)),
-                new THREE.LineBasicMaterial({color: 0xcccccc}));
-            walls.position.set(Math.random()*2, Math.random()*2, -4);
-            this.scene.add(walls);
-
-            // https://github.com/mrdoob/three.js/blob/master/examples/webvr_paint.html
-            controller0.add(walls.clone());
-            controller1.add(walls.clone());
-
             this.renderer.setAnimationLoop(() => {
                 if (! this.renderer.vr.isPresenting()) {
                     this.renderer.setAnimationLoop(null); // stop the vr loop
@@ -141,8 +188,8 @@ class Threelet {
                 // TODO update!!!!!!!!!!!!!!!!!!!
 
                 // controllers TODO
-                // intersectObjects( controller0 );
-                // intersectObjects( controller1 );
+                // intersectObjects( this.controller0 );
+                // intersectObjects( this.controller1 );
 
                 this.render(true);
             });
@@ -163,8 +210,8 @@ class Threelet {
         // console.log('@@ updateLoop(): new interval:', this.iid);
     }
 
-    _init(canvas, opts) {
-        const {optScene, optClassStats, optClassControls, optClassWebVR} = opts;
+    static _init(canvas, opts) {
+        const {optScene, optClassStats, optClassControls} = opts;
 
         const camera = new THREE.PerspectiveCamera(75, canvas.width/canvas.height, 0.001, 1000);
         camera.position.set(...opts.optCameraPosition);
@@ -220,36 +267,7 @@ class Threelet {
             }
         }
 
-        if (optClassWebVR) {
-            const hasVR = Threelet.isVrSupported();
-            // console.log('@@ optClassWebVR:', optClassWebVR);
-            // https://threejs.org/docs/manual/en/introduction/How-to-create-VR-content.html
-            renderer.vr.enabled = hasVR;
-
-            const btn = optClassWebVR.createButton(renderer);
-            btn.style.top = btn.style.bottom;
-            btn.style.bottom = '';
-            if (hasVR) {
-                btn.addEventListener('click', ev => {
-                    console.log('@@ btn.textContent:', btn.textContent);
-                    if (btn.textContent.startsWith('ENTER')) {
-                        this.enterVR(10, 400, () => { // onError
-                            console.log('@@ device:', renderer.vr.getDevice());
-                            console.log('@@ controller:', renderer.vr.getController(0));
-                            // TODO (how to exit the VR session????)
-                            // this.updateLoop(this.fpsDesktopLast); // wanna call this after exiting the vr session...
-                        });
-                    }
-                });
-            }
-            document.body.appendChild(btn);
-        }
-
         return [camera, scene, renderer, render];
-    }
-    static isVrSupported() {
-        // https://github.com/mrdoob/three.js/blob/dev/examples/js/vr/WebVR.js
-        return 'getVRDisplays' in navigator;
     }
 
     // log with time splits
