@@ -44,3 +44,76 @@ Usage
 `live <https://w3reality.github.io/threelet/examples/simple/index.html>`__ | `source code <https://github.com/w3reality/threelet/tree/master/examples/simple/index.html>`__
 
 .. image:: https://w3reality.github.io/threelet/examples/simple/img/threelet.png
+
+More Usage (WIP)
+----------------
+
+**Basic**
+
+auto/manual camera/scene/renderer configuration:
+
+.. code:: js
+
+   const threelet = new Threelet();
+   threelet.camera
+   threelet.scene
+   threelet.renderer
+
+object registration/custom scene:
+
+.. code:: js
+
+   threelet.scene.add(myObject) // add an object
+
+   const threelet = new Threelet({scene: myScene}) // instantiate with a custom scene
+
+passive/active/fps-based rendering, built-in rendering loop control:
+
+.. code:: js
+
+   threelet.updateLoop(fps) // render via the looper
+
+   threelet.render() // atomic render manually
+
+scene dynamics handler:
+
+.. code:: js
+
+   threelet.update = (t, dt) => {
+      // your implementation
+   };
+
+**Utils**
+
+built-in mouse events handlers (clicks, drags):
+
+.. code:: js
+
+   threelet.onClick = (mx, my) => {
+      // your implementation
+   };
+
+raycasting utils:
+
+.. code:: js
+
+   threelet.raycast()
+   threelet.raycastFromCamera()
+
+optional controls:
+
+.. code:: js
+
+   const threelet = new Threelet({optClassControls})
+
+optional stats:
+
+.. code:: js
+
+   const threelet = new Threelet({optClassStats})
+
+optional desktop/WebVR switching:
+
+.. code:: js
+
+   const threelet = new Threelet({optClassWebVR})
