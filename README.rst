@@ -50,7 +50,7 @@ More Usage (WIP)
 
 **Basic**
 
-auto/manual camera/scene/renderer configuration:
+auto/manual configuring camera/scene/renderer:
 
 .. code:: js
 
@@ -59,7 +59,6 @@ auto/manual camera/scene/renderer configuration:
    // threelet.camera
    // threelet.scene
    // threelet.renderer
-   // threelet.controls
 
 object registration/custom scene:
 
@@ -69,15 +68,15 @@ object registration/custom scene:
 
    const threelet = new Threelet({scene: myScene}) // instantiate with a custom scene
 
-passive/active/fps-based rendering, built-in rendering loop control:
+passive/active/fps-throttled rendering by built-in loop controller:
 
 .. code:: js
 
-   threelet.updateLoop(fps) // render via the looper
+   threelet.updateLoop(fps) // render at fps using the looper
 
    threelet.render() // atomic render manually
 
-scene dynamics handler:
+binding scene mechanics handler:
 
 .. code:: js
 
@@ -87,13 +86,14 @@ scene dynamics handler:
 
 **Utils**
 
-built-in mouse events handlers (clicks, drags):
+binding built-in mouse event handlers (clicks, drags):
 
 .. code:: js
 
-   threelet.onClick = (mx, my) => {
-      // your implementation
-   };
+   threelet.onClick = (mx, my) => { /* your implementation */ }; // alias for left click
+   threelet.onClickLeft = (mx, my) => { /* ... */ };
+   threelet.onClickMiddle = (mx, my) => { /* ... */ };
+   threelet.onClickRight = (mx, my) => { /* ... */ };
 
 raycasting utils:
 
@@ -114,8 +114,9 @@ optional stats:
 
    const threelet = new Threelet({optClassStats})
 
-optional desktop/WebVR switching:
+optional desktop/WebVR switch:
 
 .. code:: js
 
    const threelet = new Threelet({optClassWebVR})
+

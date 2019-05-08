@@ -55,7 +55,7 @@ class VRControlHelper {
     }
 
     onSelectStart( event ) {
-        // console.log('@@ onSelectStart(): hi');
+        console.log('@@ onSelectStart(): hi');
         // console.log('@@ onSelectStart(): this:', this);
         const controller = event.target;
         const intersections = this.getIntersections( controller );
@@ -75,7 +75,7 @@ class VRControlHelper {
     }
 
     onSelectEnd( event ) {
-        // console.log('@@ onSelectEnd(): hi');
+        console.log('@@ onSelectEnd(): hi');
         const controller = event.target;
         if ( controller.userData.selected !== undefined ) {
             const object = controller.userData.selected;
@@ -202,6 +202,7 @@ class Threelet {
             Threelet._initBasics(canvas, actual);
 
         // mouse interaction
+        this.onClick = null;
         this.onClickLeft = null;
         this.onClickRight = null;
 
@@ -478,14 +479,13 @@ class Threelet {
                 const coords = Threelet.getMouseCoords(e);
                 if (e.button === 0) {
                     console.log('@@ mouse click left:', ...coords);
-                    if (this.onClickLeft) {
-                        this.onClickLeft(...coords);
-                    }
+                    if (this.onClick) { this.onClick(...coords); }
+                    if (this.onClickLeft) { this.onClickLeft(...coords); }
+                } else if (e.button === 1) {
+                    if (this.onClickMiddle) { this.onClickMiddle(...coords); }
                 } else if (e.button === 2) {
                     // console.log('@@ mouse click right:', ...coords);
-                    if (this.onClickRight) {
-                        this.onClickRight(...coords);
-                    }
+                    if (this.onClickRight) { this.onClickRight(...coords); }
                 }
             }
         }, false);
