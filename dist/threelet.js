@@ -55,7 +55,7 @@ class VRControlHelper {
     }
 
     onSelectStart( event ) {
-        console.log('@@ onSelectStart(): hi');
+        // console.log('@@ onSelectStart(): hi');
         // console.log('@@ onSelectStart(): this:', this);
         const controller = event.target;
         const intersections = this.getIntersections( controller );
@@ -75,7 +75,7 @@ class VRControlHelper {
     }
 
     onSelectEnd( event ) {
-        console.log('@@ onSelectEnd(): hi');
+        // console.log('@@ onSelectEnd(): hi');
         const controller = event.target;
         if ( controller.userData.selected !== undefined ) {
             const object = controller.userData.selected;
@@ -328,6 +328,13 @@ class Threelet {
         _enterVR(tryCountMax, delay);
     }
 
+    updateMechanics() { // update for the scene logic
+        const time = this.clock.getElapsedTime();
+        const dt = time - this.timeLast;
+        this.timeLast = time;
+        if (this.update) { this.update(time, dt); }
+    }
+
     updateLoop(fps) {
         if (this.iid !== null) {
             // console.log('@@ updateLoop(): clearing interval:', this.iid);
@@ -345,10 +352,8 @@ class Threelet {
                     return this.updateLoop(this.fpsDesktopLast);
                 }
 
-                // TODO update!!!!!!!!!!!!!!!!!!!
-
+                this.updateMechanics();
                 this.vrcHelper.intersectObjects();
-
                 this.render(true);
             });
             return;
@@ -357,12 +362,7 @@ class Threelet {
         // FIXME for this naive dev version, not looping with rAF()...
         this.fpsDesktopLast = fps;
         this.iid = setInterval(() => {
-            // update for the scene logic
-            const time = this.clock.getElapsedTime();
-            const dt = time - this.timeLast;
-            this.timeLast = time;
-            if (this.update) { this.update(time, dt); }
-
+            this.updateMechanics();
             this.render();
         }, 1000/fps);
         // console.log('@@ updateLoop(): new interval:', this.iid);
