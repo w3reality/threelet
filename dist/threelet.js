@@ -18,10 +18,6 @@ class VRControlHelper {
         this.group = new THREE.Group();
 
         this.controllers = this._createControllers(renderer);
-        this.controllers.forEach(cont => {
-            cont.addEventListener('selectstart', this.onSelectStart.bind(this));
-            cont.addEventListener('selectend', this.onSelectEnd.bind(this));
-        });
 
     }
     getInteractionGroup() { return this.group; }
@@ -54,11 +50,20 @@ class VRControlHelper {
         return [cont0, cont1];
     }
 
-    onSelectStart( event ) {
-        console.log('@@ onSelectStart(): hi');
-        // console.log('@@ onSelectStart(): this:', this);
+    initSelectListeners(onSelectStart, onSelectEnd) {
+        this.controllers.forEach(cont => {
+            cont.addEventListener('selectstart', onSelectStart.bind(this));
+            cont.addEventListener('selectend', onSelectEnd.bind(this));
+        });
+    }
+    initSelectListenersDrag() {
+        this.initSelectListeners(this.onSelectStartDrag, this.onSelectEndDrag);
+    }
+    onSelectStartDrag( event ) {
         const controller = event.target;
-        const intersections = this.getIntersections( controller );
+        const intersections = this.getIntersections( controller, false );
+        console.log('@@ onSelectStart(): intersections.length:', intersections.length);
+
         if ( intersections.length > 0 ) {
             const intersection = intersections[ 0 ];
 
@@ -67,33 +72,37 @@ class VRControlHelper {
             const object = intersection.object;
             object.matrix.premultiply( this.tempMatrix );
             object.matrix.decompose( object.position, object.quaternion, object.scale );
-            object.material.emissive.b = 1;
+            if (object.material.emissive) {
+                object.material.emissive.b = 1;
+            }
             controller.add( object );
 
             controller.userData.selected = object;
         }
     }
 
-    onSelectEnd( event ) {
+    onSelectEndDrag( event ) {
         console.log('@@ onSelectEnd(): hi');
         const controller = event.target;
         if ( controller.userData.selected !== undefined ) {
             const object = controller.userData.selected;
             object.matrix.premultiply( controller.matrixWorld );
             object.matrix.decompose( object.position, object.quaternion, object.scale );
-            object.material.emissive.b = 0;
+            if (object.material.emissive) {
+                object.material.emissive.b = 0;
+            }
             this.group.add( object );
 
             controller.userData.selected = undefined;
         }
     }
 
-    getIntersections( controller ) {
+    getIntersections(controller, recursive=true) {
         // console.log('@@ getIntersections(): hi');
         this.tempMatrix.identity().extractRotation( controller.matrixWorld );
         this.raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
         this.raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( this.tempMatrix );
-        return this.raycaster.intersectObjects( this.group.children );
+        return this.raycaster.intersectObjects( this.group.children, recursive );
     }
 
     intersectObjects() {
@@ -110,13 +119,16 @@ class VRControlHelper {
         // Do not highlight when already selected
         if ( controller.userData.selected !== undefined ) return;
 
-        const line = controller.getObjectByName( 'line' );
         const intersections = this.getIntersections( controller );
+        // console.log('@@ intersections:', intersections);
 
+        const line = controller.getObjectByName( 'line' );
         if ( intersections.length > 0 ) {
             const intersection = intersections[ 0 ];
             const object = intersection.object;
-            object.material.emissive.r = 1;
+            if (object.material.emissive) {
+                object.material.emissive.r = 1;
+            }
             this.intersected.push( object );
             // console.log('@@ intersection.distance:', intersection.distance);
             line.scale.z = intersection.distance - this.controllerArmLength;
@@ -129,7 +141,9 @@ class VRControlHelper {
         // console.log('@@ cleanIntersected(): hi');
         while ( this.intersected.length ) {
             const object = this.intersected.pop();
-            object.material.emissive.r = 0;
+            if (object.material.emissive) {
+                object.material.emissive.r = 0;
+            }
         }
     }
 
