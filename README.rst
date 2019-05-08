@@ -90,7 +90,9 @@ binding built-in mouse event handlers (clicks, drags):
 
 .. code:: js
 
-   threelet.onClick = (mx, my) => { /* your implementation */ }; // alias for left click
+   threelet.onClick = (mx, my) => { // alias for left click
+      // your implementation
+   };
    threelet.onClickLeft = (mx, my) => { /* ... */ };
    threelet.onClickMiddle = (mx, my) => { /* ... */ };
    threelet.onClickRight = (mx, my) => { /* ... */ };
