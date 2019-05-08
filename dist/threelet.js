@@ -3,6 +3,7 @@
 
 // const __controllerArmLength = 0;
 const __controllerArmLength = 0.25;
+const __controllerLineLength = 5;
 
 class Threelet {
     constructor(params) {
@@ -63,20 +64,29 @@ class Threelet {
 
         // WebVR related stuff
         this.fpsDesktopLast = 0;
+
         // // dragging with controllers ======================
         this.vrControllers = [];
         if (actual.optClassWebVR) {
-            this.vrControllers = this._initVR(actual.optClassWebVR);
-            this.vrControllers.forEach(cont => {
-                cont.addEventListener('selectstart', this.onSelectStart.bind(this));
-                cont.addEventListener('selectend', this.onSelectEnd.bind(this));
-                this.scene.add(cont);
-            });
+            this._initVR(actual.optClassWebVR);
+
+            if (Threelet.isVrSupported()) {
+                this.vrControllers = Threelet._createControllersVR(this.renderer);
+
+                this.vrControllers.forEach(cont => {
+                    cont.addEventListener('selectstart', this.onSelectStart.bind(this));
+                    cont.addEventListener('selectend', this.onSelectEnd.bind(this));
+
+                    this.scene.add(cont);
+                });
+            }
         }
+
         this.group = new THREE.Group();
         this.scene.add(this.group);
 
         this.scene.add( new THREE.HemisphereLight( 0x808080, 0x606060 ) );
+
         const light = new THREE.DirectionalLight( 0xffffff );
         light.position.set( 0, 6, 0 );
         light.castShadow = true;
@@ -159,14 +169,14 @@ class Threelet {
     onSelectStart( event ) {
         console.log('@@ onSelectStart(): hi');
         // console.log('@@ onSelectStart(): this:', this);
-        var controller = event.target;
-        var intersections = this.getIntersections( controller );
+        const controller = event.target;
+        const intersections = this.getIntersections( controller );
         if ( intersections.length > 0 ) {
-            var intersection = intersections[ 0 ];
+            const intersection = intersections[ 0 ];
 
             this.tempMatrix.getInverse( controller.matrixWorld );
 
-            var object = intersection.object;
+            const object = intersection.object;
             object.matrix.premultiply( this.tempMatrix );
             object.matrix.decompose( object.position, object.quaternion, object.scale );
             object.material.emissive.b = 1;
@@ -178,9 +188,9 @@ class Threelet {
 
     onSelectEnd( event ) {
         console.log('@@ onSelectEnd(): hi');
-        var controller = event.target;
+        const controller = event.target;
         if ( controller.userData.selected !== undefined ) {
-            var object = controller.userData.selected;
+            const object = controller.userData.selected;
             object.matrix.premultiply( controller.matrixWorld );
             object.matrix.decompose( object.position, object.quaternion, object.scale );
             object.material.emissive.b = 0;
@@ -214,7 +224,7 @@ class Threelet {
             // console.log('@@ intersection.distance:', intersection.distance);
             line.scale.z = intersection.distance - __controllerArmLength;
         } else {
-            line.scale.z = 5 - __controllerArmLength;
+            line.scale.z = __controllerLineLength - __controllerArmLength;
         }
     }
 
@@ -227,7 +237,7 @@ class Threelet {
     }
     //---- end adaptation of the dragging example
 
-    static _initControllersVR(renderer) {
+    static _createControllersVR(renderer) {
         // https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
         const cont0 = renderer.vr.getController(0);
         const cont1 = renderer.vr.getController(1);
@@ -248,19 +258,17 @@ class Threelet {
                 new THREE.Vector3(0, 0, -1)]));
         line.position.set(0, 0, - __controllerArmLength);
         line.name = 'line';
-        line.scale.z = 5 - __controllerArmLength;
+        line.scale.z = __controllerLineLength - __controllerArmLength;
         cont0.add(line.clone());
         cont1.add(line.clone());
 
         return [cont0, cont1];
     }
     _initVR(optClassWebVR) {
-        const hasVR = Threelet.isVrSupported();
         // console.log('@@ optClassWebVR:', optClassWebVR);
         // https://threejs.org/docs/manual/en/introduction/How-to-create-VR-content.html
-        this.renderer.vr.enabled = hasVR;
+        this.renderer.vr.enabled = Threelet.isVrSupported();
         this._initButtonVR(optClassWebVR);
-        return hasVR ? Threelet._initControllersVR(this.renderer) : [];
     }
 
     enterVR(onError=null) {
@@ -520,4 +528,10 @@ class Threelet {
         return [mx, my];
     }
 }
+
+class VRControllerHelper {
+
+}
+Threelet.VRControllerHelper = VRControllerHelper;
+
 export default Threelet;
