@@ -19,6 +19,7 @@ class VRControlHelper {
 
         this.controllers = this._createControllers(renderer);
 
+        this.triggers = []; // used in checkGamepad()
     }
     getInteractiveGroup() { return this.group; }
     getControllers() { return this.controllers; }
@@ -103,6 +104,66 @@ class VRControlHelper {
         this.raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
         this.raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( this.tempMatrix );
         return this.raycaster.intersectObjects( this.group.children, recursive );
+    }
+
+    // mod of findGamepad() of three.js r104
+    static _findGamepad(id) {
+        const gamepads = navigator.getGamepads && navigator.getGamepads();
+        for ( let i = 0, j = 0, l = gamepads.length; i < l; i ++ ) {
+            const gamepad = gamepads[ i ];
+            if ( gamepad && ( gamepad.id === 'Daydream Controller' ||
+                gamepad.id === 'Gear VR Controller' || gamepad.id === 'Oculus Go Controller' ||
+                gamepad.id === 'OpenVR Gamepad' || gamepad.id.startsWith( 'Oculus Touch' ) ||
+                gamepad.id.startsWith( 'Spatial Controller' ) ) ) {
+                if ( j === id ) return gamepad;
+                j ++;
+            }
+        }
+    }
+    // mod of updateControllers() of three.js r104
+    checkGamepad() {
+        for (let i = 0; i < this.controllers.length; i ++ ) {
+            const controller = this.controllers[ i ];
+            const gamepad = VRControlHelper._findGamepad( i );
+            // console.log('@@ checkGamepad(): i, gamepad:', i, gamepad);
+
+            if ( gamepad !== undefined && gamepad.pose !== undefined ) {
+                if ( gamepad.pose === null ) return;
+                const pose = gamepad.pose;
+                const buttonId = gamepad.id === 'Daydream Controller' ? 0 : 1;
+
+                const [b0, b1] = gamepad.buttons; // touchpad, trigger in case of Oculus Go
+                if (b0.pressed || b0.touched || b1.pressed || b1.touched) {
+                    console.log('@@ ======== pressed/touched ========');
+                    console.log('@@ i, b0, b1:', i, b0, b1);
+                    // @@ observations on Oculus Go (always i == 0)
+                    // b0 (touchpad) {pressed: false, value: 0, touched: true}
+                    // b0 (touchpad) {pressed: true, value: 1, touched: true}
+                    // b1 (trigger) {pressed: true, value: 1, touched: true}
+                    console.log('@@ gamepad.axes:', gamepad.axes);
+                    //             axes[1]=-1.0
+                    // axes[0]=-1.0            axes[0]=+1.0
+                    //             axes[1]=+1.0
+                    //----
+                    console.log('@@ gamepad:', gamepad);
+                }
+
+                // TODO custom events for touchpad!!!!!!!!!!
+                
+                if ( this.triggers[ i ] !== gamepad.buttons[ buttonId ].pressed ) {
+                    this.triggers[ i ] = gamepad.buttons[ buttonId ].pressed;
+                    if ( this.triggers[ i ] === true ) {
+                        console.log('@@ dispatching selectstart !!!!');
+                        // controller.dispatchEvent( { type: 'selectstart' } );
+                    } else {
+                        console.log('@@ dispatching selectend !!!!');
+                        // controller.dispatchEvent( { type: 'selectend' } );
+                        console.log('@@ dispatching select !!!!');
+                        // controller.dispatchEvent( { type: 'select' } );
+                    }
+                }
+            }
+        }
     }
 
     intersectObjects() {
@@ -374,6 +435,7 @@ class Threelet {
 
                 this.updateMechanics();
                 this.vrcHelper.intersectObjects();
+                this.vrcHelper.checkGamepad();
                 this.render(true);
             });
             return;
