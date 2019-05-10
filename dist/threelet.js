@@ -20,7 +20,7 @@ class VRControlHelper {
         this.controllers = this._createControllers(renderer);
 
     }
-    getInteractionGroup() { return this.group; }
+    getInteractiveGroup() { return this.group; }
     getControllers() { return this.controllers; }
     _createControllers(renderer) {
         // https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
@@ -50,14 +50,14 @@ class VRControlHelper {
         return [cont0, cont1];
     }
 
-    initSelectListeners(onSelectStart, onSelectEnd) {
+    addSelectListener(eventName, listener) {
         this.controllers.forEach(cont => {
-            cont.addEventListener('selectstart', onSelectStart.bind(this));
-            cont.addEventListener('selectend', onSelectEnd.bind(this));
+            cont.addEventListener(eventName, listener.bind(this));
         });
     }
-    initSelectListenersDrag() {
-        this.initSelectListeners(this.onSelectStartDrag, this.onSelectEndDrag);
+    addSelectListenersDrag() {
+        this.addSelectListener('selectstart', this.onSelectStartDrag);
+        this.addSelectListener('selectend', this.onSelectEndDrag);
     }
     onSelectStartDrag( event ) {
         const controller = event.target;
@@ -263,15 +263,6 @@ class Threelet {
             }
         }
 
-        if (1) { // test vrcHelper
-            this.scene.add(VRControlHelper.createTestHemisphereLight());
-            this.scene.add(VRControlHelper.createTestDirectionalLight());
-
-            const group = this.vrcHelper.getInteractionGroup();
-            VRControlHelper.createTestObjects().forEach(obj => group.add(obj));
-            this.scene.add(group);
-        }
-
         // // https://stackoverflow.com/questions/49471653/in-three-js-while-using-webvr-how-do-i-move-the-camera-position
         // this.dolly = new THREE.Group();
         // this.dolly.add(this.camera);
@@ -284,6 +275,20 @@ class Threelet {
     }
     onDestroy() {
         // TODO ??
+    }
+
+    setupVRControlHelperTest() {
+        this.scene.add(VRControlHelper.createTestHemisphereLight());
+        this.scene.add(VRControlHelper.createTestDirectionalLight());
+
+        const group = this.vrcHelper.getInteractiveGroup();
+        VRControlHelper.createTestObjects().forEach(obj => group.add(obj));
+        this.scene.add(group);
+
+        this.vrcHelper.addSelectListenersDrag();
+    }
+    getVRControlHelper() {
+        return this.vrcHelper;
     }
 
     static isVrSupported() {
