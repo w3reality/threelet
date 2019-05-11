@@ -19,7 +19,11 @@ class VRControlHelper {
 
         this.controllers = this._createControllers(renderer);
 
-        this.triggers = []; // used in checkGamepad()
+        // used in updateControllers()
+        this.controllersState = {
+            triggers: [],
+            touchpads: [],
+        }
     }
     getInteractiveGroup() { return this.group; }
     getControllers() { return this.controllers; }
@@ -121,17 +125,28 @@ class VRControlHelper {
         }
     }
     // mod of updateControllers() of three.js r104
-    checkGamepad() {
+    updateControllers() {
+        const stat = this.controllersState;
+
         for (let i = 0; i < this.controllers.length; i ++ ) {
-            const controller = this.controllers[ i ];
-            const gamepad = VRControlHelper._findGamepad( i );
-            // console.log('@@ checkGamepad(): i, gamepad:', i, gamepad);
+            const controller = this.controllers[i];
+            const gamepad = VRControlHelper._findGamepad(i);
+            // console.log('@@ updateControllers(): i, gamepad:', i, gamepad);
 
-            if ( gamepad !== undefined && gamepad.pose !== undefined ) {
-                if ( gamepad.pose === null ) return;
-                const pose = gamepad.pose;
-                const buttonId = gamepad.id === 'Daydream Controller' ? 0 : 1;
+            if (gamepad === undefined ||
+                gamepad.pose === undefined ||
+                gamepad.pose === null) {
+                // this controller seems lost; reset the state
+                stat.triggers[i] = null;
+                stat.touchpads[i] = null;
+                return;
+            }
 
+            const pose = gamepad.pose;
+            const buttonId = gamepad.id === 'Daydream Controller' ? 0 : 1; // for trigger
+            const buttonIdTouchpad = 0;
+
+            if (0) { // debug with Oculus Go controller
                 const [b0, b1] = gamepad.buttons; // touchpad, trigger in case of Oculus Go
                 if (b0.pressed || b0.touched || b1.pressed || b1.touched) {
                     console.log('@@ ======== pressed/touched ========');
@@ -147,20 +162,53 @@ class VRControlHelper {
                     //----
                     console.log('@@ gamepad:', gamepad);
                 }
+            }
 
-                // TODO custom events for touchpad!!!!!!!!!!
-                
-                if ( this.triggers[ i ] !== gamepad.buttons[ buttonId ].pressed ) {
-                    this.triggers[ i ] = gamepad.buttons[ buttonId ].pressed;
-                    if ( this.triggers[ i ] === true ) {
-                        console.log('@@ dispatching selectstart !!!!');
-                        // controller.dispatchEvent( { type: 'selectstart' } );
-                    } else {
-                        console.log('@@ dispatching selectend !!!!');
-                        // controller.dispatchEvent( { type: 'selectend' } );
-                        console.log('@@ dispatching select !!!!');
-                        // controller.dispatchEvent( { type: 'select' } );
-                    }
+            //-------- begin touchpad handling --------
+            const touchpadStateNew = {
+                touched: gamepad.buttons[buttonIdTouchpad].touched,
+                pressed: gamepad.buttons[buttonIdTouchpad].pressed,
+                axes0: gamepad.axes[0],
+                axes1: gamepad.axes[1],
+            };
+            const noTouchpadStatePrev = ! stat.touchpads[i];
+
+            if (noTouchpadStatePrev || stat.touchpads[i].touched !== touchpadStateNew.touched) {
+                if (touchpadStateNew.touched === true) {
+                    console.log('@@ dispatching touchpad-touch-start !!!!');
+                    // TODO dispatch event with touchpadStateNew
+                } else {
+                    console.log('@@ dispatching touchpad-touch-end !!!!');
+                    // TODO dispatch event with touchpadStateNew
+                }
+            }
+
+            if (noTouchpadStatePrev || stat.touchpads[i].pressed !== touchpadStateNew.pressed) {
+                if (touchpadStateNew.pressed === true) {
+                    console.log('@@ dispatching touchpad-press-start !!!!');
+                    // TODO dispatch event with touchpadStateNew
+                } else {
+                    console.log('@@ dispatching touchpad-press-end !!!!');
+                    // TODO dispatch event with touchpadStateNew
+                }
+            }
+
+            // diff touchpad states done; record the new state now
+            stat.touchpads[i] = touchpadStateNew;
+            //-------- end touchpad handling --------
+
+
+            const isTriggerPressed = gamepad.buttons[buttonId].pressed;
+            if (stat.triggers[i] !== isTriggerPressed) {
+                stat.triggers[i] = isTriggerPressed;
+                if (stat.triggers[i] === true) {
+                    console.log('@@ dispatching select-start !!!!');
+                    // controller.dispatchEvent( { type: 'selectstart' } );
+                } else {
+                    console.log('@@ dispatching select-end !!!!');
+                    // controller.dispatchEvent( { type: 'selectend' } );
+                    console.log('@@ dispatching select !!!!');
+                    // controller.dispatchEvent( { type: 'select' } );
                 }
             }
         }
@@ -435,7 +483,7 @@ class Threelet {
 
                 this.updateMechanics();
                 this.vrcHelper.intersectObjects();
-                this.vrcHelper.checkGamepad();
+                this.vrcHelper.updateControllers();
                 this.render(true);
             });
             return;
