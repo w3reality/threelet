@@ -18,11 +18,9 @@ class VRControlHelper {
         this.group = new THREE.Group();
 
         this.controllers = this._createControllers(renderer);
-
-        // used in updateControllers()
         this.controllersState = {
-            triggers: [],
             touchpads: [],
+            triggers: [],
         }
     }
     getInteractiveGroup() { return this.group; }
@@ -461,7 +459,9 @@ class Threelet {
         const time = this.clock.getElapsedTime();
         const dt = time - this.timeLast;
         this.timeLast = time;
-        if (this.update) { this.update(time, dt); }
+        if (this.update) {
+            this.update(time, dt, this.vrcHelper.controllersState);
+        }
     }
 
     updateLoop(fps) {
