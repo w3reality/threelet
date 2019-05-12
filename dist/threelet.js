@@ -135,8 +135,8 @@ class VRControlHelper {
                 gamepad.pose === undefined ||
                 gamepad.pose === null) {
                 // this controller seems lost; reset the state
-                stat.triggers[i] = null;
-                stat.touchpads[i] = null;
+                stat.triggers[i] = undefined;
+                stat.touchpads[i] = undefined;
                 return;
             }
 
@@ -163,50 +163,48 @@ class VRControlHelper {
             }
 
             //-------- begin touchpad handling --------
-            const touchpadStateNew = {
-                touched: gamepad.buttons[buttonIdTouchpad].touched,
-                pressed: gamepad.buttons[buttonIdTouchpad].pressed,
-                axes0: gamepad.axes[0],
-                axes1: gamepad.axes[1],
-            };
-            const noTouchpadStatePrev = ! stat.touchpads[i];
+            const touched = gamepad.buttons[buttonIdTouchpad].touched;
+            const pressed = gamepad.buttons[buttonIdTouchpad].pressed;
+            const axes0 = gamepad.axes[0];
+            const axes1 = gamepad.axes[1];
 
-            if (noTouchpadStatePrev || stat.touchpads[i].touched !== touchpadStateNew.touched) {
-                if (touchpadStateNew.touched === true) {
+            const noPrevTouchpadState = stat.touchpads[i] === undefined;
+            if (noPrevTouchpadState) { stat.touchpads[i] = {}; };
+            const touchpad = stat.touchpads[i];
+
+            if (!noPrevTouchpadState && touchpad.touched !== touched) {
+                if (touched === true) {
                     console.log('@@ dispatching touchpad-touch-start !!!!');
-                    // TODO dispatch event with touchpadStateNew
                 } else {
                     console.log('@@ dispatching touchpad-touch-end !!!!');
-                    // TODO dispatch event with touchpadStateNew
                 }
             }
 
-            if (noTouchpadStatePrev || stat.touchpads[i].pressed !== touchpadStateNew.pressed) {
-                if (touchpadStateNew.pressed === true) {
+            if (!noPrevTouchpadState && touchpad.pressed !== pressed) {
+                if (pressed === true) {
                     console.log('@@ dispatching touchpad-press-start !!!!');
-                    // TODO dispatch event with touchpadStateNew
                 } else {
                     console.log('@@ dispatching touchpad-press-end !!!!');
-                    // TODO dispatch event with touchpadStateNew
                 }
             }
 
             // diff touchpad states done; record the new state now
-            stat.touchpads[i] = touchpadStateNew;
+            touchpad.touched = touched;
+            touchpad.pressed = pressed;
+            touchpad.axes0 = axes0;
+            touchpad.axes1 = axes1;
             //-------- end touchpad handling --------
 
+            const noPrevTriggerState = stat.triggers[i] === undefined;
+            if (noPrevTriggerState) { stat.triggers[i] = false; }
+            const trigger = gamepad.buttons[buttonId].pressed;
 
-            const isTriggerPressed = gamepad.buttons[buttonId].pressed;
-            if (stat.triggers[i] !== isTriggerPressed) {
-                stat.triggers[i] = isTriggerPressed;
+            if (!noPrevTriggerState && stat.triggers[i] !== trigger) {
+                stat.triggers[i] = trigger;
                 if (stat.triggers[i] === true) {
-                    console.log('@@ dispatching select-start !!!!');
-                    // controller.dispatchEvent( { type: 'selectstart' } );
+                    console.log('@@ dispatching trigger-press-start !!!!');
                 } else {
-                    console.log('@@ dispatching select-end !!!!');
-                    // controller.dispatchEvent( { type: 'selectend' } );
-                    console.log('@@ dispatching select !!!!');
-                    // controller.dispatchEvent( { type: 'select' } );
+                    console.log('@@ dispatching trigger-press-end !!!!');
                 }
             }
         }
