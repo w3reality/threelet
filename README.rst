@@ -104,21 +104,20 @@ raycasting utils:
    threelet.raycast()
    threelet.raycastFromCamera()
 
-optional controls:
+optional features:
+
+.. code:: html
+
+    <script src="OrbitControls.js"></script>
+    <script src="stats.min.js"></script>
+    <script src="WebVR.js"></script>
 
 .. code:: js
 
-   const threelet = new Threelet({optClassControls})
+    const threelet = new Threelet({
+        optClassControls: THREE.OrbitControls,
+        optClassStats: window.Stats,
+        optClassWebVR: window.WEBVR,
+    })
 
-optional stats:
-
-.. code:: js
-
-   const threelet = new Threelet({optClassStats})
-
-optional desktop/WebVR switch:
-
-.. code:: js
-
-   const threelet = new Threelet({optClassWebVR})
 
