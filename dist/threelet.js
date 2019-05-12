@@ -22,6 +22,12 @@ class VRControlHelper {
             touchpads: [],
             triggers: [],
         }
+        this.onTouchpadTouchStart = null;
+        this.onTouchpadTouchEnd = null;
+        this.onTouchpadPressStart = null;
+        this.onTouchpadPressEnd = null;
+        this.onTriggerPressStart = null;
+        this.onTriggerPressEnd = null;
     }
     getInteractiveGroup() { return this.group; }
     getControllers() { return this.controllers; }
@@ -175,16 +181,28 @@ class VRControlHelper {
             if (!noPrevTouchpadState && touchpad.touched !== touched) {
                 if (touched === true) {
                     console.log('@@ dispatching touchpad-touch-start !!!!');
+                    if (this.onTouchpadTouchStart) {
+                        this.onTouchpadTouchStart(axes0, axes1);
+                    }
                 } else {
                     console.log('@@ dispatching touchpad-touch-end !!!!');
+                    if (this.onTouchpadTouchEnd) {
+                        this.onTouchpadTouchEnd(axes0, axes1);
+                    }
                 }
             }
 
             if (!noPrevTouchpadState && touchpad.pressed !== pressed) {
                 if (pressed === true) {
                     console.log('@@ dispatching touchpad-press-start !!!!');
+                    if (this.onTouchpadPressStart) {
+                        this.onTouchpadPressStart(axes0, axes1);
+                    }
                 } else {
                     console.log('@@ dispatching touchpad-press-end !!!!');
+                    if (this.onTouchpadPressEnd) {
+                        this.onTouchpadPressEnd(axes0, axes1);
+                    }
                 }
             }
 
@@ -203,8 +221,14 @@ class VRControlHelper {
                 stat.triggers[i] = trigger;
                 if (stat.triggers[i] === true) {
                     console.log('@@ dispatching trigger-press-start !!!!');
+                    if (this.onTriggerPressStart) {
+                        this.onTriggerPressStart();
+                    }
                 } else {
                     console.log('@@ dispatching trigger-press-end !!!!');
+                    if (this.onTriggerPressEnd) {
+                        this.onTriggerPressEnd();
+                    }
                 }
             }
         }
