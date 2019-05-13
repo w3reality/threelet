@@ -174,25 +174,31 @@ class VRControlHelper {
             const axes0 = gamepad.axes[0];
             const axes1 = gamepad.axes[1];
 
-            const noPrevTouchpadState = stat.touchpads[i] === undefined;
-            if (noPrevTouchpadState) { stat.touchpads[i] = {}; };
+            if (stat.touchpads[i] === undefined) {
+                stat.touchpads[i] = {
+                    touched: false,
+                    pressed: false,
+                    axes0: 0,
+                    axes1: 0,
+                };
+            };
             const touchpad = stat.touchpads[i];
 
-            if (!noPrevTouchpadState && touchpad.touched !== touched) {
+            if (touchpad.touched !== touched) {
                 if (touched === true) {
                     console.log('@@ dispatching touchpad-touch-start !!!!');
                     if (this.onTouchpadTouchStart) {
                         this.onTouchpadTouchStart(axes0, axes1);
                     }
                 } else {
-                    console.log('@@ dispatching touchpad-touch-end !!!!');
+                    console.log('@@ spatching touchpad-touch-end !!!!');
                     if (this.onTouchpadTouchEnd) {
                         this.onTouchpadTouchEnd(axes0, axes1);
                     }
                 }
             }
 
-            if (!noPrevTouchpadState && touchpad.pressed !== pressed) {
+            if (touchpad.pressed !== pressed) {
                 if (pressed === true) {
                     console.log('@@ dispatching touchpad-press-start !!!!');
                     if (this.onTouchpadPressStart) {
@@ -213,11 +219,12 @@ class VRControlHelper {
             touchpad.axes1 = axes1;
             //-------- end touchpad handling --------
 
-            const noPrevTriggerState = stat.triggers[i] === undefined;
-            if (noPrevTriggerState) { stat.triggers[i] = false; }
             const trigger = gamepad.buttons[buttonId].pressed;
+            if (stat.triggers[i] === undefined) {
+                stat.triggers[i] = false;
+            }
 
-            if (!noPrevTriggerState && stat.triggers[i] !== trigger) {
+            if (stat.triggers[i] !== trigger) {
                 stat.triggers[i] = trigger;
                 if (stat.triggers[i] === true) {
                     console.log('@@ dispatching trigger-press-start !!!!');
