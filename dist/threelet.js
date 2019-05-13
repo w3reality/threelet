@@ -32,31 +32,59 @@ class VRControlHelper {
     getInteractiveGroup() { return this.group; }
     getControllers() { return this.controllers; }
     _createControllers(renderer) {
-        // https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
-        const cont0 = renderer.vr.getController(0);
-        const cont1 = renderer.vr.getController(1);
-        console.log('@@ controllers:', cont0, cont1);
-
-        // TODO load a 3D model instead of the box
+        // maybe load a 3D model instead of the box
         // https://github.com/mrdoob/three.js/blob/master/examples/webvr_paint.html
         const walls = new THREE.LineSegments(
             new THREE.EdgesGeometry(new THREE.BoxBufferGeometry(0.05, 0.025, 0.1)),
             new THREE.LineBasicMaterial({color: 0xcccccc}));
         walls.position.set(0, 0, - this.controllerArmLength); // customize Z for "arm" length
-        cont0.add(walls.clone());
-        cont1.add(walls.clone());
 
         const line = new THREE.Line(
             new THREE.BufferGeometry().setFromPoints([
                 new THREE.Vector3(0, 0, 0),
-                new THREE.Vector3(0, 0, -1)]));
+                new THREE.Vector3(0, 0, -1)]),
+            new THREE.LineBasicMaterial({color: 0xcccccc}));
         line.position.set(0, 0, - this.controllerArmLength);
-        line.name = 'line';
+        line.name = 'controller-line';
         line.scale.z = this.controllerLineLength - this.controllerArmLength;
-        cont0.add(line.clone());
-        cont1.add(line.clone());
 
-        return [cont0, cont1];
+        const triggerLoop = new THREE.LineLoop(
+            new THREE.CircleGeometry(0.0125, 64),
+            new THREE.LineBasicMaterial({color: 0x00cccc}));
+        triggerLoop.geometry.vertices.shift(); // remove the center vertex
+        triggerLoop.position.set(0, 0, - this.controllerArmLength - 0.05);
+
+        const triggerCircle = new THREE.Mesh(
+            new THREE.CircleGeometry(0.0125, 64),
+            new THREE.MeshBasicMaterial({color: 0x00cccc}));
+        triggerCircle.position.set(0, 0, - this.controllerArmLength - 0.05);
+        triggerCircle.material.side = THREE.DoubleSide;
+        triggerCircle.visible = false;
+        triggerCircle.name = 'trigger-circle';
+
+        const padLoop = new THREE.LineLoop(
+            new THREE.CircleGeometry(0.025, 64),
+            new THREE.LineBasicMaterial({color: 0x00cccc}));
+        padLoop.geometry.vertices.shift(); // remove the center vertex
+        padLoop.position.set(0, 0.0125, - this.controllerArmLength - 0.025);
+        padLoop.rotation.x = Math.PI/2;
+
+
+        // https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
+        const controllers = [0, 1].map(i => renderer.vr.getController(i)
+            .add(walls.clone())
+            .add(line.clone())
+            .add(triggerLoop.clone())
+            .add(triggerCircle.clone())
+            .add(padLoop.clone()));
+        console.log('@@ controllers:', controllers);
+
+        if (0) { // debug!! force show cont0 in desktop mode
+            this.group.add(controllers[0]);
+            controllers[0].visible = true;
+        }
+
+        return controllers;
     }
 
     addSelectListener(eventName, listener) {
@@ -188,12 +216,12 @@ class VRControlHelper {
                 if (touched === true) {
                     console.log('@@ dispatching touchpad-touch-start !!!!');
                     if (this.onTouchpadTouchStart) {
-                        this.onTouchpadTouchStart(axes0, axes1);
+                        this.onTouchpadTouchStart(i, axes0, axes1);
                     }
                 } else {
                     console.log('@@ spatching touchpad-touch-end !!!!');
                     if (this.onTouchpadTouchEnd) {
-                        this.onTouchpadTouchEnd(axes0, axes1);
+                        this.onTouchpadTouchEnd(i, axes0, axes1);
                     }
                 }
             }
@@ -202,12 +230,12 @@ class VRControlHelper {
                 if (pressed === true) {
                     console.log('@@ dispatching touchpad-press-start !!!!');
                     if (this.onTouchpadPressStart) {
-                        this.onTouchpadPressStart(axes0, axes1);
+                        this.onTouchpadPressStart(i, axes0, axes1);
                     }
                 } else {
                     console.log('@@ dispatching touchpad-press-end !!!!');
                     if (this.onTouchpadPressEnd) {
-                        this.onTouchpadPressEnd(axes0, axes1);
+                        this.onTouchpadPressEnd(i, axes0, axes1);
                     }
                 }
             }
@@ -229,12 +257,12 @@ class VRControlHelper {
                 if (stat.triggers[i] === true) {
                     console.log('@@ dispatching trigger-press-start !!!!');
                     if (this.onTriggerPressStart) {
-                        this.onTriggerPressStart();
+                        this.onTriggerPressStart(i);
                     }
                 } else {
                     console.log('@@ dispatching trigger-press-end !!!!');
                     if (this.onTriggerPressEnd) {
-                        this.onTriggerPressEnd();
+                        this.onTriggerPressEnd(i);
                     }
                 }
             }
@@ -258,7 +286,7 @@ class VRControlHelper {
         const intersections = this.getIntersections( controller );
         // console.log('@@ intersections:', intersections);
 
-        const line = controller.getObjectByName( 'line' );
+        const line = controller.getObjectByName( 'controller-line' );
         if ( intersections.length > 0 ) {
             const intersection = intersections[ 0 ];
             const object = intersection.object;
