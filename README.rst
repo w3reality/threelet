@@ -10,13 +10,13 @@ Setup
 
 .. code:: sh
 
-   $ npm install threelet
+    $ npm install threelet
 
 **Loading**
 
 .. code:: js
 
-   import Threelet from 'dist/threelet.js';
+    import Threelet from 'dist/threelet.js';
 
 Usage
 -----
@@ -54,35 +54,38 @@ auto/manual configuring camera/scene/renderer:
 
 .. code:: js
 
-   const threelet = new Threelet();
-   // now the following objects are all set
-   // threelet.camera
-   // threelet.scene
-   // threelet.renderer
+    const threelet = new Threelet({canvas: myCanvas});
+    // now the following objects are all set
+    // threelet.camera
+    // threelet.scene
+    // threelet.renderer
 
 object registration/custom scene:
 
 .. code:: js
 
-   threelet.scene.add(myObject) // add an object
+    threelet.scene.add(myObject) // add an object
 
-   const threelet = new Threelet({scene: myScene}) // instantiate with a custom scene
+    const threelet = new Threelet({
+        canvas: myCanvas,
+        scene: myScene, // instantiate with a custom scene
+    });
 
 passive/active/fps-throttled rendering by built-in loop controller:
 
 .. code:: js
 
-   threelet.updateLoop(fps) // render at fps using the looper
+    threelet.updateLoop(fps) // render at fps using the looper
 
-   threelet.render() // atomic render manually
+    threelet.render() // atomic render manually
 
 binding scene mechanics handler:
 
 .. code:: js
 
-   threelet.update = (t, dt) => {
-      // your implementation
-   };
+    threelet.update = (t, dt) => {
+       // your implementation
+    };
 
 **Utils**
 
@@ -90,21 +93,21 @@ binding built-in mouse event handlers (clicks, drags):
 
 .. code:: js
 
-   threelet.onClick = (mx, my) => { // alias for left click
-      // your implementation
-   };
-   threelet.onClickLeft = (mx, my) => { /* ... */ };
-   threelet.onClickMiddle = (mx, my) => { /* ... */ };
-   threelet.onClickRight = (mx, my) => { /* ... */ };
+    threelet.onClick = (mx, my) => { // alias for left click
+       // your implementation
+    };
+    threelet.onClickLeft = (mx, my) => { /* ... */ };
+    threelet.onClickMiddle = (mx, my) => { /* ... */ };
+    threelet.onClickRight = (mx, my) => { /* ... */ };
 
 raycasting utils:
 
 .. code:: js
 
-   threelet.raycast()
-   threelet.raycastFromCamera()
+    threelet.raycast()
+    threelet.raycastFromCamera()
 
-optional features:
+**Optional features**
 
 .. code:: html
 
@@ -115,9 +118,8 @@ optional features:
 .. code:: js
 
     const threelet = new Threelet({
+        // ...
         optClassControls: THREE.OrbitControls,
         optClassStats: window.Stats,
         optClassWebVR: window.WEBVR,
     })
-
-
