@@ -64,7 +64,7 @@ object registration/custom scene:
 
 .. code:: js
 
-    threelet.scene.add(myObject) // add an object
+    threelet.scene.add(myObject) // add an object to the scene
 
     const threelet = new Threelet({
         canvas: myCanvas,
@@ -75,9 +75,9 @@ passive/active/fps-throttled rendering by built-in loop controller:
 
 .. code:: js
 
-    threelet.updateLoop(fps) // render at fps using the looper
+    threelet.updateLoop(fps); // render at fps using the looper
 
-    threelet.render() // atomic render manually
+    threelet.render(); // atomic render manually
 
 binding scene mechanics handler:
 
@@ -104,8 +104,8 @@ raycasting utils:
 
 .. code:: js
 
-    threelet.raycast()
-    threelet.raycastFromCamera()
+    threelet.raycast();
+    threelet.raycastFromCamera();
 
 **Optional features**
 
@@ -122,4 +122,4 @@ raycasting utils:
         optClassControls: THREE.OrbitControls,
         optClassStats: window.Stats,
         optClassWebVR: window.WEBVR,
-    })
+    });
