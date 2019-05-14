@@ -380,9 +380,15 @@ class Threelet {
             Threelet._initBasics(canvas, actual);
 
         // mouse interaction
-        this.onClick = null;
-        this.onClickLeft = null;
-        this.onClickRight = null;
+        this._eventListeners = {};
+        this._eventListenerNames = [
+            'mouse-click', // alias of 'mouse-click-left'
+            'mouse-click-left',
+            'mouse-click-middle',
+            'mouse-click-right',
+            'mouse-move',
+            'mouse-drag-end',
+        ];
 
         //======== FIXME - Oculus Go's desktop mode, OrbitControls breaks mouse events...
         this._initMouseListeners(this.renderer.domElement);
@@ -645,6 +651,16 @@ class Threelet {
         }
     };
 
+    setEventListener(eventName, listener) {
+        if (this._eventListenerNames.includes(eventName)) {
+            if (eventName === 'mouse-click') {
+                eventName = 'mouse-click-left';
+            }
+            this._eventListeners[eventName] = listener;
+        } else {
+            console.error('@@ setEventListener(): unsupported eventName:', eventName);
+        }
+    }
     _initMouseListeners(canvas) {
         // https://stackoverflow.com/questions/6042202/how-to-distinguish-mouse-click-and-drag
         let isDragging = false; // in closure
@@ -653,25 +669,36 @@ class Threelet {
         }, false);
         canvas.addEventListener("mousemove", e => {
             isDragging = true;
-            // console.log('@@ mouse move:', ...Threelet.getMouseCoords(e));
+            const coords = Threelet.getMouseCoords(e);
+            // console.log('@@ mouse move:', ...coords);
+            if (this._eventListeners['mouse-move']) {
+                this._eventListeners['mouse-move'](...coords);
+            }
         }, false);
         canvas.addEventListener("mouseup", e => {
             // console.log('e:', e);
+            const coords = Threelet.getMouseCoords(e);
             if (isDragging) {
                 // console.log("mouseup: drag");
-                // nop
+                if (this._eventListeners['mouse-drag-end']) {
+                    this._eventListeners['mouse-drag-end'](...coords);
+                }
             } else {
                 // console.log("mouseup: click");
-                const coords = Threelet.getMouseCoords(e);
                 if (e.button === 0) {
                     console.log('@@ mouse click left:', ...coords);
-                    if (this.onClick) { this.onClick(...coords); }
-                    if (this.onClickLeft) { this.onClickLeft(...coords); }
+                    if (this._eventListeners['mouse-click-left']) {
+                        this._eventListeners['mouse-click-left'](...coords);
+                    }
                 } else if (e.button === 1) {
-                    if (this.onClickMiddle) { this.onClickMiddle(...coords); }
+                    if (this._eventListeners['mouse-click-middle']) {
+                        this._eventListeners['mouse-click-middle'](...coords);
+                    }
                 } else if (e.button === 2) {
                     // console.log('@@ mouse click right:', ...coords);
-                    if (this.onClickRight) { this.onClickRight(...coords); }
+                    if (this._eventListeners['mouse-click-right']) {
+                        this._eventListeners['mouse-click-right'](...coords);
+                    }
                 }
             }
         }, false);
