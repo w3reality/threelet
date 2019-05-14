@@ -105,7 +105,7 @@ class VRControlHelper {
             });
         console.log('@@ controllers:', controllers);
 
-        if (1) { // debug!! force show cont0 in desktop mode
+        if (0) { // debug!! force show cont0 in desktop mode
             this.group.add(controllers[0]);
             controllers[0].visible = true;
         }

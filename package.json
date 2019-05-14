@@ -1,7 +1,7 @@
 {
     "name": "threelet",
     "version": "0.9.1",
-    "description": "A portable standalone viewer for THREE objects",
+    "description": "A three.js scene viewer with batteries",
     "main": "dist/threelet.js",
     "directories": {
         "example": "examples",
