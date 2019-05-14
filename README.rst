@@ -45,8 +45,8 @@ Usage
 
 .. image:: https://w3reality.github.io/threelet/examples/simple/img/threelet.png
 
-More Usage (WIP)
-----------------
+🚧 🚧 🚧 More Usage (WIP)
+--------------------------
 
 **Basic**
 
@@ -87,25 +87,46 @@ binding scene mechanics handler:
        // your implementation
     };
 
+**Event listeners**
+
+.. code:: js
+
+    // setting mouse listeners
+    //   mx, my: mouse coordinates
+
+    threelet.setEventListener('mouse-click', (mx, my) => { /* ... */ }); // alias of 'mouse-click-left'
+    threelet.setEventListener('mouse-click-left', (mx, my) => { /* ... */ });
+    threelet.setEventListener('mouse-click-middle', (mx, my) => { /* ... */ });
+    threelet.setEventListener('mouse-click-right', (mx, my) => { /* ... */ });
+
+    threelet.setEventListener('mouse-down', (mx, my) => { /* ... */ });  // alias of 'mouse-down-left'
+    threelet.setEventListener('mouse-down-left', (mx, my) => { /* ... */ });
+    threelet.setEventListener('mouse-down-middle', (mx, my) => { /* ... */ });
+    threelet.setEventListener('mouse-down-right', (mx, my) => { /* ... */ });
+
+    threelet.setEventListener('mouse-move', (mx, my) => { /* ... */ });
+    threelet.setEventListener('mouse-drag-end', (mx, my) => { /* ... */ });
+
+    // setting VR controller listeners
+    //   i: controller index
+    //   x, y: touchpad coordinates
+
+    threelet.setEventListener('vr-touchpad-touch-start', (i, x, y) => { /* ... */ });
+    threelet.setEventListener('vr-touchpad-touch-end', (i, x, y) => { /* ... */ });
+    threelet.setEventListener('vr-touchpad-press-start', (i, x, y) => { /* ... */ });
+    threelet.setEventListener('vr-touchpad-press-end', (i, x, y) => { /* ... */ });
+
+    threelet.setEventListener('vr-trigger-press-start', (i) => { /* ... */ });
+    threelet.setEventListener('vr-trigger-press-end', (i) => { /* ... */ });
+
 **Utils**
 
-binding built-in mouse event handlers (clicks, drags):
+raycasting:
 
 .. code:: js
 
-    threelet.onClick = (mx, my) => { // alias for left click
-       // your implementation
-    };
-    threelet.onClickLeft = (mx, my) => { /* ... */ };
-    threelet.onClickMiddle = (mx, my) => { /* ... */ };
-    threelet.onClickRight = (mx, my) => { /* ... */ };
-
-raycasting utils:
-
-.. code:: js
-
-    threelet.raycast();
-    threelet.raycastFromCamera();
+    threelet.raycast(origin, direction, meshes, faceExclude=null, recursive=false);
+    threelet.raycastFromCamera(mx, my, meshes, recursive=false);
 
 **Optional features**
 
