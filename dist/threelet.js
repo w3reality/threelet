@@ -56,7 +56,7 @@ class VRControlHelper {
         triggerCircle.position.set(0, 0, - this.controllerArmLength - 0.05);
         triggerCircle.material.side = THREE.DoubleSide;
         triggerCircle.visible = false;
-        triggerCircle.name = 'trigger-circle';
+        triggerCircle.name = 'trigger-press';
 
         const padLoop = new THREE.LineLoop(
             new THREE.CircleGeometry(0.025, 64),
@@ -65,17 +65,47 @@ class VRControlHelper {
         padLoop.position.set(0, 0.0125, - this.controllerArmLength - 0.025);
         padLoop.rotation.x = Math.PI/2;
 
+        const padLoopTouch = new THREE.LineLoop(
+            new THREE.CircleGeometry(0.005, 64),
+            new THREE.LineBasicMaterial({color: 0x00cccc}));
+        padLoopTouch.geometry.vertices.shift(); // remove the center vertex
+        padLoopTouch.position.set(0, 0.0125, - this.controllerArmLength - 0.025);
+        padLoopTouch.rotation.x = Math.PI/2;
+        padLoopTouch.visible = false;
+        padLoopTouch.name = 'touchpad-touch';
+
+        const padCircleTouch = new THREE.Mesh(
+            new THREE.CircleGeometry(0.005, 64),
+            new THREE.MeshBasicMaterial({color: 0x00cccc}));
+        padCircleTouch.position.set(0, 0.0125, - this.controllerArmLength - 0.025);
+        padCircleTouch.rotation.x = Math.PI/2;
+        padCircleTouch.material.side = THREE.DoubleSide;
+        padCircleTouch.visible = false;
+        padCircleTouch.name = 'touchpad-press';
+
+        const _updateTouchPosition = (obj, axes0, axes1) => {
+            obj.position.set(axes0 * 0.025, 0.0125,
+                axes1 * 0.025 - this.controllerArmLength - 0.025);
+        };
 
         // https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
-        const controllers = [0, 1].map(i => renderer.vr.getController(i)
-            .add(walls.clone())
-            .add(line.clone())
-            .add(triggerLoop.clone())
-            .add(triggerCircle.clone())
-            .add(padLoop.clone()));
+        const controllers = [0, 1].map(i => {
+            const padLoopTouchClone = padLoopTouch.clone();
+            padLoopTouchClone.userData.updatePosition = _updateTouchPosition;
+            const padCircleTouchClone = padCircleTouch.clone();
+            padCircleTouchClone.userData.updatePosition = _updateTouchPosition;
+            return renderer.vr.getController(i)
+                .add(walls.clone())
+                .add(line.clone())
+                .add(triggerLoop.clone())
+                .add(triggerCircle.clone())
+                .add(padLoop.clone())
+                .add(padLoopTouchClone)
+                .add(padCircleTouchClone);
+            });
         console.log('@@ controllers:', controllers);
 
-        if (0) { // debug!! force show cont0 in desktop mode
+        if (1) { // debug!! force show cont0 in desktop mode
             this.group.add(controllers[0]);
             controllers[0].visible = true;
         }
