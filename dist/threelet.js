@@ -22,12 +22,8 @@ class VRControlHelper {
             touchpads: [],
             triggers: [],
         }
-        this.onTouchpadTouchStart = null;
-        this.onTouchpadTouchEnd = null;
-        this.onTouchpadPressStart = null;
-        this.onTouchpadPressEnd = null;
-        this.onTriggerPressStart = null;
-        this.onTriggerPressEnd = null;
+
+        this._eventListeners = {};
     }
     getInteractiveGroup() { return this.group; }
     getControllers() { return this.controllers; }
@@ -50,7 +46,7 @@ class VRControlHelper {
 
         const triggerLoop = new THREE.LineLoop(
             new THREE.CircleGeometry(0.0125, 64),
-            new THREE.LineBasicMaterial({color: 0x00cccc}));
+            new THREE.LineBasicMaterial({color: 0xcccccc}));
         triggerLoop.geometry.vertices.shift(); // remove the center vertex
         triggerLoop.position.set(0, 0, - this.controllerArmLength - 0.05);
 
@@ -64,7 +60,7 @@ class VRControlHelper {
 
         const padLoop = new THREE.LineLoop(
             new THREE.CircleGeometry(0.025, 64),
-            new THREE.LineBasicMaterial({color: 0x00cccc}));
+            new THREE.LineBasicMaterial({color: 0xcccccc}));
         padLoop.geometry.vertices.shift(); // remove the center vertex
         padLoop.position.set(0, 0.0125, - this.controllerArmLength - 0.025);
         padLoop.rotation.x = Math.PI/2;
@@ -92,7 +88,7 @@ class VRControlHelper {
             cont.addEventListener(eventName, listener.bind(this));
         });
     }
-    addSelectListenersDrag() {
+    addSelectListenersDrag() { // deprecated
         this.addSelectListener('selectstart', this.onSelectStartDrag);
         this.addSelectListener('selectend', this.onSelectEndDrag);
     }
@@ -213,31 +209,17 @@ class VRControlHelper {
             const touchpad = stat.touchpads[i];
 
             if (touchpad.touched !== touched) {
-                if (touched === true) {
-                    console.log('@@ dispatching touchpad-touch-start !!!!');
-                    if (this.onTouchpadTouchStart) {
-                        this.onTouchpadTouchStart(i, axes0, axes1);
-                    }
-                } else {
-                    console.log('@@ spatching touchpad-touch-end !!!!');
-                    if (this.onTouchpadTouchEnd) {
-                        this.onTouchpadTouchEnd(i, axes0, axes1);
-                    }
-                }
+                const func = touched === true ?
+                    this._eventListeners['vr-touchpad-touch-start'] :
+                    this._eventListeners['vr-touchpad-touch-end'];
+                if (func) func(i, axes0, axes1);
             }
 
             if (touchpad.pressed !== pressed) {
-                if (pressed === true) {
-                    console.log('@@ dispatching touchpad-press-start !!!!');
-                    if (this.onTouchpadPressStart) {
-                        this.onTouchpadPressStart(i, axes0, axes1);
-                    }
-                } else {
-                    console.log('@@ dispatching touchpad-press-end !!!!');
-                    if (this.onTouchpadPressEnd) {
-                        this.onTouchpadPressEnd(i, axes0, axes1);
-                    }
-                }
+                const func = pressed === true ?
+                    this._eventListeners['vr-touchpad-press-start'] :
+                    this._eventListeners['vr-touchpad-press-end'];
+                if (func) func(i, axes0, axes1);
             }
 
             // diff touchpad states done; record the new state now
@@ -254,17 +236,10 @@ class VRControlHelper {
 
             if (stat.triggers[i] !== trigger) {
                 stat.triggers[i] = trigger;
-                if (stat.triggers[i] === true) {
-                    console.log('@@ dispatching trigger-press-start !!!!');
-                    if (this.onTriggerPressStart) {
-                        this.onTriggerPressStart(i);
-                    }
-                } else {
-                    console.log('@@ dispatching trigger-press-end !!!!');
-                    if (this.onTriggerPressEnd) {
-                        this.onTriggerPressEnd(i);
-                    }
-                }
+                const func = stat.triggers[i] === true ?
+                    this._eventListeners['vr-trigger-press-start'] :
+                    this._eventListeners['vr-trigger-press-end'];
+                if (func) func(i);
             }
         }
     }
@@ -379,7 +354,7 @@ class Threelet {
         [this.camera, this.scene, this.renderer, this.render, this.controls] =
             Threelet._initBasics(canvas, actual);
 
-        // mouse interaction
+        // events
         this._eventListeners = {};
         this._eventListenerNames = [
             'mouse-down', // alias of 'mouse-down-left'
@@ -392,6 +367,12 @@ class Threelet {
             'mouse-click-right',
             'mouse-move',
             'mouse-drag-end',
+            'vr-touchpad-touch-start',
+            'vr-touchpad-touch-end',
+            'vr-touchpad-press-start',
+            'vr-touchpad-press-end',
+            'vr-trigger-press-start',
+            'vr-trigger-press-end',
         ];
 
         //======== FIXME - Oculus Go's desktop mode, OrbitControls breaks mouse events...
@@ -657,9 +638,13 @@ class Threelet {
 
     setEventListener(eventName, listener) {
         if (this._eventListenerNames.includes(eventName)) {
-            if (eventName === 'mouse-down') eventName = 'mouse-down-left'; // alias
-            if (eventName === 'mouse-click') eventName = 'mouse-click-left'; // alias
-            this._eventListeners[eventName] = listener;
+            // aliases
+            if (eventName === 'mouse-down') eventName = 'mouse-down-left';
+            if (eventName === 'mouse-click') eventName = 'mouse-click-left';
+
+            const listeners = eventName.startsWith('vr-') ?
+                this.vrcHelper._eventListeners : this._eventListeners;
+            listeners[eventName] = listener;
         } else {
             console.error('@@ setEventListener(): unsupported eventName:', eventName);
         }
