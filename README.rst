@@ -1,7 +1,7 @@
 threelet
 ===================
 
-A portable standalone viewer for THREE objects.
+A three.js scene viewer with batteries.
 
 Setup
 -----
