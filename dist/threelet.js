@@ -382,6 +382,10 @@ class Threelet {
         // mouse interaction
         this._eventListeners = {};
         this._eventListenerNames = [
+            'mouse-down', // alias of 'mouse-down-left'
+            'mouse-down-left',
+            'mouse-down-middle',
+            'mouse-down-right',
             'mouse-click', // alias of 'mouse-click-left'
             'mouse-click-left',
             'mouse-click-middle',
@@ -653,9 +657,8 @@ class Threelet {
 
     setEventListener(eventName, listener) {
         if (this._eventListenerNames.includes(eventName)) {
-            if (eventName === 'mouse-click') {
-                eventName = 'mouse-click-left';
-            }
+            if (eventName === 'mouse-down') eventName = 'mouse-down-left'; // alias
+            if (eventName === 'mouse-click') eventName = 'mouse-click-left'; // alias
             this._eventListeners[eventName] = listener;
         } else {
             console.error('@@ setEventListener(): unsupported eventName:', eventName);
@@ -666,6 +669,21 @@ class Threelet {
         let isDragging = false; // in closure
         canvas.addEventListener("mousedown", e => {
             isDragging = false;
+            const coords = Threelet.getMouseCoords(e);
+            // console.log('@@ mouse down:', ...coords);
+            if (e.button === 0) {
+                if (this._eventListeners['mouse-down-left']) {
+                    this._eventListeners['mouse-down-left'](...coords);
+                }
+            } else if (e.button === 1) {
+                if (this._eventListeners['mouse-down-middle']) {
+                    this._eventListeners['mouse-down-middle'](...coords);
+                }
+            } else if (e.button === 2) {
+                if (this._eventListeners['mouse-down-right']) {
+                    this._eventListeners['mouse-down-right'](...coords);
+                }
+            }
         }, false);
         canvas.addEventListener("mousemove", e => {
             isDragging = true;
@@ -686,7 +704,7 @@ class Threelet {
             } else {
                 // console.log("mouseup: click");
                 if (e.button === 0) {
-                    console.log('@@ mouse click left:', ...coords);
+                    // console.log('@@ mouse click left:', ...coords);
                     if (this._eventListeners['mouse-click-left']) {
                         this._eventListeners['mouse-click-left'](...coords);
                     }
