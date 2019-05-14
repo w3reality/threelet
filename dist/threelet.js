@@ -83,14 +83,16 @@ class VRControlHelper {
         return controllers;
     }
 
-    addSelectListener(eventName, listener) {
+    // deprecated
+    _addSelectListener(eventName, listener) {
         this.controllers.forEach(cont => {
             cont.addEventListener(eventName, listener.bind(this));
         });
     }
-    addSelectListenersDrag() { // deprecated
-        this.addSelectListener('selectstart', this.onSelectStartDrag);
-        this.addSelectListener('selectend', this.onSelectEndDrag);
+    // deprecated
+    _addSelectListenersDrag() {
+        this._addSelectListener('selectstart', this.onSelectStartDrag);
+        this._addSelectListener('selectend', this.onSelectEndDrag);
     }
     onSelectStartDrag( event ) {
         const controller = event.target;
@@ -440,7 +442,7 @@ class Threelet {
         VRControlHelper.createTestObjects().forEach(obj => group.add(obj));
         this.scene.add(group);
 
-        this.vrcHelper.addSelectListenersDrag();
+        this.vrcHelper._addSelectListenersDrag();
     }
     getVRControlHelper() {
         return this.vrcHelper;
