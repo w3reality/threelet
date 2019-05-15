@@ -18,8 +18,8 @@ Setup
 
     import Threelet from 'dist/threelet.js';
 
-Usage
------
+Simple example
+--------------
 
 .. code:: html
 
@@ -45,31 +45,31 @@ Usage
 
 .. image:: https://w3reality.github.io/threelet/examples/simple/img/threelet.png
 
-🚧 🚧 🚧 More Usage (WIP)
---------------------------
+Usage
+-----
 
 **Basic**
 
-auto/manual configuring camera/scene/renderer:
+``camera``, ``scene`` and ``renderer`` can be automatically/manually configured:
 
 .. code:: js
 
     const threelet = new Threelet({canvas: myCanvas});
     // now the following objects are all set
-    // threelet.camera
-    // threelet.scene
-    // threelet.renderer
+    //   threelet.camera
+    //   threelet.scene
+    //   threelet.renderer
 
-object registration/custom scene:
+``scene`` can be customized as:
 
 .. code:: js
-
-    threelet.scene.add(myObject) // add an object to the scene
 
     const threelet = new Threelet({
         canvas: myCanvas,
         scene: myScene, // instantiate with a custom scene
     });
+
+    threelet.scene.add(myObject) // add an object to the scene
 
 passive/active/fps-throttled rendering by built-in loop controller:
 
