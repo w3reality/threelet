@@ -1,10 +1,10 @@
 // Threelet - https://github.com/w3reality/threelet
-// A portable standalone viewer for THREE objects (MIT License)
+// A three.js scene viewer with batteries (MIT License)
 
 const __version = "0.9.2dev";
 
-// VRControlHelper is an adaptation of the dragging example
-// credits: https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
+// credits: VRControlHelper is an extention of the dragging example -
+// https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
 class VRControlHelper {
     constructor(renderer) {
         // this.controllerArmLength = 0;
@@ -27,6 +27,24 @@ class VRControlHelper {
     }
     getInteractiveGroup() { return this.group; }
     getControllers() { return this.controllers; }
+    getControllersState() { return this.controllersState; }
+
+    updateTriggerPressVisibility(i, tf) {
+        this.controllers[i].getObjectByName('trigger-press').visible = tf;
+    }
+    updateTouchpadPointVisibility(i, type, tf) {
+        const obj = this.controllers[i].getObjectByName(`touchpad-${type}`);
+        obj.visible = tf;
+        if (tf === false) {
+            obj.position.z = 99999; // kludge: workaround flickering
+        }
+    }
+    updateTouchpadPoint(i, type) {
+        const touchpad = this.controllersState.touchpads[i];
+        const obj = this.controllers[i].getObjectByName(`touchpad-${type}`);
+        obj.position.set(touchpad.axes0 * 0.025, 0.0125,
+            touchpad.axes1 * 0.025 - this.controllerArmLength - 0.025);
+    }
     _createControllers(renderer) {
         // maybe load a 3D model instead of the box
         // https://github.com/mrdoob/three.js/blob/master/examples/webvr_paint.html
@@ -83,26 +101,15 @@ class VRControlHelper {
         padCircleTouch.visible = false;
         padCircleTouch.name = 'touchpad-press';
 
-        const _updateTouchPosition = (obj, axes0, axes1) => {
-            obj.position.set(axes0 * 0.025, 0.0125,
-                axes1 * 0.025 - this.controllerArmLength - 0.025);
-        };
-
         // https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
-        const controllers = [0, 1].map(i => {
-            const padLoopTouchClone = padLoopTouch.clone();
-            padLoopTouchClone.userData.updatePosition = _updateTouchPosition;
-            const padCircleTouchClone = padCircleTouch.clone();
-            padCircleTouchClone.userData.updatePosition = _updateTouchPosition;
-            return renderer.vr.getController(i)
-                .add(walls.clone())
-                .add(line.clone())
-                .add(triggerLoop.clone())
-                .add(triggerCircle.clone())
-                .add(padLoop.clone())
-                .add(padLoopTouchClone)
-                .add(padCircleTouchClone);
-            });
+        const controllers = [0, 1].map(i => renderer.vr.getController(i)
+            .add(walls.clone())
+            .add(line.clone())
+            .add(triggerLoop.clone())
+            .add(triggerCircle.clone())
+            .add(padLoop.clone())
+            .add(padLoopTouch.clone())
+            .add(padCircleTouch.clone()));
         console.log('@@ controllers:', controllers);
 
         if (0) { // debug!! force show cont0 in desktop mode
@@ -540,7 +547,7 @@ class Threelet {
         const dt = time - this.timeLast;
         this.timeLast = time;
         if (this.update) {
-            this.update(time, dt, this.vrcHelper.controllersState);
+            this.update(time, dt);
         }
     }
 
