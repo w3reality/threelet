@@ -1,7 +1,14 @@
 threelet
 ===================
 
-A three.js scene viewer with batteries.
+**threelet** is a three.js based scene viewer.
+It can be also used as a tiny framework for rapidly making dynamic 3D applications.
+Some notable features include:
+
+- programmable scene update interface,
+- fps controllable rendering loop, and
+- built-in mouse/vr-controller event handlers.
+
 
 Setup
 -----
@@ -18,8 +25,8 @@ Setup
 
     import Threelet from 'dist/threelet.js';
 
-Simple example
---------------
+Simple usage
+------------
 
 .. code:: html
 
@@ -34,8 +41,8 @@ Simple example
 
     const threelet = new Threelet({
         canvas: document.getElementById("canvas"),
-        optClassControls: window.THREE.OrbitControls,
-        optClassStats: window.Stats,
+        optClassControls: THREE.OrbitControls,
+        optClassStats: Stats,
     });
 
     threelet.updateLoop(0); // 0 fps, i.e. passive rendering with OribitControls
@@ -45,8 +52,8 @@ Simple example
 
 .. image:: https://w3reality.github.io/threelet/examples/simple/img/threelet.png
 
-Usage
------
+More usage
+----------
 
 **Basic**
 
@@ -57,7 +64,7 @@ Usage
     const threelet = new Threelet({canvas: myCanvas});
     // now the following objects are all set
     //   threelet.camera
-    //   threelet.scene
+    //   threelet.scene (with the default axes and a unit lattice)
     //   threelet.renderer
 
 ``scene`` can be customized as:
@@ -126,9 +133,9 @@ raycasting:
 .. code:: js
 
     threelet.raycast(origin, direction, meshes, faceExclude=null, recursive=false);
-    threelet.raycastFromCamera(mx, my, meshes, recursive=false);
+    threelet.raycastFromMouse(mx, my, meshes, recursive=false);
 
-**Optional features**
+**Pluggable feature intreface**
 
 .. code:: html
 
