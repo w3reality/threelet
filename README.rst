@@ -132,7 +132,7 @@ raycasting:
 
 .. code:: js
 
-    threelet.raycast(origin, direction, meshes, faceExclude=null, recursive=false);
+    threelet.raycast(origin, direction, meshes, recursive=false, faceExclude=null);
     threelet.raycastFromMouse(mx, my, meshes, recursive=false);
 
 **Pluggable feature intreface**
