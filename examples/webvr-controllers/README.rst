@@ -4,6 +4,9 @@ WebVR controller state visualizer
 This application detects WebVR capable controller devices in VR session, and renders
 their states (button touch/press events, position/orientation in 3D space, etc.) in real time.
 
+Also, used as a template, it could be useful for designing and experimenting with
+original WebVR controllers that have customized behaviors.
+
 `live <https://w3reality.github.io/threelet/examples/webvr-controllers/index.html>`__ |
 `video <https://w3reality.github.io/threelet/examples/webvr-controllers/media/webvr-controllers.mp4>`__
 
