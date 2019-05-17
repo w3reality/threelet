@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>WebVR controller state visualizer</title>
+</head>
+<body>
+    <canvas id="canvas" style="width: 100%; height: 100%;"></canvas>
+    <div id="overlay" style="
+        position: absolute;
+        z-index: 100;
+        width: 520px; height: 320px;
+        top: 80px;
+        padding: 10px;
+        color: white;
+        background: #00000080;">
+        <div id="msg"></div>
+
+        <pre>
+WebVR controller state visualizer
+
+Open the URL with an HMD and press [ENTER VR] button.
+
+Supported controllers:
+
+    Daydream Controller
+    Gear VR Controller
+    Oculus Go Controller
+    OpenVR Gamepad
+    Oculus Touch.*
+    Spatial Controller.*
+        </pre>
+        <p>
+            <a style="color: white;" href="./media/webvr-controllers.mp4">video</a>
+            | <a style="color: white;" href="https://github.com/w3reality/threelet/tree/master/examples/webvr-controllers">source code</a>
+        </p>
+    </div>
+
+    <script src="../deps/stats.min.js"></script>
+    <script src="../deps/three.min.js"></script>
+    <script src="../deps/OrbitControls.js"></script>
+    <script src="../deps/WebVR.js"></script>
+
+    <script type="module">
+    import Threelet from '../../dist/threelet.js';
+
+    const scene = new THREE.Scene();
+    const threelet = new Threelet({
+        canvas: document.getElementById("canvas"),
+        optScene: scene,
+        optCameraPosition: [0, 1, 1.2],
+        optClassStats: window.Stats,
+        optStatsPenel: 1, // 0: fps, 1: ms, 2: mb, 3+: custom
+        optClassControls: THREE.OrbitControls,
+        optClassWebVR: window.WEBVR,
+    });
+
+    const vrcHelper = threelet.getVRControlHelper();
+    const vrTouchpadTouching = [false, false];
+    const vrTouchpadPressing = [false, false];
+
+    threelet.setEventListener('vr-touchpad-touch-start', (i, x, y) => {
+        console.log('@@ touchpad ts - i, x, y:', i, x, y);
+        vrTouchpadTouching[i] = true;
+        vrcHelper.updateTouchpadPointVisibility(i, 'touch', true);
+    });
+    threelet.setEventListener('vr-touchpad-touch-end', (i, x, y) => {
+        console.log('@@ touchpad te - i, x, y:', i, x, y);
+        // always x,y = 0,0 on Oculus Go controller; spec??
+        vrTouchpadTouching[i] = false;
+        vrcHelper.updateTouchpadPointVisibility(i, 'touch', false);
+    });
+    threelet.setEventListener('vr-touchpad-press-start', (i, x, y) => {
+        console.log('@@ touchpad ps - i, x, y:', i, x, y);
+        vrTouchpadPressing[i] = true;
+        vrcHelper.updateTouchpadPointVisibility(i, 'press', true);
+        vrcHelper.updateTouchpadPointVisibility(i, 'touch', false);
+    });
+    threelet.setEventListener('vr-touchpad-press-end', (i, x, y) => {
+        console.log('@@ touchpad pe - i, x, y:', i, x, y);
+        vrTouchpadPressing[i] = false;
+        vrcHelper.updateTouchpadPointVisibility(i, 'press', false);
+        vrcHelper.updateTouchpadPointVisibility(i, 'touch', true);
+    });
+    threelet.setEventListener('vr-trigger-press-start', (i) => {
+        console.log('@@ trigger ps - i:', i);
+        vrcHelper.updateTriggerPressVisibility(i, true);
+    });
+    threelet.setEventListener('vr-trigger-press-end', (i) => {
+        console.log('@@ trigger pe - i:', i);
+        vrcHelper.updateTriggerPressVisibility(i, false);
+    });
+
+    //
+
+    const createTextCanvas = (str, width, height, opts={}) => {
+        const defaults = {
+            bg: "#fff",
+            tbg: "#fff",
+            tfg: "#000",
+            // fontFamily: "Times",
+            fontFamily: "monospace", // https://stackoverflow.com/questions/4686754/making-every-character-on-a-web-page-the-same-width
+        };
+        const actual = Object.assign({}, defaults, opts);
+
+        const can = document.createElement("canvas");
+        can.width = width;
+        can.height = height;
+
+        const ctx = can.getContext("2d");
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+
+        str = str.replace(/&lt;/g, "<")
+            .replace(/&gt;/g, ">")
+            .replace(/&quot;/, "\"");
+        const [w, h] = [ctx.measureText(str).width + 16, 45];
+
+        // ctx.font = `48px ${actual.fontFamily}`;
+        // ctx.font = `36px ${actual.fontFamily}`;
+        ctx.font = `13px ${actual.fontFamily}`;
+
+        ctx.fillStyle = actual.bg;
+        ctx.fillRect(0, 0, can.width, can.height);
+
+        ctx.fillStyle = actual.tbg;
+        ctx.fillRect(0, 0, w, 45);
+
+        ctx.fillStyle = actual.tfg;
+        // ctx.fillText(str, 25, 35+25); // ok for 256, 128
+        ctx.fillText(str, 25, 35); // ok for 256, 64
+
+        return can;
+    };
+    const createPanelSprite = (can, pixelsPerUnit=512) => {
+        const mat = new THREE.SpriteMaterial({
+            map: new THREE.Texture(can),
+            opacity: 0.7,
+            color: 0xffffff,
+        });
+        mat.map.needsUpdate = true;
+        const sp = new THREE.Sprite(mat);
+        sp.scale.set(
+            can.width/pixelsPerUnit, can.height/pixelsPerUnit, 1.0);
+        return sp;
+    };
+
+    const panelCanvas = createTextCanvas('', 512, 256, {tfg: '#000'});
+    const sp = createPanelSprite(panelCanvas);
+    sp.position.set(0, 0.5, -0.5);
+
+    const interactiveGroup = vrcHelper.getInteractiveGroup();
+    interactiveGroup.add(sp);
+    scene.add(interactiveGroup);
+    vrcHelper.enableDragInteractiveGroup();
+
+    //
+
+    const stats = vrcHelper.getControllersState();
+    const ctx = panelCanvas.getContext('2d');
+    const ysLine = [];
+    for (let i = 0; i < 12; i++) { ysLine.push(16 + 18 * i); }
+    const clearPanel = () => {
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, panelCanvas.width, panelCanvas.height);
+    };
+
+    const updateControllerStats = (i) => {
+        ctx.fillStyle = '#000';
+        // ctx.fillText('0--------90--------90--------90--------90--------90--------90--------90--------9', 10, ysLine[0+6*i]);
+        ctx.fillText(`---- controller[${i}]: ${stats.ids[i] ? stats.ids[i] : '-'}`, 10, ysLine[0+6*i]);
+        if (! stats.touchpads[i]) return;
+
+        // refs -
+        //   https://developer.mozilla.org/en-US/docs/Web/API/GamepadPose
+        //   three.js/src/renderers/webvr/WebVRManager.js
+        // console.log('@@ pose:', stats.poses[i]);
+
+        const pos = stats.poses[i].position; // null for 3DoF controllers
+        const ori = stats.poses[i].orientation;
+        // https://stackoverflow.com/questions/12760643/how-to-convert-a-javascript-typed-array-into-a-javascript-array
+        const strPos = pos ? Array.prototype.slice.call(pos)
+            .map(q => q.toFixed(4)).join(', ') : '-, -, -';
+        const strOri = ori ? Array.prototype.slice.call(ori)
+            .map(q => q.toFixed(4)).join(', ') : '-, -, -, -';
+        ctx.fillText(`position: (${strPos})`, 10, ysLine[1+6*i]);
+        ctx.fillText(`orientation: (${strOri})`, 10, ysLine[2+6*i]);
+
+        ctx.fillText(`trigger press: ${stats.triggers[i]}`, 10, ysLine[3+6*i]);
+
+        const touchpad = stats.touchpads[i];
+        ctx.fillText(`touchpad (touch, press): (${touchpad.touched}, ${touchpad.pressed})`, 10, ysLine[4+6*i]);
+        ctx.fillText(`touchpad axes: (${touchpad.axes0.toFixed(4)}, ${touchpad.axes1.toFixed(4)})`, 10, ysLine[5+6*i]);
+
+        sp.material.map.needsUpdate = true;
+    };
+
+    threelet.update = (t, dt) => {
+        // console.log('t, dt:', t, dt);
+        clearPanel();
+        updateControllerStats(0);
+        updateControllerStats(1);
+
+        // console.log('@@ vr touchpad touching/pressing:', vrTouchpadTouching, vrTouchpadPressing);
+        for (let i of [0, 1]) {
+            if (vrTouchpadPressing[i]) {
+                vrcHelper.updateTouchpadPoint(i, 'press');
+            } else if (vrTouchpadTouching[i]) {
+                vrcHelper.updateTouchpadPoint(i, 'touch');
+            }
+        }
+    };
+
+    // first time
+    threelet.update();
+    threelet.render();
+
+    </script>
+</body>
+</html>

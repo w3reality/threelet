@@ -1,7 +1,7 @@
 // Threelet - https://github.com/w3reality/threelet
 // A three.js scene viewer with batteries (MIT License)
 
-const __version = "0.9.2dev";
+const __version = "0.9.2";
 
 // credits: VRControlHelper is an extention of the dragging example -
 // https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
@@ -21,6 +21,8 @@ class VRControlHelper {
         this.controllersState = {
             touchpads: [],
             triggers: [],
+            poses: [],
+            ids: [],
         }
 
         this._eventListeners = {};
@@ -120,14 +122,13 @@ class VRControlHelper {
         return controllers;
     }
 
-    // deprecated
     _addSelectListener(eventName, listener) {
         this.controllers.forEach(cont => {
             cont.addEventListener(eventName, listener.bind(this));
         });
     }
-    // deprecated
-    _addSelectListenersDrag() {
+
+    enableDragInteractiveGroup() {
         this._addSelectListener('selectstart', this.onSelectStartDrag);
         this._addSelectListener('selectend', this.onSelectEndDrag);
     }
@@ -206,12 +207,16 @@ class VRControlHelper {
                 // this controller seems lost; reset the state
                 stat.triggers[i] = undefined;
                 stat.touchpads[i] = undefined;
+                stat.poses[i] = undefined;
+                stat.ids[i] = undefined;
                 return;
             }
 
-            const pose = gamepad.pose;
             const buttonId = gamepad.id === 'Daydream Controller' ? 0 : 1; // for trigger
             const buttonIdTouchpad = 0;
+
+            stat.poses[i] = gamepad.pose;
+            stat.ids[i] = gamepad.id;
 
             if (0) { // debug with Oculus Go controller
                 const [b0, b1] = gamepad.buttons; // touchpad, trigger in case of Oculus Go
@@ -269,9 +274,8 @@ class VRControlHelper {
             //-------- end touchpad handling --------
 
             const trigger = gamepad.buttons[buttonId].pressed;
-            if (stat.triggers[i] === undefined) {
-                stat.triggers[i] = false;
-            }
+
+            if (stat.triggers[i] === undefined) stat.triggers[i] = false;
 
             if (stat.triggers[i] !== trigger) {
                 stat.triggers[i] = trigger;
@@ -377,6 +381,7 @@ class Threelet {
             optScene: null,
             optCameraPosition: [0, 1, 2],
             optClassStats: null,
+            optStatsPenel: 0, // 0: fps, 1: ms, 2: mb, 3+: custom
             optClassControls: null,
             optClassWebVR: null,
         };
@@ -479,7 +484,7 @@ class Threelet {
         VRControlHelper.createTestObjects().forEach(obj => group.add(obj));
         this.scene.add(group);
 
-        this.vrcHelper._addSelectListenersDrag();
+        this.vrcHelper.enableDragInteractiveGroup();
     }
     getVRControlHelper() {
         return this.vrcHelper;
@@ -586,7 +591,7 @@ class Threelet {
     }
 
     static _initBasics(canvas, opts) {
-        const {optScene, optClassStats, optClassControls} = opts;
+        const {optScene, optClassStats, optStatsPenel, optClassControls} = opts;
 
         const camera = new THREE.PerspectiveCamera(75, canvas.width/canvas.height, 0.001, 1000);
         camera.position.set(...opts.optCameraPosition);
@@ -620,7 +625,7 @@ class Threelet {
         let stats = null;
         if (optClassStats) {
             stats = new optClassStats();
-            stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+            stats.showPanel(optStatsPenel);
             const statsDom = stats.dom;
             // statsDom.style.top = '90%';
             document.body.appendChild(statsDom);
@@ -638,7 +643,7 @@ class Threelet {
             controls.addEventListener('change', render.bind(null, false));
             if (Threelet.isVrSupported()) {
                 // FIXME - OrbitControl breaks _initMouseListeners() on Oculus Go
-                console.error('note: OrbitControls set but not enabling on this VR-capable browser.');
+                console.warn('not enabling OrbitControls (although requested) on this VR-capable browser.');
                 controls.enabled = false; // https://stackoverflow.com/questions/20058579/threejs-disable-orbit-camera-while-using-transform-control
             }
         }
@@ -758,7 +763,7 @@ class Threelet {
         }
         return isects.length > 0 ? isects[0] : null;
     }
-    _raycastFromCamera(mx, my, width, height, cam, meshes, recursive=false) {
+    _raycastFromMouse(mx, my, width, height, cam, meshes, recursive=false) {
         const mouse = new THREE.Vector2( // normalized (-1 to +1)
             (mx / width) * 2 - 1,
             - (my / height) * 2 + 1);
@@ -767,13 +772,13 @@ class Threelet {
         this._raycaster.setFromCamera(mouse, cam);
         return this._raycast(meshes, recursive, null);
     }
-    raycast(origin, direction, meshes, faceExclude=null, recursive=false) {
+    raycast(origin, direction, meshes, recursive=false, faceExclude=null) {
         this._raycaster.set(origin, direction);
         return this._raycast(meshes, recursive, faceExclude);
     }
-    raycastFromCamera(mx, my, meshes, recursive=false) {
+    raycastFromMouse(mx, my, meshes, recursive=false) {
         const {width, height} = this.renderer.domElement;
-        return this._raycastFromCamera(
+        return this._raycastFromMouse(
             mx, my, width, height, this.camera,
             meshes, recursive);
     }
