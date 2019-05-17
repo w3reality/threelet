@@ -9,6 +9,10 @@ Some notable features include:
 - fps controllable rendering loop, and
 - built-in mouse/vr-controller event handlers.
 
+**demos**
+
+- Simple usage with the default axes and a unit lattice (`live <https://w3reality.github.io/threelet/examples/simple/index.html>`__ | `source code <https://github.com/w3reality/threelet/tree/master/examples/simple>`__)
+- WebVR controller state visualizer (`live <https://w3reality.github.io/threelet/examples/webvr-controllers/index.html>`__ | `source code <https://github.com/w3reality/threelet/tree/master/examples/webvr-controllers>`__)
 
 Setup
 -----
