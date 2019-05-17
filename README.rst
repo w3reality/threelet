@@ -82,7 +82,7 @@ More usage
 
     threelet.scene.add(myObject) // add an object to the scene
 
-passive/active/fps-throttled rendering by built-in loop controller:
+render modes (passive, active, and fps-throttled) by the built-in loop controller:
 
 .. code:: js
 
@@ -90,7 +90,7 @@ passive/active/fps-throttled rendering by built-in loop controller:
 
     threelet.render(); // atomic render manually
 
-binding scene mechanics handler:
+scene mechanics handler:
 
 .. code:: js
 
@@ -139,7 +139,7 @@ raycasting:
     threelet.raycast(origin, direction, meshes, recursive=false, faceExclude=null);
     threelet.raycastFromMouse(mx, my, meshes, recursive=false);
 
-**Pluggable feature intreface**
+**Pluggable feature interface**
 
 .. code:: html
 
