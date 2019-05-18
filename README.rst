@@ -105,30 +105,34 @@ scene mechanics handler:
     // setting mouse listeners
     //   mx, my: mouse coordinates
 
-    threelet.setEventListener('mouse-click', (mx, my) => { /* ... */ }); // alias of 'mouse-click-left'
-    threelet.setEventListener('mouse-click-left', (mx, my) => { /* ... */ });
-    threelet.setEventListener('mouse-click-middle', (mx, my) => { /* ... */ });
-    threelet.setEventListener('mouse-click-right', (mx, my) => { /* ... */ });
+    threelet.on('mouse-click', (mx, my) => { /* ... */ }); // alias of 'mouse-click-left'
+    threelet.on('mouse-click-left', (mx, my) => { /* ... */ });
+    threelet.on('mouse-click-middle', (mx, my) => { /* ... */ });
+    threelet.on('mouse-click-right', (mx, my) => { /* ... */ });
 
-    threelet.setEventListener('mouse-down', (mx, my) => { /* ... */ });  // alias of 'mouse-down-left'
-    threelet.setEventListener('mouse-down-left', (mx, my) => { /* ... */ });
-    threelet.setEventListener('mouse-down-middle', (mx, my) => { /* ... */ });
-    threelet.setEventListener('mouse-down-right', (mx, my) => { /* ... */ });
+    threelet.on('mouse-down', (mx, my) => { /* ... */ });  // alias of 'mouse-down-left'
+    threelet.on('mouse-down-left', (mx, my) => { /* ... */ });
+    threelet.on('mouse-down-middle', (mx, my) => { /* ... */ });
+    threelet.on('mouse-down-right', (mx, my) => { /* ... */ });
 
-    threelet.setEventListener('mouse-move', (mx, my) => { /* ... */ });
-    threelet.setEventListener('mouse-drag-end', (mx, my) => { /* ... */ });
+    threelet.on('mouse-move', (mx, my) => { /* ... */ });
+    threelet.on('mouse-drag-end', (mx, my) => { /* ... */ });
 
     // setting VR controller listeners
     //   i: controller index
     //   x, y: touchpad coordinates
 
-    threelet.setEventListener('vr-touchpad-touch-start', (i, x, y) => { /* ... */ });
-    threelet.setEventListener('vr-touchpad-touch-end', (i, x, y) => { /* ... */ });
-    threelet.setEventListener('vr-touchpad-press-start', (i, x, y) => { /* ... */ });
-    threelet.setEventListener('vr-touchpad-press-end', (i, x, y) => { /* ... */ });
+    threelet.on('vr-touchpad-touch-start', (i, x, y) => { /* ... */ });
+    threelet.on('vr-touchpad-touch-end', (i, x, y) => { /* ... */ });
+    threelet.on('vr-touchpad-press-start', (i, x, y) => { /* ... */ });
+    threelet.on('vr-touchpad-press-end', (i, x, y) => { /* ... */ });
 
-    threelet.setEventListener('vr-trigger-press-start', (i) => { /* ... */ });
-    threelet.setEventListener('vr-trigger-press-end', (i) => { /* ... */ });
+    threelet.on('vr-trigger-press-start', (i) => { /* ... */ });
+    threelet.on('vr-trigger-press-end', (i) => { /* ... */ });
+
+    // cancelling
+
+    threelet.on(eventName, null);
 
 **Utils**
 

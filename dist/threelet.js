@@ -1,7 +1,7 @@
 // Threelet - https://github.com/w3reality/threelet
 // A three.js scene viewer with batteries (MIT License)
 
-const __version = "0.9.2";
+const __version = "0.9.3dev";
 
 // credits: VRControlHelper is an extention of the dragging example -
 // https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
@@ -401,6 +401,7 @@ class Threelet {
         // events
         this._eventListeners = {};
         this._eventListenerNames = [
+            // TODO add keyboard events
             'mouse-down', // alias of 'mouse-down-left'
             'mouse-down-left',
             'mouse-down-middle',
@@ -680,7 +681,10 @@ class Threelet {
         }
     };
 
-    setEventListener(eventName, listener) {
+    // deprecated; for compat only
+    setEventListener(eventName, listener) { this.on(eventName, listener); }
+
+    on(eventName, listener) {
         if (this._eventListenerNames.includes(eventName)) {
             // aliases
             if (eventName === 'mouse-down') eventName = 'mouse-down-left';
@@ -690,7 +694,7 @@ class Threelet {
                 this.vrcHelper._eventListeners : this._eventListeners;
             listeners[eventName] = listener;
         } else {
-            console.error('@@ setEventListener(): unsupported eventName:', eventName);
+            console.error('@@ on(): unsupported eventName:', eventName);
         }
     }
     _initMouseListeners(canvas) {

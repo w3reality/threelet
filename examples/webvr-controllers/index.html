@@ -59,34 +59,34 @@ Supported controllers:
     const vrTouchpadTouching = [false, false];
     const vrTouchpadPressing = [false, false];
 
-    threelet.setEventListener('vr-touchpad-touch-start', (i, x, y) => {
+    threelet.on('vr-touchpad-touch-start', (i, x, y) => {
         console.log('@@ touchpad ts - i, x, y:', i, x, y);
         vrTouchpadTouching[i] = true;
         vrcHelper.updateTouchpadPointVisibility(i, 'touch', true);
     });
-    threelet.setEventListener('vr-touchpad-touch-end', (i, x, y) => {
+    threelet.on('vr-touchpad-touch-end', (i, x, y) => {
         console.log('@@ touchpad te - i, x, y:', i, x, y);
         // always x,y = 0,0 on Oculus Go controller; spec??
         vrTouchpadTouching[i] = false;
         vrcHelper.updateTouchpadPointVisibility(i, 'touch', false);
     });
-    threelet.setEventListener('vr-touchpad-press-start', (i, x, y) => {
+    threelet.on('vr-touchpad-press-start', (i, x, y) => {
         console.log('@@ touchpad ps - i, x, y:', i, x, y);
         vrTouchpadPressing[i] = true;
         vrcHelper.updateTouchpadPointVisibility(i, 'press', true);
         vrcHelper.updateTouchpadPointVisibility(i, 'touch', false);
     });
-    threelet.setEventListener('vr-touchpad-press-end', (i, x, y) => {
+    threelet.on('vr-touchpad-press-end', (i, x, y) => {
         console.log('@@ touchpad pe - i, x, y:', i, x, y);
         vrTouchpadPressing[i] = false;
         vrcHelper.updateTouchpadPointVisibility(i, 'press', false);
         vrcHelper.updateTouchpadPointVisibility(i, 'touch', true);
     });
-    threelet.setEventListener('vr-trigger-press-start', (i) => {
+    threelet.on('vr-trigger-press-start', (i) => {
         console.log('@@ trigger ps - i:', i);
         vrcHelper.updateTriggerPressVisibility(i, true);
     });
-    threelet.setEventListener('vr-trigger-press-end', (i) => {
+    threelet.on('vr-trigger-press-end', (i) => {
         console.log('@@ trigger pe - i:', i);
         vrcHelper.updateTriggerPressVisibility(i, false);
     });
