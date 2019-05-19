@@ -143,7 +143,9 @@ raycasting:
     threelet.raycast(origin, direction, meshes, recursive=false, faceExclude=null);
     threelet.raycastFromMouse(mx, my, meshes, recursive=false);
 
-**Pluggable feature interface**
+**Pluggable features**
+
+OrbitControls, stats, and WebVR:
 
 .. code:: html
 
@@ -158,4 +160,24 @@ raycasting:
         optClassControls: THREE.OrbitControls,
         optClassStats: window.Stats,
         optClassWebVR: window.WEBVR,
+    });
+
+Sky based on the `shaders/sky <https://threejs.org/examples/?q=sky#webgl_shaders_sky>`__ example in three.js:
+
+.. code:: html
+
+    <script src="Sky.js"></script>
+
+.. code:: js
+
+    const threelet = new Threelet({
+        // ...
+        optClassSky: THREE.Sky,
+    });
+
+    const skyHelper = threelet.getSkyHelper();
+    threelet.scene.add(...skyHelper.init()); // add 'sun' and 'sunSphere' objects
+    skyHelper.updateUniforms({ // optional configs
+        turbidity: 1,
+        // ...
     });
