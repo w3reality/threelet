@@ -3,7 +3,7 @@
 
 const __version = "0.9.3dev";
 
-// credits: VRControlHelper is an extention of the dragging example -
+// credits: VRControlHelper is based on the dragging example -
 // https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
 class VRControlHelper {
     constructor(renderer) {
@@ -373,6 +373,85 @@ class VRControlHelper {
     }
 }
 
+// credits: SkyHelper is based on the sky example -
+// https://github.com/mrdoob/three.js/blob/master/examples/webgl_shaders_sky.html
+class SkyHelper {
+    constructor(classSky) {
+        this._classSky = classSky;
+        this._effectController = {
+            turbidity: 10,
+            rayleigh: 2,
+            mieCoefficient: 0.005,
+            mieDirectionalG: 0.8,
+            luminance: 1,
+            inclination: 0.49, // elevation / inclination
+            azimuth: 0.25, // Facing front,
+            sun: ! true
+        };
+        this._updateUniforms = null;
+    }
+
+    init() {
+        // Add Sky
+        const sky = new this._classSky();
+        sky.scale.setScalar( 450000 );
+        // scene.add( sky );
+        // Add Sun Helper
+        const sunSphere = new THREE.Mesh(
+            new THREE.SphereBufferGeometry( 20000, 16, 8 ),
+            new THREE.MeshBasicMaterial( { color: 0xffffff } )
+        );
+        sunSphere.position.y = - 700000;
+        sunSphere.visible = false;
+        // scene.add( sunSphere );
+        /// GUI
+        var distance = 400000;
+
+        // function guiChanged() {
+        //-------
+        this._updateUniforms = () => {
+            const effectController = this._effectController;
+
+            var uniforms = sky.material.uniforms;
+            uniforms[ "turbidity" ].value = effectController.turbidity;
+            uniforms[ "rayleigh" ].value = effectController.rayleigh;
+            uniforms[ "luminance" ].value = effectController.luminance;
+            uniforms[ "mieCoefficient" ].value = effectController.mieCoefficient;
+            uniforms[ "mieDirectionalG" ].value = effectController.mieDirectionalG;
+            var theta = Math.PI * ( effectController.inclination - 0.5 );
+            var phi = 2 * Math.PI * ( effectController.azimuth - 0.5 );
+            sunSphere.position.x = distance * Math.cos( phi );
+            sunSphere.position.y = distance * Math.sin( phi ) * Math.sin( theta );
+            sunSphere.position.z = distance * Math.sin( phi ) * Math.cos( theta );
+            sunSphere.visible = effectController.sun;
+            uniforms[ "sunPosition" ].value.copy( sunSphere.position );
+            // renderer.render( scene, camera );
+        };
+
+        // var gui = new dat.GUI();
+        // gui.add( effectController, "turbidity", 1.0, 20.0, 0.1 ).onChange( guiChanged );
+        // gui.add( effectController, "rayleigh", 0.0, 4, 0.001 ).onChange( guiChanged );
+        // gui.add( effectController, "mieCoefficient", 0.0, 0.1, 0.001 ).onChange( guiChanged );
+        // gui.add( effectController, "mieDirectionalG", 0.0, 1, 0.001 ).onChange( guiChanged );
+        // gui.add( effectController, "luminance", 0.0, 2 ).onChange( guiChanged );
+        // gui.add( effectController, "inclination", 0, 1, 0.0001 ).onChange( guiChanged );
+        // gui.add( effectController, "azimuth", 0, 1, 0.0001 ).onChange( guiChanged );
+        // gui.add( effectController, "sun" ).onChange( guiChanged );
+        // guiChanged();
+        //--------
+        this._updateUniforms(); // first time
+        return [sky, sunSphere];
+    }
+
+    updateUniforms(params={}) {
+        if (! this._updateUniforms) {
+            throw 'updateUniforms(): error; init() must be called first'
+        }
+        Object.assign(this._effectController, params);
+        this._updateUniforms();
+    };
+}
+
 class Threelet {
     constructor(params) {
         this.version = __version;
@@ -384,6 +463,7 @@ class Threelet {
             optStatsPenel: 0, // 0: fps, 1: ms, 2: mb, 3+: custom
             optClassControls: null,
             optClassWebVR: null,
+            optClassSky: null,
         };
         const actual = Object.assign({}, defaults, params);
 
@@ -467,6 +547,13 @@ class Threelet {
         // this.dolly = new THREE.Group();
         // this.dolly.add(this.camera);
 
+        // sky stuff
+        this.skyHelper = null;
+        if (actual.optClassSky) {
+            this.skyHelper = new SkyHelper(actual.optClassSky);
+            console.log('@@ this.skyHelper:', this.skyHelper);
+        }
+
         // api
         this.onCreate();
     }
@@ -476,6 +563,8 @@ class Threelet {
     onDestroy() {
         // TODO ??
     }
+
+    getSkyHelper() { return this.skyHelper; }
 
     setupVRControlHelperTest() {
         this.scene.add(VRControlHelper.createTestHemisphereLight());
@@ -818,5 +907,6 @@ class Threelet {
 }
 
 Threelet.VRControlHelper = VRControlHelper;
+Threelet.SkyHelper = SkyHelper;
 
 export default Threelet;
