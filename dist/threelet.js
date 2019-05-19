@@ -1,7 +1,7 @@
 // Threelet - https://github.com/w3reality/threelet
 // A three.js scene viewer with batteries (MIT License)
 
-const __version = "0.9.3";
+const __version = "0.9.4";
 
 // credits: VRControlHelper is based on the dragging example -
 // https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
@@ -801,7 +801,7 @@ class Threelet {
         let isDragging = false; // in closure
         canvas.addEventListener("mousedown", e => {
             isDragging = false;
-            const coords = Threelet.getMouseCoords(e);
+            const coords = Threelet.getMouseCoords(e, canvas);
             // console.log('@@ mouse down:', ...coords);
             if (e.button === 0) {
                 if (this._eventListeners['mouse-down-left']) {
@@ -819,7 +819,7 @@ class Threelet {
         }, false);
         canvas.addEventListener("mousemove", e => {
             isDragging = true;
-            const coords = Threelet.getMouseCoords(e);
+            const coords = Threelet.getMouseCoords(e, canvas);
             // console.log('@@ mouse move:', ...coords);
             if (this._eventListeners['mouse-move']) {
                 this._eventListeners['mouse-move'](...coords);
@@ -827,7 +827,7 @@ class Threelet {
         }, false);
         canvas.addEventListener("mouseup", e => {
             // console.log('e:', e);
-            const coords = Threelet.getMouseCoords(e);
+            const coords = Threelet.getMouseCoords(e, canvas);
             if (isDragging) {
                 // console.log("mouseup: drag");
                 if (this._eventListeners['mouse-drag-end']) {
@@ -906,7 +906,7 @@ class Threelet {
         if (obj.texture) obj.texture.dispose();
     }
 
-    static getMouseCoords(e) {
+    static getMouseCoords(e, canvas) {
         // https://stackoverflow.com/questions/55677/how-do-i-get-the-coordinates-of-a-mouse-click-on-a-canvas-element/18053642#18053642
         const rect = canvas.getBoundingClientRect();
         const mx = e.clientX - rect.left;
