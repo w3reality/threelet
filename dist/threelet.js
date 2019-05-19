@@ -449,7 +449,7 @@ class SkyHelper {
         }
         Object.assign(this._effectController, params);
         this._updateUniforms();
-    };
+    }
 }
 
 class Threelet {
@@ -565,6 +565,16 @@ class Threelet {
     }
 
     getSkyHelper() { return this.skyHelper; }
+    setupSky() {
+        if (! THREE.Sky) {
+            throw 'setupSky(): error; forgot to load Sky.js?';
+            return;
+        }
+        this.scene.add(...this.skyHelper.init());
+        this.skyHelper.updateUniforms({
+            turbidity: 1,
+        });
+    }
 
     setupVRControlHelperTest() {
         this.scene.add(VRControlHelper.createTestHemisphereLight());
