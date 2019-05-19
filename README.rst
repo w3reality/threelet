@@ -175,6 +175,10 @@ Sky based on the `shaders/sky <https://threejs.org/examples/?q=sky#webgl_shaders
         optClassSky: THREE.Sky,
     });
 
+    threelet.setupSky(); // one liner
+
+    // OR, to manually add the sky, do as follows:
+
     const skyHelper = threelet.getSkyHelper();
     threelet.scene.add(...skyHelper.init()); // add 'sun' and 'sunSphere' objects
     skyHelper.updateUniforms({ // optional configs
