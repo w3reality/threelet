@@ -1,7 +1,7 @@
 // Threelet - https://github.com/w3reality/threelet
 // A three.js scene viewer with batteries (MIT License)
 
-const __version = "0.9.5";
+const __version = "0.9.6dev";
 
 // credits: VRControlHelper is based on the dragging example -
 // https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
