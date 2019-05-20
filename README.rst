@@ -19,6 +19,9 @@ Some notable features include:
 
 - WebVR controller state visualizer [`live <https://w3reality.github.io/threelet/examples/webvr-controllers/index.html>`__ | `source code <https://github.com/w3reality/threelet/tree/master/examples/webvr-controllers>`__]
 
+.. image:: https://w3reality.github.io/threelet/examples/simple-dynamic/index.jpg
+     :target: https://w3reality.github.io/threelet/examples/simple-dynamic/index.html
+
 Setup
 -----
 
