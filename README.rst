@@ -2,7 +2,7 @@ threelet
 ===================
 
 **threelet** is a three.js based scene viewer.
-It can be also used as a tiny framework for rapidly making dynamic desktop/VR applications.
+It can be also used as a 3D app framework for rapidly making dynamic desktop/VR applications.
 Some notable features include:
 
 - 3D scene update interface,
