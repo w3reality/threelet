@@ -48,9 +48,9 @@ Simple usage
     <script src="../deps/OrbitControls.js"></script>
     <script src="../deps/stats.min.js"></script>
 
-    <script type="module">
-    import Threelet from '../../dist/threelet.js';
+    <script src="../../dist/threelet.min.js"></script>
 
+    <script>
     const threelet = new Threelet({
         canvas: document.getElementById("canvas"),
         optClassControls: THREE.OrbitControls,
