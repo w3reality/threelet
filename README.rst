@@ -57,7 +57,7 @@ Simple usage
         optClassStats: Stats,
     });
 
-    threelet.updateLoop(0); // 0 fps, i.e. passive rendering with OribitControls
+    threelet.render(); // first time
     </script>
 
 `live <https://w3reality.github.io/threelet/examples/simple/index.html>`__ | `source code <https://github.com/w3reality/threelet/tree/master/examples/simple/index.html>`__
