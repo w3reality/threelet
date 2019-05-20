@@ -1,13 +1,20 @@
 {
     "name": "threelet",
-    "version": "0.9.4",
+    "version": "0.9.5",
     "description": "A three.js scene viewer with batteries",
     "main": "dist/threelet.js",
     "directories": {
         "example": "examples",
         "test": "test"
     },
-    "scripts": {},
+    "scripts": {
+        "dist": "npm run build && npm run build:esm && mkdir -p ./dist && cp ./lib/*.js ./dist/",
+        "build": "webpack --mode development --env dev && webpack --mode production --env build && npm run test",
+        "build:esm": "webpack --mode production --env esm && npm run test",
+        "dev": "webpack --mode development --progress --colors --watch --env dev",
+        "test": "mocha --require babel-core/register --colors ./test/*.spec.js",
+        "test:watch": "mocha --require babel-core/register --colors -w ./test/*.spec.js"
+    },
     "repository": {
         "type": "git",
         "url": "https://github.com/w3reality/threelet.git"
@@ -24,6 +31,23 @@
     "homepage": "https://github.com/w3reality/threelet",
     "dependencies": {},
     "devDependencies": {
-        "three": "^0.104.0"
+        "babel-cli": "^6.26.0",
+        "babel-core": "^6.26.0",
+        "babel-eslint": "^8.0.3",
+        "babel-loader": "^7.1.2",
+        "babel-plugin-add-module-exports": "^0.2.1",
+        "babel-preset-env": "^1.6.1",
+        "chai": "^4.1.2",
+        "eslint": "^5.3.0",
+        "eslint-loader": "^2.1.0",
+        "lodash": "^4.17.11",
+        "mocha": "^4.0.1",
+        "three": "^0.104.0",
+        "uglifyjs-webpack-plugin": "^1.0.0-rc.0",
+        "webpack": "^4.16.5",
+        "webpack-bundle-analyzer": "^3.0.2",
+        "webpack-cli": "^3.1.0",
+        "webpack-var2esm-plugin": "^1.2.1",
+        "yargs": "^10.0.3"
     }
 }

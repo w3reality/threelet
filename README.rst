@@ -25,9 +25,17 @@ Setup
 
 **Loading**
 
+ES6:
+
 .. code:: js
 
-    import Threelet from 'dist/threelet.js';
+    import Threelet from 'src/index.js';
+
+Script tag:
+
+.. code:: html
+
+    <script src="dist/threelet.min.js"></script>
 
 Simple usage
 ------------
