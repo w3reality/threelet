@@ -11,7 +11,10 @@ Some notable features include:
 
 **demos**
 
-- Simple usage with the default axes and a unit lattice (`live <https://w3reality.github.io/threelet/examples/simple/index.html>`__ | `source code <https://github.com/w3reality/threelet/tree/master/examples/simple>`__)
+- Hello world with the default axes and a unit lattice (`live <https://w3reality.github.io/threelet/examples/simple/index.html>`__ | `source code <https://github.com/w3reality/threelet/tree/master/examples/simple>`__)
+- App with a static scene (mouse-event driven passive rendering) (`live <https://w3reality.github.io/threelet/examples/simple-static/index.html>`__ | `source code <https://github.com/w3reality/threelet/tree/master/examples/simple-static>`__)
+- App with a dynamic scene (rendering at 30 fps) (`live <https://w3reality.github.io/threelet/examples/simple-dynamic/index.html>`__ | `source code <https://github.com/w3reality/threelet/tree/master/examples/simple-dynamic>`__)
+
 - WebVR controller state visualizer (`live <https://w3reality.github.io/threelet/examples/webvr-controllers/index.html>`__ | `source code <https://github.com/w3reality/threelet/tree/master/examples/webvr-controllers>`__)
 
 Setup
@@ -37,8 +40,8 @@ Script tag:
 
     <script src="dist/threelet.min.js"></script>
 
-Simple usage
-------------
+Hello world
+-----------
 
 .. code:: html
 
