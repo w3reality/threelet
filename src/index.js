@@ -10,13 +10,16 @@ class Threelet {
     constructor(params) {
         this.version = __version;
         const defaults = {
-            canvas: null,
+            canvas: null, // required
+            // viewer options ----
             optScene: null,
-            optCameraPosition: [0, 1, 2],
-            optClassStats: null,
+            optAxes: true, // axes and a unit lattice
+            optCameraPosition: [0, 1, 2], // initial camera position in desktop mode
+            // plugin options ----
+            optClassStats: null, // for stats.js
             optStatsPenel: 0, // 0: fps, 1: ms, 2: mb, 3+: custom
-            optClassControls: null,
-            optClassWebVR: null,
+            optClassControls: null, // for OrbitControls
+            optClassWebVR: null, // for VR switch button
             optClassSky: null,
         };
         const actual = Object.assign({}, defaults, params);
@@ -245,7 +248,7 @@ class Threelet {
     }
 
     static _initBasics(canvas, opts) {
-        const {optScene, optClassStats, optStatsPenel, optClassControls} = opts;
+        const {optClassStats, optStatsPenel, optClassControls} = opts;
 
         const camera = new THREE.PerspectiveCamera(75, canvas.width/canvas.height, 0.001, 1000);
         camera.position.set(...opts.optCameraPosition);
@@ -264,16 +267,19 @@ class Threelet {
         resizeCanvas(true); // first time
 
         // init basic objects --------
-        const scene = optScene ? optScene : new THREE.Scene();
-        const walls = new THREE.LineSegments(
-            new THREE.EdgesGeometry(new THREE.BoxBufferGeometry(1, 1, 1)),
-            new THREE.LineBasicMaterial({color: 0xcccccc}));
-        walls.position.set(0, 0, 0);
-        walls.name = 'walls';
-        scene.add(walls);
-        const axes = new THREE.AxesHelper(1);
-        axes.name = 'axes';
-        scene.add(axes);
+        const scene = opts.optScene ? opts.optScene : new THREE.Scene();
+
+        if (opts.optAxes) {
+            const walls = new THREE.LineSegments(
+                new THREE.EdgesGeometry(new THREE.BoxBufferGeometry(1, 1, 1)),
+                new THREE.LineBasicMaterial({color: 0xcccccc}));
+            walls.position.set(0, 0, 0);
+            walls.name = 'walls';
+            scene.add(walls);
+            const axes = new THREE.AxesHelper(1);
+            axes.name = 'axes';
+            scene.add(axes);
+        }
 
         // init render stuff --------
         let stats = null;
