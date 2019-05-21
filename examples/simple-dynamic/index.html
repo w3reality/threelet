@@ -71,7 +71,6 @@
 
     const objs = createTestObjects();
     objs.forEach(obj => threelet.scene.add(obj));
-    threelet.scene.add(new THREE.HemisphereLight(0x808080, 0x606060));
 
     threelet.update = (t, dt) => {
         objs[0].rotation.x += dt;

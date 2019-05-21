@@ -68,9 +68,7 @@
 
     threelet.scene.add(createTestHemisphereLight());
     threelet.scene.add(createTestDirectionalLight());
-
     createTestObjects().forEach(obj => threelet.scene.add(obj));
-    threelet.scene.add(new THREE.HemisphereLight(0x808080, 0x606060));
 
     threelet.render(); // first time; passive rendering per mouse interaction
     </script>
