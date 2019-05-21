@@ -114,6 +114,12 @@ scene mechanics handler:
        // your implementation
     };
 
+``dispose()`` terminates the loop and disposes all the scene objects:
+
+.. code:: js
+
+    threelet.dispose();
+
 **Parameters**
 
 Calling the constructor with the default parameters looks as:
