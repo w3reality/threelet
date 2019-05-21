@@ -1,7 +1,7 @@
 // Threelet - https://github.com/w3reality/threelet
 // A three.js scene viewer with batteries (MIT License)
 
-const __version = "0.9.6dev";
+const __version = "0.9.6";
 
 import VRControlHelper from './VRControlHelper.js';
 import SkyHelper from './SkyHelper.js';
@@ -10,12 +10,13 @@ class Threelet {
     constructor(params) {
         this.version = __version;
         const defaults = {
-            canvas: null, // required
-            // viewer options ----
+            // ---- required ----
+            canvas: null,
+            // ---- viewer options ----
             optScene: null,
             optAxes: true, // axes and a unit lattice
             optCameraPosition: [0, 1, 2], // initial camera position in desktop mode
-            // plugin options ----
+            // ---- plugin options ----
             optClassStats: null, // for stats.js
             optStatsPenel: 0, // 0: fps, 1: ms, 2: mb, 3+: custom
             optClassControls: null, // for OrbitControls
@@ -115,10 +116,10 @@ class Threelet {
         this.onCreate();
     }
     onCreate() {
-        this.render(); // first time
+        this.render(); // _first _time
     }
     onDestroy() {
-        // TODO ??
+        // nop for the moment
     }
 
     getSkyHelper() { return this.skyHelper; }
@@ -258,6 +259,8 @@ class Threelet {
             // alpha: true,
             canvas: canvas,
         });
+        renderer.setPixelRatio(window.devicePixelRatio);
+
         console.log('renderer:', renderer);
 
         const resizeCanvas = (force=false) => {
@@ -322,8 +325,6 @@ class Threelet {
         console.log(`========`);
         this._last = now;
     }
-
-    // TODO freeRendererAndScenes()
 
     // https://stackoverflow.com/questions/29884485/threejs-canvas-size-based-on-container
     static _resizeCanvasToDisplaySize(renderer, canvas, camera, force=false) {
@@ -446,26 +447,6 @@ class Threelet {
             meshes, recursive);
     }
 
-    static freeObjects(scene, namePrefix) {
-        // https://stackoverflow.com/questions/35060831/how-to-remove-all-mesh-objects-from-the-scene-in-three-js
-        for (let i = scene.children.length - 1; i >= 0; i--) {
-            let ch = scene.children[i];
-            if (ch.name.startsWith(namePrefix)) {
-                scene.remove(ch);
-                Threelet.disposeObject(ch);
-            }
-        }
-    }
-    static disposeMaterial(mat) {
-        if (mat.map) mat.map.dispose();
-        mat.dispose();
-    }
-    static disposeObject(obj) { // https://gist.github.com/j-devel/6d0323264b6a1e47e2ee38bc8647c726
-        if (obj.geometry) obj.geometry.dispose();
-        if (obj.material) Threelet.disposeMaterial(obj.material);
-        if (obj.texture) obj.texture.dispose();
-    }
-
     static getMouseCoords(e, canvas) {
         // https://stackoverflow.com/questions/55677/how-do-i-get-the-coordinates-of-a-mouse-click-on-a-canvas-element/18053642#18053642
         const rect = canvas.getBoundingClientRect();
@@ -473,6 +454,56 @@ class Threelet {
         const my = e.clientY - rect.top;
         // console.log('getMouseCoords():', mx, my, canvas.width, canvas.height);
         return [mx, my];
+    }
+
+    dispose() {
+        this.onDestroy();
+
+        this.updateLoop(0); // stop the loop
+        this.update = null;
+
+        if (this.controls) {
+            this.controls.dispose();
+            this.controls = null;
+        }
+
+        // TODO clean up stats if any
+
+        // TODO clean up webvr button if any
+
+        // this also ensures releasing memory for objects freed by freeScene()
+        this.renderer.dispose();
+        this.renderer = null;
+
+        // recursively release child objects in the scene
+        Threelet.freeScene(this.scene);
+        this.scene = null;
+
+        this.camera = null;
+    }
+
+    static freeScene(scene) {
+        Threelet._freeChildren(scene, scene.children);
+    }
+    static _freeChildren(_parent, _children) {
+        while (_children.length > 0) {
+            let ch = _children[0];
+            Threelet._freeChildren(ch, ch.children);
+            console.log('@@ freeing: one obj:', ch.name);
+            console.log(`@@ freeing obj ${ch.uuid} of ${_parent.uuid}`);
+            _parent.remove(ch);
+            Threelet.disposeObject(ch);
+            ch = null
+        }
+    }
+    static disposeObject(obj) { // https://gist.github.com/j-devel/6d0323264b6a1e47e2ee38bc8647c726
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) Threelet.disposeMaterial(obj.material);
+        if (obj.texture) obj.texture.dispose();
+    }
+    static disposeMaterial(mat) {
+        if (mat.map) mat.map.dispose();
+        mat.dispose();
     }
 }
 

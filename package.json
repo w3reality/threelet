@@ -1,6 +1,6 @@
 {
     "name": "threelet",
-    "version": "0.9.5",
+    "version": "0.9.6",
     "description": "A three.js scene viewer with batteries",
     "main": "dist/threelet.js",
     "directories": {

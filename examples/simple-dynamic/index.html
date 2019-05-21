@@ -13,8 +13,10 @@
     <script src="../deps/Sky.js"></script>
 
     <script src="../../dist/threelet.min.js"></script>
+    <!-- ==== prod/dev ==== -->
+    <script type="module">
+    // import Threelet from '../../src/index.js';
 
-    <script>
     const threelet = new Threelet({
         canvas: document.getElementById("canvas"),
         optClassControls: THREE.OrbitControls,
@@ -81,6 +83,15 @@
     };
 
     threelet.updateLoop(30); // active rendering at 30 fps
+
+    if (0) { // for debug
+        threelet.updateLoop(1);
+        setTimeout(() => {
+            console.log('@@ (before) threelet.scene:', threelet.scene);
+            threelet.dispose();
+            console.log('@@ (after) threelet.scene:', threelet.scene);
+        }, 3000);
+    }
     </script>
 </body>
 </html>
