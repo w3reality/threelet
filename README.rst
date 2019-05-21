@@ -11,11 +11,11 @@ Some notable features include:
 
 **demos**
 
-- Hello world with the default axes and a unit lattice [ `live <https://w3reality.github.io/threelet/examples/simple/index.html>`__ | `source code <https://github.com/w3reality/threelet/tree/master/examples/simple/index.html>`__ | `Observable notebook <https://observablehq.com/@j-devel/hello-world-with-threelet>`__ ]
+- Hello world with the default axes and a unit lattice [ `live <https://w3reality.github.io/threelet/examples/simple/index.html>`__ | `source code <https://github.com/w3reality/threelet/tree/master/examples/simple/index.html>`__ | `Observable <https://observablehq.com/@j-devel/hello-world-with-threelet>`__ ]
 
-- App with a static scene (mouse-event driven passive rendering) [ `live <https://w3reality.github.io/threelet/examples/simple-static/index.html>`__ | `source code <https://github.com/w3reality/threelet/tree/master/examples/simple-static/index.html>`__ | `Observable notebook <https://observablehq.com/@j-devel/making-a-static-3d-app>`__ ]
+- App with a static scene (mouse-event driven passive rendering) [ `live <https://w3reality.github.io/threelet/examples/simple-static/index.html>`__ | `source code <https://github.com/w3reality/threelet/tree/master/examples/simple-static/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-a-static-3d-app>`__ ]
 
-- App with a dynamic scene (rendering at 30 fps) [ `live <https://w3reality.github.io/threelet/examples/simple-dynamic/index.html>`__ | `source code <https://github.com/w3reality/threelet/tree/master/examples/simple-dynamic/index.html>`__ | `Observable notebook <https://observablehq.com/@j-devel/making-a-dynamic-3d-app>`__ ]
+- App with a dynamic scene (rendering at 30 fps) [ `live <https://w3reality.github.io/threelet/examples/simple-dynamic/index.html>`__ | `source code <https://github.com/w3reality/threelet/tree/master/examples/simple-dynamic/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-a-dynamic-3d-app>`__ ]
 
 - WebVR controller state visualizer [ `live <https://w3reality.github.io/threelet/examples/webvr-controllers/index.html>`__ | `source code <https://github.com/w3reality/threelet/tree/master/examples/webvr-controllers>`__ ]
 
@@ -114,27 +114,32 @@ scene mechanics handler:
        // your implementation
     };
 
+``dispose()`` terminates the loop and disposes all the scene objects:
+
+.. code:: js
+
+    threelet.dispose();
+
 **Parameters**
 
-.. code:: js
-
-    const threelet = new Threelet({ /* params */ });
-
-``/* params */`` with default values are as follows:
+Calling the constructor with the default parameters looks as:
 
 .. code:: js
 
-    canvas: null, // required
-    // viewer options ----
-    optScene: null,
-    optAxes: true, // axes and a unit lattice
-    optCameraPosition: [0, 1, 2], // initial camera position in desktop mode
-    // plugin options ----
-    optClassStats: null, // for stats.js
-    optStatsPenel: 0, // 0: fps, 1: ms, 2: mb, 3+: custom
-    optClassControls: null, // for OrbitControls
-    optClassWebVR: null, // for VR switch button
-    optClassSky: null,
+    const threelet = new Threelet({
+        // ---- required ----
+        canvas: null,
+        // ---- viewer options ----
+        optScene: null,
+        optAxes: true, // axes and a unit lattice
+        optCameraPosition: [0, 1, 2], // initial camera position in desktop mode
+        // ---- plugin options ----
+        optClassStats: null, // for stats.js
+        optStatsPenel: 0, // 0: fps, 1: ms, 2: mb, 3+: custom
+        optClassControls: null, // for OrbitControls
+        optClassWebVR: null, // WebVR support
+        optClassSky: null,
+    });
 
 **Event listeners**
 
