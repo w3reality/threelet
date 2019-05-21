@@ -114,6 +114,28 @@ scene mechanics handler:
        // your implementation
     };
 
+**Parameters**
+
+.. code:: js
+
+    const threelet = new Threelet({ /* params */ });
+
+``/* params */`` with default values are as follows:
+
+.. code:: js
+
+    canvas: null, // required
+    // viewer options ----
+    optScene: null,
+    optAxes: true, // axes and a unit lattice
+    optCameraPosition: [0, 1, 2], // initial camera position in desktop mode
+    // plugin options ----
+    optClassStats: null, // for stats.js
+    optStatsPenel: 0, // 0: fps, 1: ms, 2: mb, 3+: custom
+    optClassControls: null, // for OrbitControls
+    optClassWebVR: null, // for VR switch button
+    optClassSky: null,
+
 **Event listeners**
 
 .. code:: js
