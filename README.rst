@@ -6,8 +6,8 @@ It can be also used as a 3D app framework for rapidly making dynamic desktop/VR 
 Some notable features include:
 
 - 3D scene update interface,
-- render loop manager, and
-- built-in mouse/vr-controller event handlers.
+- built-in render loop manager, and
+- mouse/vr-controller event handlers.
 
 **demos**
 
@@ -65,6 +65,7 @@ Hello world
         optClassStats: Stats,
     });
 
+    threelet.setupStats();
     threelet.render(); // first time
     </script>
 
@@ -135,7 +136,6 @@ Calling the constructor with the default parameters looks as:
         optCameraPosition: [0, 1, 2], // initial camera position in desktop mode
         // ---- plugin options ----
         optClassStats: null, // for stats.js
-        optStatsPenel: 0, // 0: fps, 1: ms, 2: mb, 3+: custom
         optClassControls: null, // for OrbitControls
         optClassWebVR: null, // WebVR support
         optClassSky: null,
@@ -186,7 +186,7 @@ raycasting:
     threelet.raycast(origin, direction, meshes, recursive=false, faceExclude=null);
     threelet.raycastFromMouse(mx, my, meshes, recursive=false);
 
-**Pluggable features**
+**Plugin features**
 
 OrbitControls, stats, and WebVR:
 
@@ -204,6 +204,10 @@ OrbitControls, stats, and WebVR:
         optClassStats: window.Stats,
         optClassWebVR: window.WEBVR,
     });
+    
+    threelet.setupStats();
+    threelet.setupWebVR();
+
 
 Sky based on the `shaders/sky <https://threejs.org/examples/?q=sky#webgl_shaders_sky>`__ example in three.js:
 

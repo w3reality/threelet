@@ -14,8 +14,6 @@
         padding: 10px;
         color: white;
         background: #00000080;">
-        <div id="msg"></div>
-
         <pre>
 WebVR controller state visualizer
 
@@ -50,11 +48,13 @@ Supported controllers:
         optScene: scene,
         optCameraPosition: [0, 1, 1.2],
         optClassStats: window.Stats,
-        optStatsPenel: 1, // 0: fps, 1: ms, 2: mb, 3+: custom
         optClassControls: THREE.OrbitControls,
         optClassWebVR: window.WEBVR,
     });
 
+    threelet.setupStats({panelType: 1}); // 0: fps, 1: ms, 2: mb, 3+: custom
+    threelet.setupWebVR();
+        
     const vrcHelper = threelet.getVRControlHelper();
     const vrTouchpadTouching = [false, false];
     const vrTouchpadPressing = [false, false];
