@@ -135,7 +135,6 @@ Calling the constructor with the default parameters looks as:
         optCameraPosition: [0, 1, 2], // initial camera position in desktop mode
         // ---- plugin options ----
         optClassStats: null, // for stats.js
-        optStatsPenel: 0, // 0: fps, 1: ms, 2: mb, 3+: custom
         optClassControls: null, // for OrbitControls
         optClassWebVR: null, // WebVR support
         optClassSky: null,
