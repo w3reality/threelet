@@ -205,8 +205,9 @@ OrbitControls, stats, and WebVR:
         optClassWebVR: window.WEBVR,
     });
     
-    threelet.setupStats();
-    threelet.setupWebVR();
+    // (no setup function calls required to enable the controls)
+    threelet.setupStats(); // show the stats meter
+    threelet.setupWebVR(); // show the desktop/VR switch button
 
 
 Sky based on the `shaders/sky <https://threejs.org/examples/?q=sky#webgl_shaders_sky>`__ example in three.js:
@@ -222,7 +223,7 @@ Sky based on the `shaders/sky <https://threejs.org/examples/?q=sky#webgl_shaders
         optClassSky: THREE.Sky,
     });
 
-    threelet.setupSky(); // one liner
+    threelet.setupSky(); // show sky with the analytical daylight
 
     // OR, to manually add the sky, do as follows:
 
