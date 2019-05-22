@@ -18,9 +18,8 @@ class Threelet {
             optCameraPosition: [0, 1, 2], // initial camera position in desktop mode
             // ---- plugin options ----
             optClassStats: null, // for stats.js
-            optStatsPenel: 0, // 0: fps, 1: ms, 2: mb, 3+: custom
             optClassControls: null, // for OrbitControls
-            optClassWebVR: null, // for VR switch button
+            optClassWebVR: null, // for VR switching
             optClassSky: null,
         };
         const actual = Object.assign({}, defaults, params);
@@ -33,8 +32,18 @@ class Threelet {
         canvas.style.display = 'block'; // https://stackoverflow.com/questions/8600393/there-is-a-4px-gap-below-canvas-video-audio-elements-in-html5
 
         // basics
-        [this.camera, this.scene, this.renderer, this.render, this.controls] =
+        [this.scene, this.camera, this.renderer] =
             Threelet._initBasics(canvas, actual);
+
+        this.resizeCanvas(canvas, true); // first time
+
+        // render function
+        this.render = (isPresenting=false) => {
+            // console.log('@@ render(): isPresenting:', isPresenting);
+            if (this.stats) { this.stats.update(); }
+            if (! isPresenting) { this.resizeCanvas(canvas); }
+            this.renderer.render(this.scene, this.camera);
+        };
 
         // events
         this._eventListeners = {};
@@ -58,9 +67,9 @@ class Threelet {
             'vr-trigger-press-end',
         ];
 
-        //======== FIXME - Oculus Go's desktop mode, OrbitControls breaks mouse events...
+        //======== FIXME ?? - Oculus Go's desktop mode, OrbitControls breaks mouse events...
         this._initMouseListeners(this.renderer.domElement);
-        //======== below is this too hackish and still not sure how to trigger
+        //======== approach below is this too hackish and still not sure how to trigger
         //         mouse events for *both* overlay and canvas
         // this._initMouseListeners(document.querySelector('#overlay'));
         // <!-- https://stackoverflow.com/questions/5763911/placing-a-div-within-a-canvas -->
@@ -87,25 +96,33 @@ class Threelet {
         this.iid = null;
         this.update = null;
 
-        // WebVR related stuff
-        this.fpsDesktopLast = 0;
+        // stats plugin
+        this.stats = null;
+        this._classStats = actual.optClassStats;
 
-        // // dragging with controllers ======================
-        this.vrcHelper = new VRControlHelper(this.renderer);
-        if (actual.optClassWebVR) {
-            this._initVR(actual.optClassWebVR);
-
+        // controls plugin
+        this.controls = null;
+        if (actual.optClassControls) {
+            this.controls = new actual.optClassControls(this.camera, this.renderer.domElement);
+            this.controls.addEventListener('change', this.render.bind(null, false));
             if (Threelet.isVrSupported()) {
-                this.vrcHelper.getControllers()
-                    .forEach(cont => this.scene.add(cont));
+                // FIXME - OrbitControl breaks _initMouseListeners() on Oculus Go
+                console.warn('not enabling OrbitControls (although requested) on this VR-capable browser.');
+                this.controls.enabled = false; // https://stackoverflow.com/questions/20058579/threejs-disable-orbit-camera-while-using-transform-control
             }
         }
+
+        // WebVR plugin
+        this.fpsDesktopLast = 0;
+        this.vrcHelper = new VRControlHelper(this.renderer);
+        this.vrButton = null;
+        this._classWebVR = actual.optClassWebVR;
 
         // // https://stackoverflow.com/questions/49471653/in-three-js-while-using-webvr-how-do-i-move-the-camera-position
         // this.dolly = new THREE.Group();
         // this.dolly.add(this.camera);
 
-        // sky stuff
+        // sky plugin
         this.skyHelper = null;
         if (actual.optClassSky) {
             this.skyHelper = new SkyHelper(actual.optClassSky);
@@ -122,10 +139,30 @@ class Threelet {
         // nop for the moment
     }
 
+    setupStats(opts={}) {
+        if (! this._classStats) {
+            console.warn('setupStats(): error; please check optClassStats');
+            return;
+        }
+
+        const defaults = {
+            panelType: 0, // 0: fps, 1: ms, 2: mb, 3+: custom
+            appendTo: document.body,
+        };
+        const actual = Object.assign({}, defaults, opts);
+
+        const stats = this.stats = new this._classStats();
+        stats.showPanel(actual.panelType);
+        if (actual.appendTo !== document.body) {
+            stats.dom.style.position = 'absolute';
+        }
+        actual.appendTo.appendChild(stats.dom);
+    }
+
     getSkyHelper() { return this.skyHelper; }
     setupSky() {
         if (! THREE.Sky) {
-            throw 'setupSky(): error; forgot to load Sky.js?';
+            console.warn('setupSky(): error; please check optClassSky');
             return;
         }
         this.scene.add(...this.skyHelper.init());
@@ -144,19 +181,39 @@ class Threelet {
 
         this.vrcHelper.enableDragInteractiveGroup();
     }
-    getVRControlHelper() {
-        return this.vrcHelper;
+    getVRControlHelper() { return this.vrcHelper; }
+    setupWebVR(opts={}) {
+        if (! this._classWebVR) {
+            console.warn('setupWebVR(): error; please check optClassWebVR');
+            return;
+        }
+
+        const defaults = {
+            appendTo: document.body,
+        };
+        const actual = Object.assign({}, defaults, opts);
+
+        // https://threejs.org/docs/manual/en/introduction/How-to-create-VR-content.html
+        this.renderer.vr.enabled = Threelet.isVrSupported();
+
+        const btn = this._createVRButton(this._classWebVR);
+        actual.appendTo.appendChild(btn);
+        this.vrButton = btn;
+
+        if (Threelet.isVrSupported()) {
+            this.vrcHelper.getControllers()
+                .forEach(cont => this.scene.add(cont));
+        }
     }
 
     static isVrSupported() {
         // https://github.com/mrdoob/three.js/blob/dev/examples/js/vr/WebVR.js
         return 'getVRDisplays' in navigator;
     }
-    _initButtonVR(optClassWebVR) {
-        const btn = optClassWebVR.createButton(this.renderer);
+    _createVRButton(classWebVR) {
+        const btn = classWebVR.createButton(this.renderer);
         btn.style.top = btn.style.bottom;
         btn.style.bottom = '';
-        document.body.appendChild(btn);
         if (Threelet.isVrSupported()) {
             btn.addEventListener('click', ev => {
                 console.log('@@ btn.textContent:', btn.textContent);
@@ -170,13 +227,7 @@ class Threelet {
                 }
             });
         }
-    }
-
-    _initVR(optClassWebVR) {
-        // console.log('@@ optClassWebVR:', optClassWebVR);
-        // https://threejs.org/docs/manual/en/introduction/How-to-create-VR-content.html
-        this.renderer.vr.enabled = Threelet.isVrSupported();
-        this._initButtonVR(optClassWebVR);
+        return btn;
     }
 
     enterVR(onError=null) {
@@ -249,8 +300,6 @@ class Threelet {
     }
 
     static _initBasics(canvas, opts) {
-        const {optClassStats, optStatsPenel, optClassControls} = opts;
-
         const camera = new THREE.PerspectiveCamera(75, canvas.width/canvas.height, 0.001, 1000);
         camera.position.set(...opts.optCameraPosition);
         camera.up.set(0, 1, 0); // important for OrbitControls
@@ -260,14 +309,7 @@ class Threelet {
             canvas: canvas,
         });
         renderer.setPixelRatio(window.devicePixelRatio);
-
         console.log('renderer:', renderer);
-
-        const resizeCanvas = (force=false) => {
-            Threelet._resizeCanvasToDisplaySize(
-                renderer, canvas, camera, force);
-        };
-        resizeCanvas(true); // first time
 
         // init basic objects --------
         const scene = opts.optScene ? opts.optScene : new THREE.Scene();
@@ -284,34 +326,7 @@ class Threelet {
             scene.add(axes);
         }
 
-        // init render stuff --------
-        let stats = null;
-        if (optClassStats) {
-            stats = new optClassStats();
-            stats.showPanel(optStatsPenel);
-            const statsDom = stats.dom;
-            // statsDom.style.top = '90%';
-            document.body.appendChild(statsDom);
-        }
-        const render = (isPresenting=false) => {
-            // console.log('@@ render(): isPresenting:', isPresenting);
-            if (stats) { stats.update(); }
-            if (! isPresenting) { resizeCanvas(); }
-            renderer.render(scene, camera);
-        };
-
-        let controls = null;
-        if (optClassControls) {
-            controls = new optClassControls(camera, renderer.domElement);
-            controls.addEventListener('change', render.bind(null, false));
-            if (Threelet.isVrSupported()) {
-                // FIXME - OrbitControl breaks _initMouseListeners() on Oculus Go
-                console.warn('not enabling OrbitControls (although requested) on this VR-capable browser.');
-                controls.enabled = false; // https://stackoverflow.com/questions/20058579/threejs-disable-orbit-camera-while-using-transform-control
-            }
-        }
-
-        return [camera, scene, renderer, render, controls];
+        return [scene, camera, renderer];
     }
 
     // log with time splits
@@ -326,8 +341,13 @@ class Threelet {
         this._last = now;
     }
 
+    resizeCanvas(canvas, force=false) {
+        Threelet._resizeCanvasToDisplaySize(
+            canvas, this.renderer, this.camera, force);
+    }
+
     // https://stackoverflow.com/questions/29884485/threejs-canvas-size-based-on-container
-    static _resizeCanvasToDisplaySize(renderer, canvas, camera, force=false) {
+    static _resizeCanvasToDisplaySize(canvas, renderer, camera, force=false) {
         let width = canvas.clientWidth;
         let height = canvas.clientHeight;
 
@@ -467,9 +487,13 @@ class Threelet {
             this.controls = null;
         }
 
-        // TODO clean up stats if any
+        if (this.stats) {
+            this.stats.dom.remove();
+        }
 
-        // TODO clean up webvr button if any
+        if (this.vrButton) {
+            this.vrButton.remove();
+        }
 
         // this also ensures releasing memory for objects freed by freeScene()
         this.renderer.dispose();
