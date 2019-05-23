@@ -61,11 +61,9 @@ Hello world
     <script>
     const threelet = new Threelet({
         canvas: document.getElementById("canvas"),
-        optClassControls: THREE.OrbitControls,
-        optClassStats: Stats,
     });
 
-    threelet.setupStats();
+    threelet.setup('mod-stats', window.Stats);
     threelet.render(); // first time
     </script>
 
@@ -134,11 +132,6 @@ Calling the constructor with the default parameters looks as:
         optScene: null,
         optAxes: true, // axes and a unit lattice
         optCameraPosition: [0, 1, 2], // initial camera position in desktop mode
-        // ---- plugin options ----
-        optClassStats: null, // for stats.js
-        optClassControls: null, // for OrbitControls
-        optClassWebVR: null, // WebVR support
-        optClassSky: null,
     });
 
 **Event listeners**
@@ -198,16 +191,9 @@ OrbitControls, stats, and WebVR:
 
 .. code:: js
 
-    const threelet = new Threelet({
-        // ...
-        optClassControls: THREE.OrbitControls,
-        optClassStats: window.Stats,
-        optClassWebVR: window.WEBVR,
-    });
-    
-    // (no setup function calls required to enable the controls)
-    threelet.setupStats(); // show the stats meter
-    threelet.setupWebVR(); // show the desktop/VR switch button
+    threelet.setup('mod-controls', THREE.OrbitControls); // enable controls
+    threelet.setup('mod-stats, window.Stats); // show the stats meter
+    threelet.setup('mod-webvr', window.WEBVR); // show the desktop/VR switch button
 
 
 Sky based on the `shaders/sky <https://threejs.org/examples/?q=sky#webgl_shaders_sky>`__ example in three.js:
@@ -218,12 +204,7 @@ Sky based on the `shaders/sky <https://threejs.org/examples/?q=sky#webgl_shaders
 
 .. code:: js
 
-    const threelet = new Threelet({
-        // ...
-        optClassSky: THREE.Sky,
-    });
-
-    threelet.setupSky(); // show sky with the analytical daylight
+    threelet.setup('mod-sky', THREE.Sky); // show sky with the analytical daylight
 
     // OR, to manually add the sky, do as follows:
 

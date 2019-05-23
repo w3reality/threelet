@@ -47,13 +47,15 @@ Supported controllers:
         canvas: document.getElementById("canvas"),
         optScene: scene,
         optCameraPosition: [0, 1, 1.2],
-        optClassStats: window.Stats,
-        optClassControls: THREE.OrbitControls,
-        optClassWebVR: window.WEBVR,
     });
 
     threelet.setupStats({panelType: 1}); // 0: fps, 1: ms, 2: mb, 3+: custom
     threelet.setupWebVR();
+
+    threelet.setup('mod-controls', THREE.OrbitControls);
+    threelet.setup('mod-stats', window.Stats, {panelType: 1}); // 0: fps, 1: ms, 2: mb, 3+: custom
+    threelet.setup('mod-webvr', window.WEBVR);
+
         
     const vrcHelper = threelet.getVRControlHelper();
     const vrTouchpadTouching = [false, false];

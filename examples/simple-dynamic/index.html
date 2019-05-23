@@ -19,13 +19,11 @@
 
     const threelet = new Threelet({
         canvas: document.getElementById("canvas"),
-        optClassControls: THREE.OrbitControls,
-        optClassStats: window.Stats,
-        optClassSky: THREE.Sky,
     });
 
-    threelet.setupStats();
-    threelet.setupSky();
+    threelet.setup('mod-controls', THREE.OrbitControls);
+    threelet.setup('mod-stats', window.Stats);
+    threelet.setup('mod-sky', THREE.Sky);
 
     const createTestHemisphereLight = () => {
         return new THREE.HemisphereLight(0x808080, 0x606060);

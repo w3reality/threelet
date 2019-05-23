@@ -17,11 +17,11 @@
     const threelet = new Threelet({
         canvas: document.getElementById("canvas"),
         // optAxes: false,
-        optClassControls: THREE.OrbitControls,
-        optClassStats: window.Stats,
     });
 
-    threelet.setupStats();
+    threelet.setup('mod-controls', THREE.OrbitControls);
+    threelet.setup('mod-stats', window.Stats);
+
     threelet.render(); // first time
     </script>
 </body>

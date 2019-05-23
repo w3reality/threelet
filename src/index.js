@@ -16,11 +16,6 @@ class Threelet {
             optScene: null,
             optAxes: true, // axes and a unit lattice
             optCameraPosition: [0, 1, 2], // initial camera position in desktop mode
-            // ---- plugin options ----
-            optClassStats: null, // for stats.js
-            optClassControls: null, // for OrbitControls
-            optClassWebVR: null, // for VR switching
-            optClassSky: null,
         };
         const actual = Object.assign({}, defaults, params);
 
@@ -96,38 +91,30 @@ class Threelet {
         this.iid = null;
         this.update = null;
 
-        // stats plugin
-        this.stats = null;
-        this._classStats = actual.optClassStats;
+        // plugin module table
+        this.modTable = {
+            'mod-controls': this._setupControls,
+            'mod-stats': this._setupStats,
+            'mod-webvr': this._setupWebVR,
+            'mod-sky': this._setupSky,
+        };
 
-        // controls plugin
+        // for controls module
         this.controls = null;
-        if (actual.optClassControls) {
-            this.controls = new actual.optClassControls(this.camera, this.renderer.domElement);
-            this.controls.addEventListener('change', this.render.bind(null, false));
-            if (Threelet.isVrSupported()) {
-                // FIXME - OrbitControl breaks _initMouseListeners() on Oculus Go
-                console.warn('not enabling OrbitControls (although requested) on this VR-capable browser.');
-                this.controls.enabled = false; // https://stackoverflow.com/questions/20058579/threejs-disable-orbit-camera-while-using-transform-control
-            }
-        }
 
-        // WebVR plugin
+        // for stats module
+        this.stats = null;
+
+        // for sky module
+        this.skyHelper = null;
+
+        // for WebVR module
         this.fpsDesktopLast = 0;
         this.vrcHelper = new VRControlHelper(this.renderer);
         this.vrButton = null;
-        this._classWebVR = actual.optClassWebVR;
-
-        // // https://stackoverflow.com/questions/49471653/in-three-js-while-using-webvr-how-do-i-move-the-camera-position
-        // this.dolly = new THREE.Group();
-        // this.dolly.add(this.camera);
-
-        // sky plugin
-        this.skyHelper = null;
-        if (actual.optClassSky) {
-            this.skyHelper = new SkyHelper(actual.optClassSky);
-            console.log('@@ this.skyHelper:', this.skyHelper);
-        }
+            // https://stackoverflow.com/questions/49471653/in-three-js-while-using-webvr-how-do-i-move-the-camera-position
+            // this.dolly = new THREE.Group();
+            // this.dolly.add(this.camera);
 
         // api
         this.onCreate();
@@ -139,19 +126,33 @@ class Threelet {
         // nop for the moment
     }
 
-    setupStats(opts={}) {
-        if (! this._classStats) {
-            console.warn('setupStats(): error; please check optClassStats');
-            return;
+    // plugin module setup function
+    setup(modTitle, Module, opts={}) {
+        if (modTitle in this.modTable) {
+            this.modTable[modTitle].bind(this)(Module, opts);
+        } else {
+            console.warn('setup(): unsupported module title:', modTitle);
         }
+    }
 
+    _setupControls(Module, opts) {
+        this.controls = new Module(this.camera, this.renderer.domElement);
+        this.controls.addEventListener('change', this.render.bind(null, false));
+        if (Threelet.isVrSupported()) {
+            // FIXME - OrbitControl breaks _initMouseListeners() on Oculus Go
+            console.warn('not enabling OrbitControls (although requested) on this VR-capable browser.');
+            this.controls.enabled = false; // https://stackoverflow.com/questions/20058579/threejs-disable-orbit-camera-while-using-transform-control
+        }
+    }
+
+    _setupStats(Module, opts) {
         const defaults = {
             panelType: 0, // 0: fps, 1: ms, 2: mb, 3+: custom
             appendTo: document.body,
         };
         const actual = Object.assign({}, defaults, opts);
 
-        const stats = this.stats = new this._classStats();
+        const stats = this.stats = new Module();
         stats.showPanel(actual.panelType);
         if (actual.appendTo !== document.body) {
             stats.dom.style.position = 'absolute';
@@ -160,11 +161,11 @@ class Threelet {
     }
 
     getSkyHelper() { return this.skyHelper; }
-    setupSky() {
-        if (! THREE.Sky) {
-            console.warn('setupSky(): error; please check optClassSky');
-            return;
-        }
+
+    _setupSky(Module, opts) {
+        this.skyHelper = new SkyHelper(Module);
+        // console.log('@@ this.skyHelper:', this.skyHelper);
+
         this.scene.add(...this.skyHelper.init());
         this.skyHelper.updateUniforms({
             turbidity: 1,
@@ -182,12 +183,8 @@ class Threelet {
         this.vrcHelper.enableDragInteractiveGroup();
     }
     getVRControlHelper() { return this.vrcHelper; }
-    setupWebVR(opts={}) {
-        if (! this._classWebVR) {
-            console.warn('setupWebVR(): error; please check optClassWebVR');
-            return;
-        }
 
+    _setupWebVR(Module, opts={}) {
         const defaults = {
             appendTo: document.body,
         };
@@ -196,7 +193,7 @@ class Threelet {
         // https://threejs.org/docs/manual/en/introduction/How-to-create-VR-content.html
         this.renderer.vr.enabled = Threelet.isVrSupported();
 
-        const btn = this._createVRButton(this._classWebVR);
+        const btn = this._createVRButton(Module);
         actual.appendTo.appendChild(btn);
         this.vrButton = btn;
 
