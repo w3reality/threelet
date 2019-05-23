@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>webvr-interactive</title>
+</head>
+<body>
+    <canvas id="canvas" style="width: 100%; height: 100%;"></canvas>
+    <div id="overlay" style="
+        position: absolute;
+        z-index: 100;
+        width: 520px; height: 320px;
+        top: 80px;
+        padding: 10px;
+        color: white;
+        background: #00000080;">
+        <pre>
+
+
+
+
+...
+        </pre>
+        <p>
+            <a style="color: white;" href="./media/webvr-interactive.mp4">video</a>
+            | <a style="color: white;" href="https://github.com/w3reality/threelet/tree/master/examples/webvr-interactive">source code</a>
+        </p>
+    </div>
+
+    <script src="../deps/stats.min.js"></script>
+    <script src="../deps/three.min.js"></script>
+    <script src="../deps/ColladaLoader.js"></script>
+    <script src="../deps/OrbitControls.js"></script>
+    <script src="../deps/Sky.js"></script>
+    <script src="../deps/WebVR.js"></script>
+
+
+    <!-- <script src="../../dist/threelet.min.js"></script> -->
+    <!-- ==== prod/dev ==== -->
+    <script type="module">
+    import Threelet from '../../src/index.js';
+
+    //
+
+    const scene = new THREE.Scene();
+    const threelet = new Threelet({
+        canvas: document.getElementById("canvas"),
+        optScene: scene,
+        //optAxes: false,
+        optCameraPosition: [0, 1, 1.2],
+    });
+
+    threelet.setup('mod-controls', THREE.OrbitControls);
+    threelet.setup('mod-sky', THREE.Sky);
+
+    const overlayDiv = document.getElementById('overlay');
+    threelet.setup('mod-stats', window.Stats, {
+        panelType: 0, // 0: fps, 1: ms, 2: mb, 3+: custom
+        appendTo: overlayDiv,
+    });
+    threelet.setup('mod-webvr', window.WEBVR, {appendTo: overlayDiv});
+
+    //
+
+    const createTestHemisphereLight = () => {
+        return new THREE.HemisphereLight(0x808080, 0x606060);
+    };
+    const createTestDirectionalLight = () => {
+        const light = new THREE.DirectionalLight( 0xffffff );
+        light.position.set( 0, 6, 0 );
+        light.castShadow = true;
+        light.shadow.camera.top = 2;
+        light.shadow.camera.bottom = - 2;
+        light.shadow.camera.right = 2;
+        light.shadow.camera.left = - 2;
+        light.shadow.mapSize.set( 4096, 4096 );
+        return light;
+    };
+    const createTestObjects = () => {
+        const objs = [];
+        const geoms = [
+            new THREE.BoxBufferGeometry( 0.2, 0.2, 0.2 ),
+            new THREE.ConeBufferGeometry( 0.2, 0.2, 64 ),
+            new THREE.CylinderBufferGeometry( 0.2, 0.2, 0.2, 64 ),
+            new THREE.IcosahedronBufferGeometry( 0.2, 3 ),
+            new THREE.TorusBufferGeometry( 0.2, 0.04, 64, 32 )
+        ];
+        for (let geom of geoms) {
+            const object = new THREE.Mesh(geom,
+                new THREE.MeshStandardMaterial({
+                    color: Math.random() * 0xffffff,
+                    roughness: 0.7,
+                    metalness: 0.0
+                }));
+            object.position.set(2*Math.random()-1, 2*Math.random()-1+1, 2*Math.random()-1-2);
+            object.rotation.x = Math.random() * 2 * Math.PI;
+            object.rotation.y = Math.random() * 2 * Math.PI;
+            object.rotation.z = Math.random() * 2 * Math.PI;
+            object.scale.setScalar( Math.random() + 0.5 );
+            object.castShadow = true;
+            object.receiveShadow = true;
+            objs.push(object);
+        }
+        return objs;
+    };
+
+    //
+
+    threelet.scene.add(createTestHemisphereLight());
+    threelet.scene.add(createTestDirectionalLight());
+
+    // https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_collada_skinning.html
+    let mixer = null;
+    const loader = new THREE.ColladaLoader();
+    loader.load( './media/stormtrooper.dae', collada => {
+        const animations = collada.animations;
+        const avatar = collada.scene;
+        avatar.traverse(node => {
+            if (node.isSkinnedMesh) {
+                node.frustumCulled = false;
+            }
+        });
+        mixer = new THREE.AnimationMixer(avatar);
+        const action = mixer.clipAction(animations[0]).play();
+        threelet.scene.add(avatar);
+    });
+
+
+    const vrcHelper = threelet.getVRControlHelper();
+    const group = vrcHelper.getInteractiveGroup();
+    createTestObjects().forEach(obj => group.add(obj));
+    threelet.scene.add(group);
+    vrcHelper.enableDragInteractiveGroup();
+
+    //
+
+    threelet.update = (t, dt) => {
+        // console.log('t, dt:', t, dt);
+        if (mixer !== null) {
+            mixer.update(dt);
+        }
+    };
+
+    const fps = 1;
+    threelet.updateLoop(fps);
+    threelet.render(); // first time for the case of fps === 0
+
+    </script>
+</body>
+</html>
