@@ -192,7 +192,7 @@ OrbitControls, stats, and WebVR:
 .. code:: js
 
     threelet.setup('mod-controls', THREE.OrbitControls); // enable controls
-    threelet.setup('mod-stats, window.Stats); // show the stats meter
+    threelet.setup('mod-stats', window.Stats); // show the stats meter
     threelet.setup('mod-webvr', window.WEBVR); // show the desktop/VR switch button
 
 
