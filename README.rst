@@ -206,8 +206,8 @@ Sky based on the `shaders/sky <https://threejs.org/examples/?q=sky#webgl_shaders
 
     threelet.setup('mod-sky', THREE.Sky); // show sky with the analytical daylight
 
-    // OR, to manually add the sky, do as follows:
-
+..
+    // TODO
     const skyHelper = threelet.getSkyHelper();
     threelet.scene.add(...skyHelper.init()); // add 'sun' and 'sunSphere' objects
     skyHelper.updateUniforms({ // optional configs
