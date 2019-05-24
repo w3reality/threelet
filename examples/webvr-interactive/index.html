@@ -22,9 +22,10 @@
 
 
 
-interactive VR app demo
+interactive VR app
 
-
+    - drag the still objects
+    - shoot the floating base ;-)
 
 
         </pre>
@@ -46,20 +47,17 @@ interactive VR app demo
     <script src="../deps/Sky.js"></script>
     <script src="../deps/WebVR.js"></script>
 
-
-    <!-- <script src="../../dist/threelet.min.js"></script> -->
+    <script src="../../dist/threelet.min.js"></script>
     <!-- ==== prod/dev ==== -->
     <script type="module">
-    import Threelet from '../../src/index.js';
-
-    //
+    // import Threelet from '../../src/index.js';
 
     const scene = new THREE.Scene();
     const threelet = new Threelet({
         canvas: document.getElementById("canvas"),
         optScene: scene,
         optAxes: false,
-        optCameraPosition: [0, 1, 1.2],
+        optCameraPosition: [0, 0.7, 2],
     });
 
     threelet.setup('mod-controls', THREE.OrbitControls);
@@ -67,13 +65,12 @@ interactive VR app demo
 
     const overlayDiv = document.getElementById('overlay');
     //overlayDiv.style.display = 'none'; // debug
+    threelet.setup('mod-webvr', window.WEBVR, {appendTo: overlayDiv});
+
     // threelet.setup('mod-stats', window.Stats, {
     //     panelType: 0, // 0: fps, 1: ms, 2: mb, 3+: custom
     //     appendTo: overlayDiv,
     // });
-    threelet.setup('mod-webvr', window.WEBVR, {appendTo: overlayDiv});
-
-    //
 
     const createTestHemisphereLight = () => {
         return new THREE.HemisphereLight(0x808080, 0x606060);
@@ -136,8 +133,8 @@ interactive VR app demo
             color: Math.random() * 0xffffff,
             roughness: 0.7,
             metalness: 0.0}));
-    base.position.set(-2, -0.05, -2);
-    base.rotation.y = -3*Math.PI/4;
+    base.position.set(2, -0.05, -2);
+    base.rotation.y = -Math.PI/4;
     base.name = 'base';
     group.add(base); // make the base interactive in VR
 
@@ -179,9 +176,9 @@ interactive VR app demo
             const [px, pz] = [4*Math.random()-2, 2*Math.random()-4];
             base.position.x = px;
             base.position.z = pz;
-            base.rotation.y = Math.atan(px/pz) - Math.PI;
+            base.rotation.y = Math.atan(px/pz);
             avatar.position.set(...base.position.toArray());
-            avatar.rotation.set(Math.PI/2, Math.PI, base.rotation.y+Math.PI); // kludge
+            avatar.rotation.set(Math.PI/2, Math.PI, base.rotation.y); // kludge
 
             avatar.visible = base.visible = true;
         }, 1000);
@@ -210,15 +207,15 @@ interactive VR app demo
     threelet.update = (t, dt) => {
         // console.log('t, dt:', t, dt);
         const py = 0.4 * Math.sin(t) + 0.5;
-        base.position.y = py
+        base.position.y = py;
 
         if (mixer !== null) {
             mixer.update(dt);
-            avatar.position.y = py
+            avatar.position.y = py;
         }
     };
 
-    const fps = 1;
+    const fps = 30;
     threelet.updateLoop(fps);
     threelet.render(); // first time for the case of fps === 0
 
