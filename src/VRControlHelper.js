@@ -168,10 +168,14 @@ class VRControlHelper {
 
     getIntersections(controller, recursive=true) {
         // console.log('@@ getIntersections(): hi');
+        return this.raycastFromController(
+            controller, this.group.children, recursive);
+    }
+    raycastFromController(controller, objs, recursive=true) {
         this.tempMatrix.identity().extractRotation( controller.matrixWorld );
         this.raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
         this.raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( this.tempMatrix );
-        return this.raycaster.intersectObjects( this.group.children, recursive );
+        return this.raycaster.intersectObjects( objs, recursive );
     }
 
     // mod of findGamepad() of three.js r104
