@@ -120,12 +120,11 @@ interactive VR app
     threelet.scene.add(createTestDirectionalLight());
     threelet.scene.add(new THREE.GridHelper(10, 20));
 
-    const vrcHelper = threelet.getVRControlHelper();
-    const group = vrcHelper.getInteractiveGroup();
+    threelet.enableInteractiveGroup('drag');
+    const group = threelet.getInteractiveGroup();
     const testObjs = createTestObjects();
     testObjs.forEach(obj => group.add(obj));
     threelet.scene.add(group);
-    vrcHelper.enableDragInteractiveGroup();
 
     const base = new THREE.Mesh(
         new THREE.BoxGeometry(1.5, 0.1, 1.5),
@@ -195,9 +194,9 @@ interactive VR app
         if (isec && isec.object.name === 'base') updateBase();
     });
     threelet.on('vr-trigger-press-start', (i) => {
-        const controller = vrcHelper.getControllers()[i];
-        const isects = vrcHelper.raycastFromController(
-            controller, [base, ...testObjs], false);
+        const isects = threelet.raycastFromController(
+            i, [base, ...testObjs], false);
+
         console.log('@@ isects.length:', isects.length);
         if (isects.length > 0 && isects[0].object.name === 'base') updateBase();
     });

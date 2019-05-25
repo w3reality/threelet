@@ -39,9 +39,11 @@ Supported controllers:
     <script src="../deps/OrbitControls.js"></script>
     <script src="../deps/WebVR.js"></script>
 
-    <script src="../../dist/threelet.min.js"></script>
+    <!-- <script src="../../dist/threelet.min.js"></script> -->
+    <!-- ==== prod/dev ==== -->
+    <script type="module">
+    import Threelet from '../../src/index.js';
 
-    <script>
     const scene = new THREE.Scene();
     const threelet = new Threelet({
         canvas: document.getElementById("canvas"),
@@ -53,7 +55,7 @@ Supported controllers:
     threelet.setup('mod-stats', window.Stats, {panelType: 1}); // 0: fps, 1: ms, 2: mb, 3+: custom
     threelet.setup('mod-webvr', window.WEBVR);
 
-        
+
     const vrcHelper = threelet.getVRControlHelper();
     const vrTouchpadTouching = [false, false];
     const vrTouchpadPressing = [false, false];
@@ -148,10 +150,11 @@ Supported controllers:
     const sp = createPanelSprite(panelCanvas);
     sp.position.set(0, 0.5, -0.5);
 
-    const interactiveGroup = vrcHelper.getInteractiveGroup();
-    interactiveGroup.add(sp);
-    scene.add(interactiveGroup);
-    vrcHelper.enableDragInteractiveGroup();
+
+    threelet.enableInteractiveGroup('drag');
+    const group = threelet.getInteractiveGroup();
+    group.add(sp);
+    scene.add(group);
 
     //
 

@@ -110,7 +110,7 @@ class Threelet {
 
         // for WebVR module
         this.fpsDesktopLast = 0;
-        this.vrcHelper = new VRControlHelper(this.renderer);
+        this._vrcHelper = new VRControlHelper(this.renderer);
         this.vrButton = null;
             // https://stackoverflow.com/questions/49471653/in-three-js-while-using-webvr-how-do-i-move-the-camera-position
             // this.dolly = new THREE.Group();
@@ -176,13 +176,25 @@ class Threelet {
         this.scene.add(VRControlHelper.createTestHemisphereLight());
         this.scene.add(VRControlHelper.createTestDirectionalLight());
 
-        const group = this.vrcHelper.getInteractiveGroup();
+        const group = this.getInteractiveGroup();
         VRControlHelper.createTestObjects().forEach(obj => group.add(obj));
         this.scene.add(group);
 
-        this.vrcHelper.enableDragInteractiveGroup();
+        this.enableInteractiveGroup('drag');
     }
-    getVRControlHelper() { return this.vrcHelper; }
+    getVRControlHelper() { // deprecated
+        console.warn('@@ getVRControlHelper(): i am deprecated!!');
+        return this._vrcHelper;
+    }
+    getInteractiveGroup() { return this._vrcHelper.getInteractiveGroup(); }
+    enableInteractiveGroup(mode) {
+        if (mode === 'drag') {
+            this._vrcHelper.enableDragInteractiveGroup();
+            // TODO disable interface ??
+        } else {
+            console.warn('@@ unsupported interactive mode:', mode);
+        }
+    }
 
     _setupWebVR(Module, opts={}) {
         const defaults = {
@@ -198,7 +210,7 @@ class Threelet {
         this.vrButton = btn;
 
         if (Threelet.isVrSupported()) {
-            this.vrcHelper.getControllers()
+            this._vrcHelper.getControllers()
                 .forEach(cont => this.scene.add(cont));
         }
     }
@@ -280,8 +292,8 @@ class Threelet {
                 }
 
                 this.updateMechanics();
-                this.vrcHelper.intersectObjects();
-                this.vrcHelper.updateControllers();
+                this._vrcHelper.intersectObjects();
+                this._vrcHelper.updateControllers();
                 this.render(true);
             });
             return;
@@ -368,7 +380,7 @@ class Threelet {
             if (eventName === 'mouse-click') eventName = 'mouse-click-left';
 
             const listeners = eventName.startsWith('vr-') ?
-                this.vrcHelper._eventListeners : this._eventListeners;
+                this._vrcHelper._eventListeners : this._eventListeners;
             listeners[eventName] = listener;
         } else {
             console.error('@@ on(): unsupported eventName:', eventName);
@@ -462,6 +474,11 @@ class Threelet {
         return this._raycastFromMouse(
             mx, my, width, height, this.camera,
             meshes, recursive);
+    }
+
+    raycastFromController(i, meshes, recursive=false) {
+        return this._vrcHelper.raycastFromController(
+            this._vrcHelper.getControllers()[i], meshes, recursive);
     }
 
     static getMouseCoords(e, canvas) {
