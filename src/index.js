@@ -241,7 +241,7 @@ class Threelet {
 
     enterVR(onError=null) {
         // try entering VR for at most tryCountMax * delay (ms)
-        const tryCountMax = 10, delay = 400;
+        const tryCountMax = 30, delay = 400;
         let tryCount = 0;
         const _enterVR = () => {
             setTimeout(() => {
