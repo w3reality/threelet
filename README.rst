@@ -13,7 +13,7 @@ Some notable features include:
 
 - Hello world (with the default axes and a unit lattice) [ `live <https://w3reality.github.io/threelet/examples/simple/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple/index.html>`__ | `Observable <https://observablehq.com/@j-devel/hello-world-with-threelet>`__ ]
 
-- Hello VR world [ `Observable <https://observablehq.com/@j-devel/hello-world-with-threelet/2>`__ ]
+- Hello VR world [ `live <https://w3reality.github.io/threelet/examples/simple-webvr/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple-webvr/index.html>`__ | `Observable <https://observablehq.com/@j-devel/hello-world-with-threelet/2>`__ ]
 
 - App with a static scene (mouse-event driven passive rendering) [ `live <https://w3reality.github.io/threelet/examples/simple-static/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple-static/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-a-static-3d-app>`__ ]
 
@@ -183,7 +183,8 @@ raycasting:
 .. code:: js
 
     threelet.raycast(origin, direction, meshes, recursive=false, faceExclude=null);
-    threelet.raycastFromMouse(mx, my, meshes, recursive=false);
+    threelet.raycastFromMouse(mx, my, meshes, recursive=false); // mx, my: mouse coordinates
+    threelet.raycastFromController(i, meshes, recursive=false); // i: VR controller index
 
 **Plugin features**
 
@@ -207,8 +208,6 @@ Sky based on the `shaders/sky <https://threejs.org/examples/?q=sky#webgl_shaders
 .. code:: html
 
     <script src="Sky.js"></script>
-
-.. code:: js
 
     threelet.setup('mod-sky', THREE.Sky); // show sky with the analytical daylight
 
