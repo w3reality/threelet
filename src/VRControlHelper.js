@@ -27,10 +27,10 @@ class VRControlHelper {
     getControllers() { return this.controllers; }
     getControllersState() { return this.controllersState; }
 
-    updateTriggerPressVisibility(i, tf) {
+    toggleTriggerPressVisibility(i, tf) {
         this.controllers[i].getObjectByName('trigger-press').visible = tf;
     }
-    updateTouchpadPointVisibility(i, type, tf) {
+    toggleTouchpadPointVisibility(i, type, tf) {
         const obj = this.controllers[i].getObjectByName(`touchpad-${type}`);
         obj.visible = tf;
         if (tf === false) {

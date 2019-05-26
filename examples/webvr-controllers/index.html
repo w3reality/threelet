@@ -39,10 +39,10 @@ Supported controllers:
     <script src="../deps/OrbitControls.js"></script>
     <script src="../deps/WebVR.js"></script>
 
-    <!-- <script src="../../dist/threelet.min.js"></script> -->
+    <script src="../../dist/threelet.min.js"></script>
     <!-- ==== prod/dev ==== -->
     <script type="module">
-    import Threelet from '../../src/index.js';
+    // import Threelet from '../../src/index.js';
 
     const scene = new THREE.Scene();
     const threelet = new Threelet({
@@ -56,40 +56,39 @@ Supported controllers:
     threelet.setup('mod-webvr', window.WEBVR);
 
 
-    const vrcHelper = threelet.getVRControlHelper();
     const vrTouchpadTouching = [false, false];
     const vrTouchpadPressing = [false, false];
 
     threelet.on('vr-touchpad-touch-start', (i, x, y) => {
         console.log('@@ touchpad ts - i, x, y:', i, x, y);
         vrTouchpadTouching[i] = true;
-        vrcHelper.updateTouchpadPointVisibility(i, 'touch', true);
+        threelet.displayControllerEvent(i, 'vr-touchpad-touch', true);
     });
     threelet.on('vr-touchpad-touch-end', (i, x, y) => {
         console.log('@@ touchpad te - i, x, y:', i, x, y);
         // always x,y = 0,0 on Oculus Go controller; spec??
         vrTouchpadTouching[i] = false;
-        vrcHelper.updateTouchpadPointVisibility(i, 'touch', false);
+        threelet.displayControllerEvent(i, 'vr-touchpad-touch', false);
     });
     threelet.on('vr-touchpad-press-start', (i, x, y) => {
         console.log('@@ touchpad ps - i, x, y:', i, x, y);
         vrTouchpadPressing[i] = true;
-        vrcHelper.updateTouchpadPointVisibility(i, 'press', true);
-        vrcHelper.updateTouchpadPointVisibility(i, 'touch', false);
+        threelet.displayControllerEvent(i, 'vr-touchpad-press', true);
+        threelet.displayControllerEvent(i, 'vr-touchpad-touch', false);
     });
     threelet.on('vr-touchpad-press-end', (i, x, y) => {
         console.log('@@ touchpad pe - i, x, y:', i, x, y);
         vrTouchpadPressing[i] = false;
-        vrcHelper.updateTouchpadPointVisibility(i, 'press', false);
-        vrcHelper.updateTouchpadPointVisibility(i, 'touch', true);
+        threelet.displayControllerEvent(i, 'vr-touchpad-press', false);
+        threelet.displayControllerEvent(i, 'vr-touchpad-touch', true);
     });
     threelet.on('vr-trigger-press-start', (i) => {
         console.log('@@ trigger ps - i:', i);
-        vrcHelper.updateTriggerPressVisibility(i, true);
+        threelet.displayControllerEvent(i, 'vr-trigger-press', true);
     });
     threelet.on('vr-trigger-press-end', (i) => {
         console.log('@@ trigger pe - i:', i);
-        vrcHelper.updateTriggerPressVisibility(i, false);
+        threelet.displayControllerEvent(i, 'vr-trigger-press', false);
     });
 
     //
@@ -158,7 +157,7 @@ Supported controllers:
 
     //
 
-    const stats = vrcHelper.getControllersState();
+    const stats = threelet.getControllersState();
     const ctx = panelCanvas.getContext('2d');
     const ysLine = [];
     for (let i = 0; i < 12; i++) { ysLine.push(16 + 18 * i); }
@@ -206,9 +205,9 @@ Supported controllers:
         // console.log('@@ vr touchpad touching/pressing:', vrTouchpadTouching, vrTouchpadPressing);
         for (let i of [0, 1]) {
             if (vrTouchpadPressing[i]) {
-                vrcHelper.updateTouchpadPoint(i, 'press');
+                threelet.updateControllerTouchpad(i, 'vr-touchpad-press');
             } else if (vrTouchpadTouching[i]) {
-                vrcHelper.updateTouchpadPoint(i, 'touch');
+                threelet.updateControllerTouchpad(i, 'vr-touchpad-touch');
             }
         }
     };

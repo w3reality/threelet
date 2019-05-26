@@ -176,11 +176,10 @@ class Threelet {
         this.scene.add(VRControlHelper.createTestHemisphereLight());
         this.scene.add(VRControlHelper.createTestDirectionalLight());
 
+        this.enableInteractiveGroup('drag');
         const group = this.getInteractiveGroup();
         VRControlHelper.createTestObjects().forEach(obj => group.add(obj));
         this.scene.add(group);
-
-        this.enableInteractiveGroup('drag');
     }
     getVRControlHelper() { // deprecated
         console.warn('@@ getVRControlHelper(): i am deprecated!!');
@@ -193,6 +192,29 @@ class Threelet {
             // TODO disable interface ??
         } else {
             console.warn('@@ unsupported interactive mode:', mode);
+        }
+    }
+    getControllersState() { return this._vrcHelper.getControllersState(); }
+    displayControllerEvent(i, what, tf) {
+        // only for updating visibility
+        if (what === 'vr-trigger-press') {
+            this._vrcHelper.toggleTriggerPressVisibility(i, tf);
+        } else if (what === 'vr-touchpad-touch') {
+            this._vrcHelper.toggleTouchpadPointVisibility(i, 'touch', tf);
+        } else if (what === 'vr-touchpad-press') {
+            this._vrcHelper.toggleTouchpadPointVisibility(i, 'press', tf);
+        } else {
+            console.warn('@@ unsupported what:', what);
+        }
+    }
+    updateControllerTouchpad(i, what) {
+        // only for updating the position based on the current axes values
+        if (what === 'vr-touchpad-touch') {
+            this._vrcHelper.updateTouchpadPoint(i, 'touch');
+        } else if (what === 'vr-touchpad-press') {
+            this._vrcHelper.updateTouchpadPoint(i, 'press');
+        } else {
+            console.warn('@@ unsupported what:', what);
         }
     }
 
