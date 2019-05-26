@@ -183,7 +183,8 @@ raycasting:
 .. code:: js
 
     threelet.raycast(origin, direction, meshes, recursive=false, faceExclude=null);
-    threelet.raycastFromMouse(mx, my, meshes, recursive=false);
+    threelet.raycastFromMouse(mx, my, meshes, recursive=false); // mx, my: mouse coordinates
+    threelet.raycastFromController(i, meshes, recursive=false); // i: VR controller index
 
 **Plugin features**
 
@@ -207,8 +208,6 @@ Sky based on the `shaders/sky <https://threejs.org/examples/?q=sky#webgl_shaders
 .. code:: html
 
     <script src="Sky.js"></script>
-
-.. code:: js
 
     threelet.setup('mod-sky', THREE.Sky); // show sky with the analytical daylight
 
