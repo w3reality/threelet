@@ -64,10 +64,12 @@ Hello world
 
     <script>
     const threelet = new Threelet({
-        canvas: document.getElementById("canvas"),
+        canvas: document.getElementById('canvas'),
     });
 
+    threelet.setup('mod-controls', THREE.OrbitControls);
     threelet.setup('mod-stats', window.Stats);
+
     threelet.render(); // first time
     </script>
 
