@@ -1,7 +1,7 @@
 threelet
 ===================
 
-**threelet** is a three.js based scene viewer.
+**threelet** is a `three.js <https://github.com/mrdoob/three.js/>`__ based scene viewer.
 It can be also used as a 3D app framework for rapidly making dynamic desktop/VR applications.
 Some notable features include:
 
@@ -11,7 +11,7 @@ Some notable features include:
 
 **demos**
 
-- Hello world with the default axes and a unit lattice [ `live <https://w3reality.github.io/threelet/examples/simple/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple/index.html>`__ | `Observable <https://observablehq.com/@j-devel/hello-world-with-threelet>`__ ]
+- Hello world (with the default axes and a unit lattice) [ `live <https://w3reality.github.io/threelet/examples/simple/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple/index.html>`__ | `Observable <https://observablehq.com/@j-devel/hello-world-with-threelet>`__ ]
 
 - Hello VR world [ `Observable <https://observablehq.com/@j-devel/hello-world-with-threelet/2>`__ ]
 
@@ -21,7 +21,7 @@ Some notable features include:
 
 - WebVR controller state visualizer [ `live <https://w3reality.github.io/threelet/examples/webvr-controllers/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-controllers>`__ ]
 
-- VR app with interactive objects [ `live <https://w3reality.github.io/threelet/examples/webvr-interactive/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-interactive>`__ | `Observable <https://observablehq.com/@j-devel/making-an-interactive-vr-app>`__ ]
+- VR app with interactive objects [ `live <https://w3reality.github.io/threelet/examples/webvr-interactive/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-interactive/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-an-interactive-vr-app>`__ ]
 
 .. image:: https://w3reality.github.io/threelet/examples/simple-dynamic/index.jpg
      :target: https://w3reality.github.io/threelet/examples/simple-dynamic/index.html
