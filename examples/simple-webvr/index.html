@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>simple-webvr</title>
+</head>
+<body>
+    <canvas id="canvas" style="width: 100%; height: 100%;"></canvas>
+
+    <script src="../deps/three.min.js"></script>
+    <script src="../deps/OrbitControls.js"></script>
+    <script src="../deps/WebVR.js"></script>
+
+    <script src="../../dist/threelet.min.js"></script>
+
+    <script>
+    const threelet = new Threelet({
+        canvas: document.getElementById("canvas"),
+        optAxes: false,
+    });
+
+    threelet.setup('mod-controls', THREE.OrbitControls);
+    threelet.setup('mod-webvr', window.WEBVR);
+
+    threelet.scene.add(new THREE.GridHelper(10, 20));
+
+    threelet.render(); // first time
+    </script>
+</body>
+</html>
