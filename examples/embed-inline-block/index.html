@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>embed-inline-block</title>
+</head>
+<body>
+    <div>
+        Embedding a model viewer as an inline-block element.
+        <a href="https://github.com/w3reality/threelet/tree/master/examples/embed-inline-block/index.html">source code</a>
+    </div>
+    <hr />
+
+    <div>
+        This <span id="viewer"></span> is an inline-block element.
+    </div>
+
+    <script src="../deps/stats.min.js"></script>
+    <script src="../deps/three.min.js"></script>
+    <script src="../deps/OrbitControls.js"></script>
+    <script src="../deps/WebVR.js"></script>
+
+    <!-- <script src="../../dist/threelet.min.js"></script> -->
+    <!-- ==== prod/dev ==== -->
+    <script type="module">
+    import Threelet from '../../src/index.js';
+
+    const createCube = () => {
+        const cube = new THREE.Mesh(
+                new THREE.BoxGeometry(0.4, 0.1, 0.4),
+                new THREE.MeshBasicMaterial({color: 0xff00ff, wireframe: false}));
+        cube.position.set(0, 0.5, -1.5);
+        return cube;
+    };
+
+    const threelet = new Threelet({width: 480, height: 320});
+    threelet.setup('mod-controls', THREE.OrbitControls);
+    threelet.setup('mod-webvr', window.WEBVR);
+    threelet.setup('mod-stats', window.Stats, {panelType: 0});
+    document.getElementById('viewer').appendChild(threelet.domElement);
+
+
+    const cube = createCube();
+    threelet.scene.add(cube);
+    threelet.update = (t, dt) => { cube.position.set(Math.cos(t), 0.5, Math.sin(t)-1.5); };
+    threelet.updateLoop(4); // loop with the spcified FPS
+    </script>
+</body>
+</html>

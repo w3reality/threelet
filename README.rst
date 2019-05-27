@@ -132,8 +132,9 @@ Calling the constructor with the default parameters looks as:
 .. code:: js
 
     const threelet = new Threelet({
-        // ---- required ----
         canvas: null,
+        width: 480, // used when canvas === null
+        height: 320, // used when canvas === null
         // ---- viewer options ----
         optScene: null,
         optAxes: true, // axes and a unit lattice

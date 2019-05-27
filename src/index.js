@@ -10,8 +10,9 @@ class Threelet {
     constructor(params) {
         this.version = __version;
         const defaults = {
-            // ---- required ----
             canvas: null,
+            width: 480, // used when canvas === null
+            height: 320, // used when canvas === null
             // ---- viewer options ----
             optScene: null,
             optAxes: true, // axes and a unit lattice
@@ -19,12 +20,27 @@ class Threelet {
         };
         const actual = Object.assign({}, defaults, params);
 
-        const canvas = actual.canvas;
+        let canvas = actual.canvas;
+        this.domElement = null;
         if (! canvas) {
-            throw 'error: canvas not provided';
+            // <div style="display: inline-block; position: relative;">
+            //     <canvas style="width: 480px; height: 320px;"></canvas>
+            // </div>
+            canvas = document.createElement('canvas');
+            Object.assign(canvas.style, {
+                width: typeof actual.width === 'string' ?
+                    actual.width : `${actual.width}px`,
+                height: typeof actual.height === 'string' ?
+                    actual.height : `${actual.height}px`,
+            });
+            const div = document.createElement('div');
+            Object.assign(div.style, {
+                display: 'inline-block',
+                position: 'relative',
+            });
+            div.appendChild(canvas);
+            this.domElement = div;
         }
-        // kludge for mouse events and overlay
-        canvas.style.display = 'block'; // https://stackoverflow.com/questions/8600393/there-is-a-4px-gap-below-canvas-video-audio-elements-in-html5
 
         // basics
         [this.scene, this.camera, this.renderer] =
@@ -65,6 +81,9 @@ class Threelet {
         //======== FIXME ?? - Oculus Go's desktop mode, OrbitControls breaks mouse events...
         this._initMouseListeners(this.renderer.domElement);
         //======== approach below is this too hackish and still not sure how to trigger
+        // // kludge for mouse events and overlay;
+        // canvas.style.display = 'block'; // https://stackoverflow.com/questions/8600393/there-is-a-4px-gap-below-canvas-video-audio-elements-in-html5
+        //
         //         mouse events for *both* overlay and canvas
         // this._initMouseListeners(document.querySelector('#overlay'));
         // <!-- https://stackoverflow.com/questions/5763911/placing-a-div-within-a-canvas -->
@@ -148,7 +167,7 @@ class Threelet {
     _setupStats(Module, opts) {
         const defaults = {
             panelType: 0, // 0: fps, 1: ms, 2: mb, 3+: custom
-            appendTo: document.body,
+            appendTo: this.domElement ? this.domElement : document.body,
         };
         const actual = Object.assign({}, defaults, opts);
 
@@ -220,7 +239,7 @@ class Threelet {
 
     _setupWebVR(Module, opts={}) {
         const defaults = {
-            appendTo: document.body,
+            appendTo: this.domElement ? this.domElement : document.body,
         };
         const actual = Object.assign({}, defaults, opts);
 
