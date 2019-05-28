@@ -1,7 +1,7 @@
 // Threelet - https://github.com/w3reality/threelet
 // A three.js scene viewer with batteries (MIT License)
 
-const __version = "0.9.10dev";
+const __version = "0.9.10";
 
 import VRControlHelper from './VRControlHelper.js';
 import SkyHelper from './SkyHelper.js';
@@ -11,8 +11,8 @@ class Threelet {
         this.version = __version;
         const defaults = {
             canvas: null,
-            width: 480, // used when canvas === null
-            height: 320, // used when canvas === null
+            width: 480,
+            height: 320,
             // ---- viewer options ----
             optScene: null,
             optAxes: true, // axes and a unit lattice
@@ -20,19 +20,14 @@ class Threelet {
         };
         const actual = Object.assign({}, defaults, params);
 
-        let canvas = actual.canvas;
+        // create domElement in case canvas is not provided
         this.domElement = null;
+        let canvas = actual.canvas;
         if (! canvas) {
             // <div style="display: inline-block; position: relative;">
             //     <canvas style="width: 480px; height: 320px;"></canvas>
             // </div>
             canvas = document.createElement('canvas');
-            Object.assign(canvas.style, {
-                width: typeof actual.width === 'string' ?
-                    actual.width : `${actual.width}px`,
-                height: typeof actual.height === 'string' ?
-                    actual.height : `${actual.height}px`,
-            });
             const div = document.createElement('div');
             Object.assign(div.style, {
                 display: 'inline-block',
@@ -41,6 +36,14 @@ class Threelet {
             div.appendChild(canvas);
             this.domElement = div;
         }
+
+        // set width, height of canvas
+        Object.assign(canvas.style, {
+            width: typeof actual.width === 'string' ?
+                actual.width : `${actual.width}px`,
+            height: typeof actual.height === 'string' ?
+                actual.height : `${actual.height}px`,
+        });
 
         // basics
         [this.scene, this.camera, this.renderer] =
