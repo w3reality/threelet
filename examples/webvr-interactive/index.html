@@ -72,57 +72,15 @@ interactive VR app
     //     appendTo: overlayDiv,
     // });
 
-    const createTestHemisphereLight = () => {
-        return new THREE.HemisphereLight(0x808080, 0x606060);
-    };
-    const createTestDirectionalLight = () => {
-        const light = new THREE.DirectionalLight( 0xffffff );
-        light.position.set( 0, 6, 0 );
-        light.castShadow = true;
-        light.shadow.camera.top = 2;
-        light.shadow.camera.bottom = - 2;
-        light.shadow.camera.right = 2;
-        light.shadow.camera.left = - 2;
-        light.shadow.mapSize.set( 4096, 4096 );
-        return light;
-    };
-    const createTestObjects = () => {
-        const objs = [];
-        const geoms = [
-            new THREE.BoxBufferGeometry( 0.2, 0.2, 0.2 ),
-            new THREE.ConeBufferGeometry( 0.2, 0.2, 64 ),
-            new THREE.CylinderBufferGeometry( 0.2, 0.2, 0.2, 64 ),
-            new THREE.IcosahedronBufferGeometry( 0.2, 3 ),
-            new THREE.TorusBufferGeometry( 0.2, 0.04, 64, 32 )
-        ];
-        for (let geom of geoms) {
-            const object = new THREE.Mesh(geom,
-                new THREE.MeshStandardMaterial({
-                    color: Math.random() * 0xffffff,
-                    roughness: 0.7,
-                    metalness: 0.0
-                }));
-            object.position.set(2*Math.random()-1, 2*Math.random()-1+1, 2*Math.random()-1-2);
-            object.rotation.x = Math.random() * 2 * Math.PI;
-            object.rotation.y = Math.random() * 2 * Math.PI;
-            object.rotation.z = Math.random() * 2 * Math.PI;
-            object.scale.setScalar( Math.random() + 0.5 );
-            object.castShadow = true;
-            object.receiveShadow = true;
-            objs.push(object);
-        }
-        return objs;
-    };
-
     //
 
-    threelet.scene.add(createTestHemisphereLight());
-    threelet.scene.add(createTestDirectionalLight());
+    threelet.scene.add(Threelet.Utils.createTestHemisphereLight());
+    threelet.scene.add(Threelet.Utils.createTestDirectionalLight());
     threelet.scene.add(new THREE.GridHelper(10, 20));
 
     threelet.enableInteractiveGroup('drag');
     const group = threelet.getInteractiveGroup();
-    const testObjs = createTestObjects();
+    const testObjs = Threelet.Utils.createTestObjects();
     testObjs.forEach(obj => group.add(obj));
     threelet.scene.add(group);
 
@@ -137,25 +95,12 @@ interactive VR app
     base.name = 'base';
     group.add(base); // make the base interactive in VR
 
-    // https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_collada_skinning.html
-    let mixer = null;
     let avatar = null;
-    const loader = new THREE.ColladaLoader();
-    loader.load('./media/stormtrooper.dae', collada => {
-        const animations = collada.animations;
-        avatar = collada.scene;
-        console.log('@@ avatar:', avatar);
-        avatar.traverse(node => {
-            // console.log('@@ node:', node);
-            // console.log('@@ node.type:', node.type);
-            if (node.isSkinnedMesh) {
-                node.frustumCulled = false;
-                // node.material.wireframe = true; // @@ debug
-            }
-        });
-        avatar.scale.set(0.4, 0.4, 0.4);
-        mixer = new THREE.AnimationMixer(avatar);
-        const action = mixer.clipAction(animations[0]).play();
+    let mixer = null;
+    Threelet.Utils.loadCollada('./media/stormtrooper.dae', (_avatar, _mixer) => {
+        _avatar.scale.set(0.4, 0.4, 0.4);
+        avatar = _avatar;
+        mixer = _mixer;
     });
 
     //

@@ -43,14 +43,6 @@
     <script type="module">
     // import Threelet from '../../src/index.js';
 
-    const createCube = () => {
-        const cube = new THREE.Mesh(
-                new THREE.BoxGeometry(0.4, 0.1, 0.4),
-                new THREE.MeshBasicMaterial({color: 0xff00ff, wireframe: false}));
-        cube.position.set(0, 0.5, -1.5);
-        return cube;
-    };
-
     for (let i of [0, 1, 2, 3]) {
         const threelet = new Threelet({width: 380, height: 260});
         document.getElementById(`viewer${i}`).appendChild(threelet.domElement);
@@ -64,12 +56,12 @@
         if (i < 2) {
             threelet.setup('mod-stats', window.Stats, {panelType: 1});
 
-            threelet.scene.add(createCube());
+            threelet.scene.add(Threelet.Utils.createTestCube());
             threelet.render(); // first time
         } else {
             threelet.setup('mod-stats', window.Stats, {panelType: 0});
 
-            const cube = createCube();
+            const cube = Threelet.Utils.createTestCube();
             threelet.scene.add(cube);
             threelet.update = (t, dt) => { cube.position.set(Math.cos(t), 0.5, Math.sin(t)-1.5); };
             threelet.updateLoop(4); // loop with the spcified FPS

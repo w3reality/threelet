@@ -1,10 +1,11 @@
 // Threelet - https://github.com/w3reality/threelet
 // A three.js scene viewer with batteries (MIT License)
 
-const __version = "0.9.11";
+const __version = "0.9.12dev";
 
 import VRControlHelper from './VRControlHelper.js';
 import SkyHelper from './SkyHelper.js';
+import Utils from './Utils.js';
 
 class Threelet {
     constructor(params) {
@@ -596,5 +597,7 @@ class Threelet {
         mat.dispose();
     }
 }
+
+Threelet.Utils = Utils;
 
 export default Threelet;
