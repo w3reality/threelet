@@ -23,6 +23,10 @@ Some notable features include:
 
 - VR app with interactive objects [ `live <https://w3reality.github.io/threelet/examples/webvr-interactive/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-interactive/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-an-interactive-vr-app>`__ ]
 
+- Embdding a 3D model viewer into a page. [ `live <https://w3reality.github.io/threelet/examples/embed-inline-block/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/embed-inline-block/index.html>`__ ]
+
+- Embedding multiple independent viewers into a page. [ `live <https://w3reality.github.io/threelet/examples/embed-multiple/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/embed-multiple/index.html>`__ ]
+
 .. image:: https://w3reality.github.io/threelet/examples/simple-dynamic/index.jpg
      :target: https://w3reality.github.io/threelet/examples/simple-dynamic/index.html
 
@@ -133,13 +137,27 @@ Calling the constructor with the default parameters looks as:
 
     const threelet = new Threelet({
         canvas: null,
-        width: 480, // used when canvas === null
-        height: 320, // used when canvas === null
+        width: 480,
+        height: 320,
         // ---- viewer options ----
         optScene: null,
         optAxes: true, // axes and a unit lattice
         optCameraPosition: [0, 1, 2], // initial camera position in desktop mode
     });
+
+**Embedding**
+
+Without the ``canvas`` paramter, the constructor creates an inline-block
+div element (``threelet.domElement``) that is ready to be embedded to a web page.
+
+.. code:: html
+
+    <div>
+        This <span id="viewer"></span> is an inline-block element.
+    </div>
+
+    const threelet = new Threelet({width: 480, height: 320});
+    document.getElementById('viewer').appendChild(threelet.domElement);
 
 **Event listeners**
 
