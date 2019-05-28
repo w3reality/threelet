@@ -23,7 +23,7 @@ Some notable features include:
 
 - VR app with interactive objects [ `live <https://w3reality.github.io/threelet/examples/webvr-interactive/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-interactive/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-an-interactive-vr-app>`__ ]
 
-- Embdding a 3D model viewer into a page. [ `live <https://w3reality.github.io/threelet/examples/embed-inline-block/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/embed-inline-block/index.html>`__ ]
+- Embedding a 3D model viewer into a page. [ `live <https://w3reality.github.io/threelet/examples/embed-inline-block/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/embed-inline-block/index.html>`__ ]
 
 - Embedding multiple independent viewers into a page. [ `live <https://w3reality.github.io/threelet/examples/embed-multiple/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/embed-multiple/index.html>`__ ]
 
