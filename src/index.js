@@ -1,7 +1,7 @@
 // Threelet - https://github.com/w3reality/threelet
 // A three.js scene viewer with batteries (MIT License)
 
-const __version = "0.9.11dev";
+const __version = "0.9.11";
 
 import VRControlHelper from './VRControlHelper.js';
 import SkyHelper from './SkyHelper.js';
@@ -20,6 +20,16 @@ class Threelet {
         };
         const actual = Object.assign({}, defaults, params);
 
+        // for setting width, height of canvas
+        const applySize = (_canvas, _params) => {
+            Object.assign(_canvas.style, {
+                width: typeof _params.width === 'string' ?
+                    _params.width : `${_params.width}px`,
+                height: typeof _params.height === 'string' ?
+                    _params.height : `${_params.height}px`,
+            });
+        };
+
         // create domElement in case canvas is not provided
         this.domElement = null;
         let canvas = actual.canvas;
@@ -28,6 +38,7 @@ class Threelet {
             //     <canvas style="width: 480px; height: 320px;"></canvas>
             // </div>
             canvas = document.createElement('canvas');
+            applySize(canvas, actual);
             const div = document.createElement('div');
             Object.assign(div.style, {
                 display: 'inline-block',
@@ -35,15 +46,12 @@ class Threelet {
             });
             div.appendChild(canvas);
             this.domElement = div;
+        } else {
+            if (params.width !== undefined && params.height !== undefined) {
+                applySize(canvas, params);
+            }
         }
 
-        // set width, height of canvas
-        Object.assign(canvas.style, {
-            width: typeof actual.width === 'string' ?
-                actual.width : `${actual.width}px`,
-            height: typeof actual.height === 'string' ?
-                actual.height : `${actual.height}px`,
-        });
 
         // basics
         [this.scene, this.camera, this.renderer] =
