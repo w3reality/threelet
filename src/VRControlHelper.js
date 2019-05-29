@@ -328,49 +328,6 @@ class VRControlHelper {
             }
         }
     }
-
-    static createTestHemisphereLight() {
-        return new THREE.HemisphereLight(0x808080, 0x606060);
-    }
-    static createTestDirectionalLight() {
-        const light = new THREE.DirectionalLight( 0xffffff );
-        light.position.set( 0, 6, 0 );
-        light.castShadow = true;
-        light.shadow.camera.top = 2;
-        light.shadow.camera.bottom = - 2;
-        light.shadow.camera.right = 2;
-        light.shadow.camera.left = - 2;
-        light.shadow.mapSize.set( 4096, 4096 );
-        return light;
-    }
-    static createTestObjects() {
-        const objs = [];
-        const geoms = [
-            new THREE.BoxBufferGeometry( 0.2, 0.2, 0.2 ),
-            new THREE.ConeBufferGeometry( 0.2, 0.2, 64 ),
-            new THREE.CylinderBufferGeometry( 0.2, 0.2, 0.2, 64 ),
-            new THREE.IcosahedronBufferGeometry( 0.2, 3 ),
-            new THREE.TorusBufferGeometry( 0.2, 0.04, 64, 32 )
-        ];
-        for (let geom of geoms) {
-            const object = new THREE.Mesh(geom,
-                new THREE.MeshStandardMaterial({
-                    color: Math.random() * 0xffffff,
-                    roughness: 0.7,
-                    metalness: 0.0
-                }));
-            object.position.set(2*Math.random(), 2*Math.random(), -1);
-            // console.log('@@ object:', object);
-            object.rotation.x = Math.random() * 2 * Math.PI;
-            object.rotation.y = Math.random() * 2 * Math.PI;
-            object.rotation.z = Math.random() * 2 * Math.PI;
-            object.scale.setScalar( Math.random() + 0.5 );
-            object.castShadow = true;
-            object.receiveShadow = true;
-            objs.push(object);
-        }
-        return objs;
-    }
 }
 
 export default VRControlHelper;

@@ -204,12 +204,12 @@ class Threelet {
     }
 
     setupVRControlHelperTest() {
-        this.scene.add(VRControlHelper.createTestHemisphereLight());
-        this.scene.add(VRControlHelper.createTestDirectionalLight());
+        this.scene.add(Threelet.Utils.createTestHemisphereLight());
+        this.scene.add(Threelet.Utils.createTestDirectionalLight());
 
         this.enableInteractiveGroup('drag');
         const group = this.getInteractiveGroup();
-        VRControlHelper.createTestObjects().forEach(obj => group.add(obj));
+        Threelet.Utils.createTestObjects([0,0,0]).forEach(obj => group.add(obj));
         this.scene.add(group);
     }
     getVRControlHelper() { // deprecated
