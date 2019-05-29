@@ -62,9 +62,9 @@ class Utils {
         // https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_collada_skinning.html
         const loader = new THREE.ColladaLoader();
         loader.load(path, collada => {
-            const avatar = collada.scene;
-            console.log('@@ avatar:', avatar);
-            avatar.traverse(node => {
+            const object = collada.scene;
+            console.log('@@ collada.object:', object);
+            object.traverse(node => {
                 // console.log('@@ node:', node);
                 // console.log('@@ node.type:', node.type);
                 if (node.isSkinnedMesh) {
@@ -72,9 +72,7 @@ class Utils {
                     // node.material.wireframe = true; // @@ debug
                 }
             });
-            const mixer = new THREE.AnimationMixer(avatar);
-            const action = mixer.clipAction(collada.animations[0]).play();
-            cb(avatar, mixer);
+            Utils._resolveAnimations(object, collada, cb);
         });
     }
 
@@ -84,17 +82,43 @@ class Utils {
         // https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_fbx.html
         const loader = new THREE.FBXLoader();
         loader.load(path, object => {
-            const mixer = new THREE.AnimationMixer(object);
-            const action = mixer.clipAction(object.animations[0]);
-            action.play();
-            object.traverse(child => {
-                if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
+            object.traverse(node => {
+                if (node.isMesh) {
+                    node.castShadow = true;
+                    node.receiveShadow = true;
                 }
             });
-            cb(object, mixer);
+            Utils._resolveAnimations(object, object, cb);
         });
+    }
+
+    static loadGLTF(path, file, cb) {
+        const loader = new THREE.GLTFLoader().setPath(path);
+        loader.load(file, gltf => {
+            console.log('@@ gltf:', gltf);
+            const object = gltf.scene;
+            object.traverse(node => {
+                // if (node.isMesh) {
+                //     node.material.envMap = envMap;
+                // }
+            });
+            Utils._resolveAnimations(object, gltf, cb);
+        });
+    }
+
+    // https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_gltf_extensions.html
+    static _resolveAnimations(object, raw, cb) {
+        const animations = raw.animations;
+        let mixer = null;
+        const actions = [];
+        if (animations && animations.length) {
+            mixer = new THREE.AnimationMixer(object);
+            for (let anim of animations) {
+                actions.push(mixer.clipAction(anim).play());
+            }
+        }
+        console.log('@@ actions:', actions);
+        cb(object, mixer, actions, raw);
     }
 }
 

@@ -23,9 +23,9 @@ Some notable features include:
 
 - VR app with interactive objects [ `live <https://w3reality.github.io/threelet/examples/webvr-interactive/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-interactive/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-an-interactive-vr-app>`__ ]
 
-- Embedding a 3D model viewer into a page. [ `live <https://w3reality.github.io/threelet/examples/embed-inline-block/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/embed-inline-block/index.html>`__ ]
+- Embedding a 3D viewer into a web page. [ `live <https://w3reality.github.io/threelet/examples/embed-inline-block/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/embed-inline-block/index.html>`__ ]
 
-- Embedding multiple independent viewers into a page. [ `live <https://w3reality.github.io/threelet/examples/embed-multiple/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/embed-multiple/index.html>`__ ]
+- Embedding multiple independent viewers into a web page. [ `live <https://w3reality.github.io/threelet/examples/embed-multiple/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/embed-multiple/index.html>`__ ]
 
 .. image:: https://w3reality.github.io/threelet/examples/simple-dynamic/index.jpg
      :target: https://w3reality.github.io/threelet/examples/simple-dynamic/index.html
@@ -147,8 +147,8 @@ Calling the constructor with the default parameters looks as:
 
 **Embedding**
 
-Without the ``canvas`` paramter, the constructor creates an inline-block
-div element (``threelet.domElement``) that is ready to be embedded to a web page.
+Without the ``canvas`` parameter, the constructor creates an inline-block
+div element (``threelet.domElement``) that is ready to be embedded into a web page.
 
 .. code:: html
 

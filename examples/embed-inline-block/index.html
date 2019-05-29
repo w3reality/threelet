@@ -6,7 +6,7 @@
 </head>
 <body>
     <div>
-        Embedding a model viewer as an inline-block element.
+        Embedding a 3D viewer as an inline-block element.
         <a href="https://github.com/w3reality/threelet/tree/master/examples/embed-inline-block/index.html">source code</a>
     </div>
     <hr />
@@ -15,20 +15,20 @@
         This <span id="viewer"></span> is an inline-block element.
     </div>
 
-    <script src="../deps/stats.min.js"></script>
     <script src="../deps/three.min.js"></script>
-    <script src="../deps/inflate.min.js"></script>
-    <script src="../deps/FBXLoader.js"></script>
     <script src="../deps/OrbitControls.js"></script>
+    <script src="../deps/stats.min.js"></script>
+    <script src="../deps/Sky.js"></script>
     <script src="../deps/WebVR.js"></script>
 
-    <!-- <script src="../../dist/threelet.min.js"></script> -->
+    <script src="../../dist/threelet.min.js"></script>
     <!-- ==== prod/dev ==== -->
     <script type="module">
-    import Threelet from '../../src/index.js';
+    // import Threelet from '../../src/index.js';
 
     const threelet = new Threelet({width: 480, height: 320});
     threelet.setup('mod-controls', THREE.OrbitControls);
+    threelet.setup('mod-sky', THREE.Sky);
     threelet.setup('mod-webvr', window.WEBVR);
     threelet.setup('mod-stats', window.Stats, {panelType: 0});
     document.getElementById('viewer').appendChild(threelet.domElement);
@@ -36,22 +36,14 @@
     threelet.scene.add(Threelet.Utils.createTestHemisphereLight());
     threelet.scene.add(Threelet.Utils.createTestDirectionalLight());
 
-    let mixer = null;
-    Threelet.Utils.loadFBX('../media/Samba Dancing.fbx', (_obj, _mixer) => {
-        _obj.scale.set(0.01, 0.01, 0.01);
-        _obj.position.z = -1.5;
-        threelet.scene.add(_obj);
-        mixer = _mixer;
-    });
-
     const cube = Threelet.Utils.createTestCube([0.4, 0.1, 0.4], 0xff00ff);
     threelet.scene.add(cube);
 
     threelet.update = (t, dt) => {
         cube.position.set(Math.cos(t), 0.5, Math.sin(t)-1.5);
-        if (mixer !== null) { mixer.update(dt); }
     };
-    threelet.updateLoop(4); // loop with the spcified FPS
+
+    threelet.updateLoop(10); // loop with the spcified FPS
     </script>
 </body>
 </html>

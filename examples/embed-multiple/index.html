@@ -53,16 +53,13 @@
             threelet.setup('mod-webvr', window.WEBVR);
         }
 
+        const cube = Threelet.Utils.createTestCube([0.4, 0.1, 0.4], 0xff00ff);
+        threelet.scene.add(cube);
         if (i < 2) {
             threelet.setup('mod-stats', window.Stats, {panelType: 1});
-
-            threelet.scene.add(Threelet.Utils.createTestCube());
             threelet.render(); // first time
         } else {
             threelet.setup('mod-stats', window.Stats, {panelType: 0});
-
-            const cube = Threelet.Utils.createTestCube();
-            threelet.scene.add(cube);
             threelet.update = (t, dt) => { cube.position.set(Math.cos(t), 0.5, Math.sin(t)-1.5); };
             threelet.updateLoop(4); // loop with the spcified FPS
         }
