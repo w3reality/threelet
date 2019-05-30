@@ -572,7 +572,6 @@ class Threelet {
 
         this.camera = null;
     }
-
     static freeScene(scene) {
         Threelet._freeChildren(scene, scene.children);
     }

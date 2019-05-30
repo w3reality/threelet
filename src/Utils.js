@@ -78,23 +78,26 @@ class Utils {
 
     // <script src="../deps/inflate.min.js"></script>
     // <script src="../deps/FBXLoader.js"></script>
-    static loadFBX(path, cb) {
+    static loadFBX(path, cb=null) {
         // https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_fbx.html
         const loader = new THREE.FBXLoader();
-        loader.load(path, object => {
+        const onLoaded = (object, _cb) => {
+            console.log('@@ object:', object);
             object.traverse(node => {
                 if (node.isMesh) {
                     node.castShadow = true;
                     node.receiveShadow = true;
                 }
             });
-            Utils._resolveAnimations(object, object, cb);
-        });
+            _cb(Utils._resolveAnimations(object, object));
+        };
+        return Utils._out(loader, path, onLoaded, cb);
     }
 
-    static loadGLTF(path, file, cb) {
+    // <script src="../deps/GLTFLoader.js"></script>
+    static loadGLTF(path, file, cb=null) {
         const loader = new THREE.GLTFLoader().setPath(path);
-        loader.load(file, gltf => {
+        const onLoaded = (gltf, _cb) => {
             console.log('@@ gltf:', gltf);
             const object = gltf.scene;
             object.traverse(node => {
@@ -102,12 +105,21 @@ class Utils {
                 //     node.material.envMap = envMap;
                 // }
             });
-            Utils._resolveAnimations(object, gltf, cb);
-        });
+            _cb(Utils._resolveAnimations(object, gltf));
+        };
+        return Utils._out(loader, file, onLoaded, cb);
+    }
+
+    static _out(loader, file, onLoaded, cb) {
+        return cb ? loader.load(file, raw => onLoaded(raw, cb)) :
+            new Promise((res, rej) => {
+                loader.load(file, raw => onLoaded(raw, res));
+            });
     }
 
     // https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_gltf_extensions.html
-    static _resolveAnimations(object, raw, cb) {
+    // https://threejs.org/docs/manual/en/introduction/Animation-system.html
+    static _resolveAnimations(object, raw) {
         const animations = raw.animations;
         let mixer = null;
         const actions = [];
@@ -118,7 +130,12 @@ class Utils {
             }
         }
         console.log('@@ actions:', actions);
-        cb(object, mixer, actions, raw);
+        return { // out
+            object: object,
+            mixer: mixer,
+            actions: actions,
+            raw: raw,
+        };
     }
 }
 

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>animation-player</title>
+</head>
+<body>
+    <div>
+        Animation Player
+        <a href="https://github.com/w3reality/threelet/tree/master/examples/animation-player/index.html">source code</a>
+    </div>
+    <hr />
+    <div id="buttons">
+        <button id="mora">Welcome to Mora (glTF)</button>
+        <button id="monster">Monster (glTF)</button>
+        <button id="samba">Samba Dancing (FBX)</button>
+        <button id="stormtrooper">Dancing Stormtrooper (Collada)</button>
+    </div>
+    <hr />
+    <div id="viewer"></div>
+    <div id="controls" style="display: none;">
+        animation controls: <button id="btnPauseResume"></button>
+    </div>
+    <div id="info">
+        info .......
+    </div>
+
+    <!-- <script src="../deps/three-debug.js"></script> -->
+    <script src="../deps/three.min.js"></script>
+
+    <script src="../deps/inflate.min.js"></script>
+    <!-- <script src="../deps/FBXLoader-debug.js"></script> -->
+    <script src="../deps/FBXLoader.js"></script>
+
+    <script src="../deps/GLTFLoader.js"></script>
+    <script src="../deps/MTLLoader.js"></script>
+    <script src="../deps/OBJLoader.js"></script>
+
+    <script src="../deps/LoaderSupport.js"></script>
+    <script src="../deps/OBJLoader2.js"></script>
+
+    <script src="../deps/OrbitControls.js"></script>
+
+    <script src="../deps/stats.min.js"></script>
+    <script src="../deps/Sky.js"></script>
+    <script src="../deps/WebVR.js"></script>
+
+    <!-- <script src="../../dist/threelet.min.js"></script> -->
+    <!-- ==== prod/dev ==== -->
+    <script type="module">
+    import Threelet from '../../src/index.js';
+
+    const hasVR = Threelet.isVrSupported();
+    const threelet = new Threelet({
+        width: hasVR ? 480 : 800,
+        height: hasVR ? 320 : 480,
+        optAxes: false,
+    });
+    threelet.setup('mod-controls', THREE.OrbitControls);
+    threelet.setup('mod-sky', THREE.Sky);
+    threelet.setup('mod-webvr', window.WEBVR);
+    threelet.setup('mod-stats', window.Stats, {panelType: 0});
+    document.getElementById('viewer').appendChild(threelet.domElement);
+
+    threelet.scene.add(new THREE.GridHelper(10, 20));
+    threelet.scene.add(Threelet.Utils.createTestHemisphereLight());
+    threelet.scene.add(Threelet.Utils.createTestDirectionalLight());
+
+    let keyLast = 'dummy';
+    const dummyEntry = {
+        object: Threelet.Utils.createTestCube(),
+        mixer: null,
+        actions: [],
+    };
+    const modelData = {
+        dummy: Object.assign({}, dummyEntry),
+        // to be dynamically populated by loadModel()
+        // ...
+    };
+
+    let animPaused = false;
+
+    const btnPauseResume = document.getElementById('btnPauseResume');
+    const setBtnText = (_animPaused) => {
+        btnPauseResume.innerText = _animPaused ? 'RESUME' : 'PAUSE';
+    };
+    setBtnText(animPaused);
+
+    btnPauseResume.addEventListener('click', (e) => {
+        const { mixer, actions } = modelData[keyLast];
+        if (animPaused) {
+            animPaused = false;
+            // https://threejs.org/docs/#api/en/animation/AnimationAction.startAt
+            // for (let action of actions) action.play().startAt(_timeStop);
+            for (let action of actions) action.play().startAt(0);
+        } else {
+            animPaused = true;
+            // for (let action of actions) action.stop();
+            // https://threejs.org/docs/#api/en/animation/AnimationMixer.stopAllAction
+            if (mixer) mixer.stopAllAction();
+        };
+        setBtnText(animPaused);
+    });
+
+if (0) {
+	// Character and animation from <a href="https://www.mixamo.com/" target="_blank" rel="noopener">Mixamo</a>
+    const path = '../media/Samba Dancing.fbx';
+
+    // const path = '../media/welcome-to-mora-animated/robot_animation.fbx';
+    // !!!! seeing errors about matrix inversion...; try gltf version instead.
+    // faillllllllllllllllllllllllllllllllllll
+    //
+    // det === 0 without scaling; mo
+    // @@ me: (9) [0, 0, 0, 0, 0, 0, 0, 0, 0] for polySurface161
+    // https://stackoverflow.com/questions/19150120/scaling-an-object-in-three-js/33918318#33918318
+    // script src="../deps/three-debug.js"
+    // script src="../deps/inflate.min.js"
+    // script src="../deps/FBXLoader-debug.js"
+
+    Threelet.Utils.loadFBX(path, (_obj, _mixer) => {
+        _obj.scale.set(0.007, 0.007, 0.007);
+        if (hasVR) _obj.position.z = -1.5;
+        //----
+        // _obj.scale.set(0.1, 0.1, 0.1);
+
+        threelet.scene.add(_obj);
+        mixer = _mixer;
+    });
+}
+
+if (0) {
+    const path = '../media/welcome-to-mora/';
+
+    // mtl faillllllllllllllllllllllllllllllllllll
+    // https://stackoverflow.com/questions/47944038/difference-between-objloader-and-objloader2-in-three-js
+    // https://threejs.org/docs/examples/loaders/OBJLoader2.html
+    new THREE.OBJLoader2()
+        .load(path+'testtest5.obj', (event) => {
+            const object = event.detail.loaderRootNode;
+            object.scale.set(0.2, 0.2, 0.2); // for Mora
+            object.position.set(0, 0.5, -1.0);
+            threelet.scene.add(object);
+        });
+
+    // mtl faillllllllllllllllllllllllllllllllllll
+    // new THREE.MTLLoader()
+    //     .setPath(path)
+    //     // .load('male02_dds.mtl', (materials) => { // for material with DDSLoader()
+    //     .load('testtest5.obj', (materials) => { // ?????????
+    //         console.log('@@ materials:', materials);
+    //         materials.preload();
+    //
+    //         new THREE.OBJLoader()
+    //             .setMaterials(materials)
+    //             .setPath(path)
+    //             .load('testtest5.obj', (object) => {
+    //                 object.scale.set(0.2, 0.2, 0.2); // for Mora
+    //                 object.position.set(0, 0.5, -1.0);
+    //                 threelet.scene.add(object);
+    //             });
+    //     });
+}
+
+    const loadModel = async (key) => {
+        modelData[key] = Object.assign({}, dummyEntry); // first, set a cloned dummy
+
+        let scale;
+        let position = hasVR ? [0, 0.5, -1.0] : [0, 0, 1.0];
+        let data = null;
+
+        // TODO list up
+        // scale, position, loadFunc, path, file
+
+        if (key === 'mora') {
+            scale = [0.2, 0.2, 0.2];
+            data = await Threelet.Utils.loadGLTF('../media/welcome-to-mora-animated-gltf/', 'scene.gltf');
+        } else if (key === 'monster') {
+            scale = [0.02, 0.02, 0.02];
+            position = hasVR ? [-0.5, 0.5, -1.0] : [-0.5, 0, 1.0];
+            data = await Threelet.Utils.loadGLTF('../media/Monster/glTF/', 'Monster.gltf');
+        } else if (key === 'samba') {
+            scale = [0.007, 0.007, 0.007];
+            data = await Threelet.Utils.loadFBX('../media/Samba Dancing.fbx');
+        } else if (key === 'stormtrooper') {
+            return; // todo !!!!!!!!!!!
+        } else {
+            return;
+        }
+
+        modelData[key] = data;
+        if (key === 'monster') {
+            // https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_gltf_extensions.html
+            // There's .3333 seconds junk at the tail of the Monster animation that
+            // keeps it from looping cleanly. Clip it at 3 seconds
+            for (let anim of data.raw.animations) anim.duration = 3;
+        }
+        data.object.scale.set(...scale);
+        data.object.position.set(...position);
+        threelet.scene.add(data.object);
+    };
+
+    const updateModel = (key) => {
+        document.getElementById('controls').style.display = 'inherit';
+
+        if (key === keyLast) return;
+        modelData[keyLast].object.visible = false;
+        keyLast = key;
+
+        if (modelData[key]) {
+            modelData[key].object.visible = true;
+        } else {
+            loadModel(key);
+        }
+    };
+
+    for (let btn of document.getElementById('buttons').children) {
+        btn.addEventListener('click', (e) => updateModel(btn.id));
+    }
+    updateModel('mora'); // default
+    // updateModel('monster'); // default
+
+    const cube = Threelet.Utils.createTestCube([0.4, 0.1, 0.4], 0xff00ff);
+    threelet.scene.add(cube);
+
+    threelet.update = (t, dt) => {
+        cube.position.set(Math.cos(t), 0.5, Math.sin(t)-1.5);
+
+        const { mixer } = modelData[keyLast];
+        if (mixer !== null && !animPaused) {
+            mixer.update(dt);
+        }
+    };
+
+    threelet.updateLoop(4); // loop with the specified FPS
+    </script>
+</body>
+</html>
