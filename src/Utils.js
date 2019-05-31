@@ -61,7 +61,7 @@ class Utils {
     static loadCollada(path, cb) {
         // https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_collada_skinning.html
         const loader = new THREE.ColladaLoader();
-        const onLoaded = (collada, _cb) => {
+        const filter = collada => {
             const object = collada.scene;
             console.log('@@ object:', object);
             object.traverse(node => {
@@ -72,9 +72,9 @@ class Utils {
                     // node.material.wireframe = true; // @@ debug
                 }
             });
-            _cb(Utils._resolveAnimations(object, collada));
+            return [object, collada];
         };
-        return Utils._returnModelData(loader, path, onLoaded, cb);
+        return Utils.fetchModelData(loader, path, filter, cb);
     }
 
     // <script src="../deps/inflate.min.js"></script>
@@ -82,7 +82,7 @@ class Utils {
     static loadFBX(path, cb=null) {
         // https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_fbx.html
         const loader = new THREE.FBXLoader();
-        const onLoaded = (object, _cb) => {
+        const filter = object => {
             console.log('@@ object:', object);
             object.traverse(node => {
                 if (node.isMesh) {
@@ -90,15 +90,15 @@ class Utils {
                     node.receiveShadow = true;
                 }
             });
-            _cb(Utils._resolveAnimations(object, object));
+            return [object, object];
         };
-        return Utils._returnModelData(loader, path, onLoaded, cb);
+        return Utils.fetchModelData(loader, path, filter, cb);
     }
 
     // <script src="../deps/GLTFLoader.js"></script>
     static loadGLTF(path, file, cb=null) {
         const loader = new THREE.GLTFLoader().setPath(path);
-        const onLoaded = (gltf, _cb) => {
+        const filter = gltf => {
             console.log('@@ gltf:', gltf);
             const object = gltf.scene;
             object.traverse(node => {
@@ -106,16 +106,23 @@ class Utils {
                 //     node.material.envMap = envMap;
                 // }
             });
-            _cb(Utils._resolveAnimations(object, gltf));
+            return [object, gltf];
         };
-        return Utils._returnModelData(loader, file, onLoaded, cb);
+        return Utils.fetchModelData(loader, file, filter, cb);
     }
 
-    static _returnModelData(loader, file, onLoaded, cb) {
-        return cb ? loader.load(file, raw => onLoaded(raw, cb)) :
-            new Promise((res, rej) => {
-                loader.load(file, raw => onLoaded(raw, res));
-            });
+    // filter: raw => [object, raw]
+    static fetchModelData(loader, file, filter, cb, cbError=null) {
+        // e.g. https://threejs.org/docs/#examples/loaders/GLTFLoader
+        const doLoad = (url, onLoaded, onProgress, onError) => {
+            loader.load(url,
+                raw => onLoaded(Utils._resolveAnimations(...filter(raw))),
+                onProgress, // (xhr) => {}
+                onError); // (error) => {}
+        };
+        return cb ?
+            doLoad(file, cb, null, cbError) :
+            new Promise((res, rej) => doLoad(file, res, null, rej));
     }
 
     // https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_gltf_extensions.html

@@ -19,7 +19,7 @@
     <hr />
     <div id="viewer"></div>
     <div id="controls" style="display: none;">
-        animation controls: <button id="btnPauseResume"></button>
+        model animation: <button id="btnPauseResume"></button>
     </div>
     <div id="info">
         info .......
@@ -164,32 +164,53 @@ if (0) {
     //     });
 }
 
+    const { loadGLTF, loadFBX, loadCollada } = Threelet.Utils;
+    const posDefault = hasVR ? [0, 0.5, -1.0] : [0, 0, 1.0];
+    const rotDefault = [0, 0, 0];
+    const catalog = {
+        mora: {
+            path: '../media/welcome-to-mora-animated-gltf/',
+            file: 'scene.gltf',
+            load: loadGLTF,
+            scale: [0.2, 0.2, 0.2],
+            position: posDefault,
+            rotation: rotDefault,
+        },
+        monster: {
+            path: '../media/Monster/glTF/',
+            file: 'Monster.gltf',
+            load: loadGLTF,
+            scale: [0.02, 0.02, 0.02],
+            position: hasVR ? [-0.5, 0.5, -1.0] : [-0.5, 0, 1.0],
+            rotation: rotDefault,
+        },
+        samba: {
+            path: '../media/Samba Dancing.fbx',
+            file: '',
+            load: loadFBX,
+            scale: [0.007, 0.007, 0.007],
+            position: posDefault,
+            rotation: rotDefault,
+        },
+        stormtrooper: {
+            path: '../media/stormtrooper/stormtrooper.dae',
+            file: '',
+            load: loadCollada,
+            scale: [0.2, 0.2, 0.2],
+            position: posDefault,
+            rotation: [Math.PI/2, Math.PI, 0],
+        },
+    };
+
     const loadModel = async (key) => {
         modelData[key] = Object.assign({}, dummyEntry); // first, set a cloned dummy
 
-        let scale;
-        let position = hasVR ? [0, 0.5, -1.0] : [0, 0, 1.0];
-        let rotation = [0, 0, 0];
+        const { path, file, load, scale, position, rotation } = catalog[key];
         let data = null;
-
-        // TODO list up
-        // per key: scale, position, rotation, loadFunc, path, file
-
-        if (key === 'mora') {
-            scale = [0.2, 0.2, 0.2];
-            data = await Threelet.Utils.loadGLTF('../media/welcome-to-mora-animated-gltf/', 'scene.gltf');
-        } else if (key === 'monster') {
-            scale = [0.02, 0.02, 0.02];
-            position = hasVR ? [-0.5, 0.5, -1.0] : [-0.5, 0, 1.0];
-            data = await Threelet.Utils.loadGLTF('../media/Monster/glTF/', 'Monster.gltf');
-        } else if (key === 'samba') {
-            scale = [0.007, 0.007, 0.007];
-            data = await Threelet.Utils.loadFBX('../media/Samba Dancing.fbx');
-        } else if (key === 'stormtrooper') {
-            scale = [0.2, 0.2, 0.2];
-            rotation = [Math.PI/2, Math.PI, 0];
-            data = await Threelet.Utils.loadCollada('../media/stormtrooper/stormtrooper.dae');
-        } else {
+        try {
+            data = await load(path, file);
+        } catch (ex) {
+            console.log('ex:', ex);
             return;
         }
 
