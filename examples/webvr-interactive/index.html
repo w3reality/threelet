@@ -93,10 +93,10 @@ interactive VR app
 
     let avatar = null;
     let mixer = null;
-    Threelet.Utils.loadCollada('./media/stormtrooper.dae', (_avatar, _mixer) => {
-        _avatar.scale.set(0.4, 0.4, 0.4);
-        avatar = _avatar;
-        mixer = _mixer;
+    Threelet.Utils.loadCollada('./media/stormtrooper.dae', data => {
+        data.object.scale.set(0.4, 0.4, 0.4);
+        avatar = data.object;
+        mixer = data.mixer;
     });
 
     //

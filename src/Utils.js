@@ -61,9 +61,9 @@ class Utils {
     static loadCollada(path, cb) {
         // https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_collada_skinning.html
         const loader = new THREE.ColladaLoader();
-        loader.load(path, collada => {
+        const onLoaded = (collada, _cb) => {
             const object = collada.scene;
-            console.log('@@ collada.object:', object);
+            console.log('@@ object:', object);
             object.traverse(node => {
                 // console.log('@@ node:', node);
                 // console.log('@@ node.type:', node.type);
@@ -72,8 +72,9 @@ class Utils {
                     // node.material.wireframe = true; // @@ debug
                 }
             });
-            Utils._resolveAnimations(object, collada, cb);
-        });
+            _cb(Utils._resolveAnimations(object, collada));
+        };
+        return Utils._returnModelData(loader, path, onLoaded, cb);
     }
 
     // <script src="../deps/inflate.min.js"></script>
@@ -91,7 +92,7 @@ class Utils {
             });
             _cb(Utils._resolveAnimations(object, object));
         };
-        return Utils._out(loader, path, onLoaded, cb);
+        return Utils._returnModelData(loader, path, onLoaded, cb);
     }
 
     // <script src="../deps/GLTFLoader.js"></script>
@@ -107,10 +108,10 @@ class Utils {
             });
             _cb(Utils._resolveAnimations(object, gltf));
         };
-        return Utils._out(loader, file, onLoaded, cb);
+        return Utils._returnModelData(loader, file, onLoaded, cb);
     }
 
-    static _out(loader, file, onLoaded, cb) {
+    static _returnModelData(loader, file, onLoaded, cb) {
         return cb ? loader.load(file, raw => onLoaded(raw, cb)) :
             new Promise((res, rej) => {
                 loader.load(file, raw => onLoaded(raw, res));
@@ -130,7 +131,7 @@ class Utils {
             }
         }
         console.log('@@ actions:', actions);
-        return { // out
+        return { // modelData
             object: object,
             mixer: mixer,
             actions: actions,

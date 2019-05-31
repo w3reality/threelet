@@ -28,11 +28,14 @@
     <!-- <script src="../deps/three-debug.js"></script> -->
     <script src="../deps/three.min.js"></script>
 
+    <script src="../deps/GLTFLoader.js"></script>
+
     <script src="../deps/inflate.min.js"></script>
     <!-- <script src="../deps/FBXLoader-debug.js"></script> -->
     <script src="../deps/FBXLoader.js"></script>
 
-    <script src="../deps/GLTFLoader.js"></script>
+    <script src="../deps/ColladaLoader.js"></script>
+
     <script src="../deps/MTLLoader.js"></script>
     <script src="../deps/OBJLoader.js"></script>
 
@@ -166,10 +169,11 @@ if (0) {
 
         let scale;
         let position = hasVR ? [0, 0.5, -1.0] : [0, 0, 1.0];
+        let rotation = [0, 0, 0];
         let data = null;
 
         // TODO list up
-        // per key: scale, position, loadFunc, path, file
+        // per key: scale, position, rotation, loadFunc, path, file
 
         if (key === 'mora') {
             scale = [0.2, 0.2, 0.2];
@@ -182,7 +186,9 @@ if (0) {
             scale = [0.007, 0.007, 0.007];
             data = await Threelet.Utils.loadFBX('../media/Samba Dancing.fbx');
         } else if (key === 'stormtrooper') {
-            return; // todo !!!!!!!!!!!
+            scale = [0.2, 0.2, 0.2];
+            rotation = [Math.PI/2, Math.PI, 0];
+            data = await Threelet.Utils.loadCollada('../media/stormtrooper/stormtrooper.dae');
         } else {
             return;
         }
@@ -196,6 +202,7 @@ if (0) {
         }
         data.object.scale.set(...scale);
         data.object.position.set(...position);
+        data.object.rotation.set(...rotation);
         threelet.scene.add(data.object);
     };
 
