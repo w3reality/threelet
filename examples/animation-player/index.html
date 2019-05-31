@@ -169,33 +169,31 @@ if (0) {
     const rotDefault = [0, 0, 0];
     const catalog = {
         mora: {
+            load: loadGLTF,
             path: '../media/welcome-to-mora-animated-gltf/',
             file: 'scene.gltf',
-            load: loadGLTF,
             scale: [0.2, 0.2, 0.2],
             position: posDefault,
             rotation: rotDefault,
         },
         monster: {
+            load: loadGLTF,
             path: '../media/Monster/glTF/',
             file: 'Monster.gltf',
-            load: loadGLTF,
             scale: [0.02, 0.02, 0.02],
             position: hasVR ? [-0.5, 0.5, -1.0] : [-0.5, 0, 1.0],
             rotation: rotDefault,
         },
         samba: {
-            path: '../media/Samba Dancing.fbx',
-            file: '',
             load: loadFBX,
+            path: '../media/Samba Dancing.fbx',
             scale: [0.007, 0.007, 0.007],
             position: posDefault,
             rotation: rotDefault,
         },
         stormtrooper: {
-            path: '../media/stormtrooper/stormtrooper.dae',
-            file: '',
             load: loadCollada,
+            path: '../media/stormtrooper/stormtrooper.dae',
             scale: [0.2, 0.2, 0.2],
             position: posDefault,
             rotation: [Math.PI/2, Math.PI, 0],
@@ -205,12 +203,15 @@ if (0) {
     const loadModel = async (key) => {
         modelData[key] = Object.assign({}, dummyEntry); // first, set a cloned dummy
 
-        const { path, file, load, scale, position, rotation } = catalog[key];
+        const { load, path, file, scale, position, rotation } = catalog[key];
         let data = null;
         try {
-            data = await load(path, file);
+            data = (load === loadGLTF) ?
+                await load(path, file) : // loadGLTF
+                await load(path); // loadCollada, loadFBX
+            // console.log('@@ data:', data);
         } catch (ex) {
-            console.log('ex:', ex);
+            console.log('@@ ex:', ex);
             return;
         }
 

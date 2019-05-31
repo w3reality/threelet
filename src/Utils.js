@@ -58,7 +58,7 @@ class Utils {
 
 
     // <script src="../deps/ColladaLoader.js"></script>
-    static loadCollada(path, cb) {
+    static loadCollada(path, cb=null) {
         // https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_collada_skinning.html
         const loader = new THREE.ColladaLoader();
         const filter = collada => {
@@ -112,7 +112,7 @@ class Utils {
     }
 
     // filter: raw => [object, raw]
-    static fetchModelData(loader, file, filter, cb, cbError=null) {
+    static fetchModelData(loader, file, filter, cb=null, cbError=null) {
         // e.g. https://threejs.org/docs/#examples/loaders/GLTFLoader
         const doLoad = (url, onLoaded, onProgress, onError) => {
             loader.load(url,
@@ -120,6 +120,7 @@ class Utils {
                 onProgress, // (xhr) => {}
                 onError); // (error) => {}
         };
+        // console.log('@@ cb:', cb, cb ? 1 : 0);
         return cb ?
             doLoad(file, cb, null, cbError) :
             new Promise((res, rej) => doLoad(file, res, null, rej));
