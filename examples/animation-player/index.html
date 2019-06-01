@@ -6,8 +6,7 @@
 </head>
 <body>
     <div>
-        Animation Player
-        <a href="https://github.com/w3reality/threelet/tree/master/examples/animation-player/index.html">source code</a>
+        Animation Player <a href="https://github.com/w3reality/threelet/tree/master/examples/animation-player/index.html">source code</a>
     </div>
     <hr />
     <div id="buttons">
@@ -17,33 +16,36 @@
         <button id="stormtrooper">Dancing Stormtrooper (Collada)</button>
     </div>
     <hr />
-    <div id="viewer"></div>
     <div id="controls" style="display: none;">
         model animation: <button id="btnPauseResume"></button>
     </div>
-    <div id="info">
-        info .......
+    <hr />
+    <div id="viewer"></div>
+    <div id="info" style="display: none;">
+        <div id="info-mora">
+            Credits: Welcome to Mora - Animated by <a href="https://sketchfab.com/ediediedi" target="_blank" rel="noopener">ediediedi</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC Attribution</a>
+        </div>
+        <div id="info-monster">
+            Credits: Model from: <a href="http://www.3drt.com/downloads.htm" target="_blank" rel="noopener">www.3drt.com</a>
+        </div>
+        <div id="info-samba">
+            Credits: Character and animation from <a href="https://www.mixamo.com/" target="_blank" rel="noopener">Mixamo</a>
+        </div>
+        <div id="info-stormtrooper">
+            Credits: Dancing Stormtrooper by <a href="https://sketchfab.com/strykerdoesgames" target="_blank" rel="noopener">StrykerDoesAnimation</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC Attribution</a>
+        </div>
     </div>
 
-    <!-- <script src="../deps/three-debug.js"></script> -->
     <script src="../deps/three.min.js"></script>
 
     <script src="../deps/GLTFLoader.js"></script>
 
     <script src="../deps/inflate.min.js"></script>
-    <!-- <script src="../deps/FBXLoader-debug.js"></script> -->
     <script src="../deps/FBXLoader.js"></script>
 
     <script src="../deps/ColladaLoader.js"></script>
 
-    <script src="../deps/MTLLoader.js"></script>
-    <script src="../deps/OBJLoader.js"></script>
-
-    <script src="../deps/LoaderSupport.js"></script>
-    <script src="../deps/OBJLoader2.js"></script>
-
     <script src="../deps/OrbitControls.js"></script>
-
     <script src="../deps/stats.min.js"></script>
     <script src="../deps/Sky.js"></script>
     <script src="../deps/WebVR.js"></script>
@@ -105,95 +107,34 @@
         setBtnText(animPaused);
     });
 
-if (0) {
-	// Character and animation from <a href="https://www.mixamo.com/" target="_blank" rel="noopener">Mixamo</a>
-    const path = '../media/Samba Dancing.fbx';
-
-    // const path = '../media/welcome-to-mora-animated/robot_animation.fbx';
-    // !!!! seeing errors about matrix inversion...; try gltf version instead.
-    // faillllllllllllllllllllllllllllllllllll
-    //
-    // det === 0 without scaling; mo
-    // @@ me: (9) [0, 0, 0, 0, 0, 0, 0, 0, 0] for polySurface161
-    // https://stackoverflow.com/questions/19150120/scaling-an-object-in-three-js/33918318#33918318
-    // script src="../deps/three-debug.js"
-    // script src="../deps/inflate.min.js"
-    // script src="../deps/FBXLoader-debug.js"
-
-    Threelet.Utils.loadFBX(path, (_obj, _mixer) => {
-        _obj.scale.set(0.007, 0.007, 0.007);
-        if (hasVR) _obj.position.z = -1.5;
-        //----
-        // _obj.scale.set(0.1, 0.1, 0.1);
-
-        threelet.scene.add(_obj);
-        mixer = _mixer;
-    });
-}
-
-if (0) {
-    const path = '../media/welcome-to-mora/';
-
-    // mtl faillllllllllllllllllllllllllllllllllll
-    // https://stackoverflow.com/questions/47944038/difference-between-objloader-and-objloader2-in-three-js
-    // https://threejs.org/docs/examples/loaders/OBJLoader2.html
-    new THREE.OBJLoader2()
-        .load(path+'testtest5.obj', (event) => {
-            const object = event.detail.loaderRootNode;
-            object.scale.set(0.2, 0.2, 0.2); // for Mora
-            object.position.set(0, 0.5, -1.0);
-            threelet.scene.add(object);
-        });
-
-    // mtl faillllllllllllllllllllllllllllllllllll
-    // new THREE.MTLLoader()
-    //     .setPath(path)
-    //     // .load('male02_dds.mtl', (materials) => { // for material with DDSLoader()
-    //     .load('testtest5.obj', (materials) => { // ?????????
-    //         console.log('@@ materials:', materials);
-    //         materials.preload();
-    //
-    //         new THREE.OBJLoader()
-    //             .setMaterials(materials)
-    //             .setPath(path)
-    //             .load('testtest5.obj', (object) => {
-    //                 object.scale.set(0.2, 0.2, 0.2); // for Mora
-    //                 object.position.set(0, 0.5, -1.0);
-    //                 threelet.scene.add(object);
-    //             });
-    //     });
-}
-
     const { loadGLTF, loadFBX, loadCollada } = Threelet.Utils;
     const posDefault = hasVR ? [0, 0.5, -1.0] : [0, 0, 1.0];
     const rotDefault = [0, 0, 0];
     const catalog = {
         mora: {
             load: loadGLTF,
-            path: '../media/welcome-to-mora-animated-gltf/',
-            file: 'scene.gltf',
+            pathFile: ['../media/welcome-to-mora-animated-gltf/', 'scene.gltf'],
             scale: [0.2, 0.2, 0.2],
             position: posDefault,
             rotation: rotDefault,
         },
         monster: {
             load: loadGLTF,
-            path: '../media/Monster/glTF/',
-            file: 'Monster.gltf',
+            pathFile: ['../media/Monster/glTF/', 'Monster.gltf'],
             scale: [0.02, 0.02, 0.02],
             position: hasVR ? [-0.5, 0.5, -1.0] : [-0.5, 0, 1.0],
             rotation: rotDefault,
         },
         samba: {
             load: loadFBX,
-            path: '../media/Samba Dancing.fbx',
+            pathFile: ['../media/samba-dancing/Samba Dancing.fbx'],
             scale: [0.007, 0.007, 0.007],
             position: posDefault,
             rotation: rotDefault,
         },
         stormtrooper: {
             load: loadCollada,
-            path: '../media/stormtrooper/stormtrooper.dae',
+            pathFile: ['../media/stormtrooper/stormtrooper.dae'],
             scale: [0.2, 0.2, 0.2],
             position: posDefault,
             rotation: [Math.PI/2, Math.PI, 0],
@@ -203,15 +144,13 @@ if (0) {
     const loadModel = async (key) => {
         modelData[key] = Object.assign({}, dummyEntry); // first, set a cloned dummy
 
-        const { load, path, file, scale, position, rotation } = catalog[key];
+        const { load, pathFile, scale, position, rotation } = catalog[key];
         let data = null;
         try {
-            data = (load === loadGLTF) ?
-                await load(path, file) : // loadGLTF
-                await load(path); // loadCollada, loadFBX
+            data = await load(...pathFile);
             // console.log('@@ data:', data);
         } catch (ex) {
-            console.log('@@ ex:', ex);
+            console.log('@@ caught ex:', ex);
             return;
         }
 
@@ -231,6 +170,15 @@ if (0) {
     const updateModel = (key) => {
         document.getElementById('controls').style.display = 'inherit';
 
+        const divInfo = document.getElementById('info');
+        divInfo.style.display = 'inherit';
+        for (let div of divInfo.children) {
+            div.style.display = 'none';
+            if (div.id === `info-${key}`) {
+                div.style.display = 'inherit';
+            }
+        }
+
         if (key === keyLast) return;
         modelData[keyLast].object.visible = false;
         keyLast = key;
@@ -246,7 +194,6 @@ if (0) {
         btn.addEventListener('click', (e) => updateModel(btn.id));
     }
     updateModel('mora'); // default
-    // updateModel('monster'); // default
 
     const cube = Threelet.Utils.createTestCube([0.4, 0.1, 0.4], 0xff00ff);
     threelet.scene.add(cube);

@@ -27,6 +27,8 @@ Some notable features include:
 
 - Embedding multiple independent viewers into a web page. [ `live <https://w3reality.github.io/threelet/examples/embed-multiple/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/embed-multiple/index.html>`__ ]
 
+- Animation player (glTF, FBX, Collada). [ `live <https://w3reality.github.io/threelet/examples/animation-player/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/animation-player/index.html>`__ ]
+
 .. image:: https://w3reality.github.io/threelet/examples/simple-dynamic/index.jpg
      :target: https://w3reality.github.io/threelet/examples/simple-dynamic/index.html
 
