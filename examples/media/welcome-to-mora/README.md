@@ -1,0 +1,1 @@
+Welcome to Mora by <a href="https://sketchfab.com/ediediedi" target="_blank" rel="noopener">ediediedi</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC Attribution</a>
