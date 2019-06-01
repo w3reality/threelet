@@ -50,10 +50,10 @@
     <script src="../deps/Sky.js"></script>
     <script src="../deps/WebVR.js"></script>
 
-    <!-- <script src="../../dist/threelet.min.js"></script> -->
+    <script src="../../dist/threelet.min.js"></script>
     <!-- ==== prod/dev ==== -->
     <script type="module">
-    import Threelet from '../../src/index.js';
+    // import Threelet from '../../src/index.js';
 
     const hasVR = Threelet.isVrSupported();
     const threelet = new Threelet({
@@ -207,7 +207,7 @@
         }
     };
 
-    threelet.updateLoop(4); // loop with the specified FPS
+    threelet.updateLoop(20); // loop with the specified FPS
     </script>
 </body>
 </html>
