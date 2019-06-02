@@ -12,11 +12,9 @@ Some notable features include:
 **demos**
 
 - Hello world (with the default axes and a unit lattice) [ `live <https://w3reality.github.io/threelet/examples/simple/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple/index.html>`__ | `Observable <https://observablehq.com/@j-devel/hello-world-with-threelet>`__ ]
-
 - Hello VR world [ `live <https://w3reality.github.io/threelet/examples/simple-webvr/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple-webvr/index.html>`__ | `Observable <https://observablehq.com/@j-devel/hello-world-with-threelet/2>`__ ]
 
 - App with a static scene (mouse-event driven passive rendering) [ `live <https://w3reality.github.io/threelet/examples/simple-static/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple-static/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-a-static-3d-app>`__ ]
-
 - App with a dynamic scene (rendering at 30 fps) [ `live <https://w3reality.github.io/threelet/examples/simple-dynamic/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple-dynamic/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-a-dynamic-3d-app>`__ ]
 
 - WebVR controller state visualizer [ `live <https://w3reality.github.io/threelet/examples/webvr-controllers/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-controllers>`__ ]
@@ -24,9 +22,9 @@ Some notable features include:
 - VR app with interactive objects [ `live <https://w3reality.github.io/threelet/examples/webvr-interactive/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-interactive/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-an-interactive-vr-app>`__ ]
 
 - Embedding a 3D viewer into a web page. [ `live <https://w3reality.github.io/threelet/examples/embed-inline-block/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/embed-inline-block/index.html>`__ ]
-
 - Embedding multiple independent viewers into a web page. [ `live <https://w3reality.github.io/threelet/examples/embed-multiple/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/embed-multiple/index.html>`__ ]
 
+- Hello glTF animation. [ `live <https://w3reality.github.io/threelet/examples/animation-hello/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/animation-hello/index.html>`__ ]
 - Animation player demo (with glTF, FBX and Collada models). [ `live <https://w3reality.github.io/threelet/examples/animation-player/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/animation-player/index.html>`__ ]
 
 .. image:: https://w3reality.github.io/threelet/examples/simple-dynamic/index.jpg

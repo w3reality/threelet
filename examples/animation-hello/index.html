@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>animation-hello</title>
+</head>
+<body>
+    <div>
+        Hello glTF animation.
+        <a href="https://github.com/w3reality/threelet/tree/master/examples/animation-hello/index.html">source code</a>
+    </div>
+    <hr />
+
+    <div id="viewer"></div>
+
+    <script src="../deps/three.min.js"></script>
+    <script src="../deps/OrbitControls.js"></script>
+    <script src="../deps/stats.min.js"></script>
+    <script src="../deps/WebVR.js"></script>
+    <script src="../deps/GLTFLoader.js"></script>
+
+    <script src="../../dist/threelet.min.js"></script>
+    <!-- ==== prod/dev ==== -->
+    <script type="module">
+    // import Threelet from '../../src/index.js';
+
+    const threelet = new Threelet({width: 800, height: 480});
+    threelet.setup('mod-controls', THREE.OrbitControls);
+    threelet.setup('mod-webvr', window.WEBVR);
+    threelet.setup('mod-stats', window.Stats, {panelType: 0});
+    document.getElementById('viewer').appendChild(threelet.domElement);
+
+    threelet.scene.add(Threelet.Utils.createTestHemisphereLight());
+    threelet.scene.add(Threelet.Utils.createTestDirectionalLight());
+
+    const pos = Threelet.isVrSupported() ? [0, 0.5, -1.0] : [0, 0, 1.0];
+    const scale = [0.2, 0.2, 0.2];
+    let mixer = null;
+    Threelet.Utils.loadGLTF('../media/welcome-to-mora-animated-gltf/', 'scene.gltf', data => {
+        console.log('@@ data:', data);
+        mixer = data.mixer;
+        const obj = data.object;
+        obj.position.set(...pos);
+        obj.scale.set(...scale);
+        threelet.scene.add(obj);
+    });
+
+    threelet.update = (t, dt) => {
+        if (mixer) mixer.update(dt);
+    };
+
+    threelet.updateLoop(10); // loop with the spcified FPS
+    </script>
+</body>
+</html>
