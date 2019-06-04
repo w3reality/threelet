@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>vr-casting-in-window</title>
+</head>
+<body>
+    <canvas id="canvas" style="width: 480px; height: 320px;"></canvas>
+    <canvas id="canvasCaster" style="width: 512px; height: 256px;"></canvas>
+
+    <script src="../deps/stats.min.js"></script>
+    <script src="../deps/three.min.js"></script>
+    <script src="../deps/OrbitControls.js"></script>
+    <script src="../deps/WebVR.js"></script>
+    <script src="../deps/Sky.js"></script>
+
+    <!-- <script src="../../dist/threelet.min.js"></script> -->
+    <!-- ==== prod/dev ==== -->
+    <script type="module">
+    import Threelet from '../../src/index.js';
+
+    const createDataSprite = (texData, shape, pixelsPerUnit=512) => {
+        const mat = new THREE.SpriteMaterial({
+            map: new THREE.DataTexture(texData, ...shape, THREE.RGBAFormat),
+            // opacity: 0.7,
+            color: 0xffffff,
+        });
+        // console.log('@@ map:', mat.map);
+        mat.map.needsUpdate = true;
+
+        const sp = new THREE.Sprite(mat);
+        sp.scale.set(shape[0]/pixelsPerUnit, shape[1]/pixelsPerUnit, 1.0);
+        return sp;
+    };
+
+    //
+
+    const threeletCaster = new Threelet({
+        canvas: document.getElementById("canvasCaster"),
+    });
+    threeletCaster.setup('mod-controls', THREE.OrbitControls);
+    threeletCaster.setup('mod-stats', window.Stats, {panelType: 0});
+
+    const cube = Threelet.Utils.createTestCube([0.4, 0.1, 0.4], 0xff00ff);
+    threeletCaster.scene.add(cube);
+
+    //
+
+    const shape = [ threeletCaster.canvas.width, threeletCaster.canvas.height];
+
+    const can2d = document.createElement("canvas");
+    can2d.width = shape[0];
+    can2d.height = shape[1];
+
+    const texData = new Uint8Array(shape[0] * shape[1] * 4);
+    const sp = createDataSprite(texData, shape);
+    const posPanel = Threelet.isVrSupported() ? [0, 0.5, -0.6] : [0, 0.5, 0.6];
+    sp.position.set(...posPanel);
+
+    // https://stackoverflow.com/questions/40137378/three-js-webgl-and-2d-canvas-passing-getimagedata-array-into-three-datatext
+    // https://stackoverflow.com/questions/40273927/read-pixel-information-from-a-webgl-3d-canvas-return-all-0-0-0-255
+    const ctx2d = can2d.getContext("2d");
+
+    let imgData = null;
+    let hasNewImgData = false;
+    threeletCaster.update = (t, dt) => {
+        cube.position.set(Math.cos(t), 0.5, Math.sin(t)-1.5);
+
+        threeletCaster.render(); // make sure image is avail; https://stackoverflow.com/questions/30628064/how-to-toggle-preservedrawingbuffer-in-three-js
+        ctx2d.drawImage(threeletCaster.canvas, 0, 0);
+        // if (t > 2 && t < 3) { console.log(can2d.toDataURL('image/png')); }
+        imgData = ctx2d.getImageData(0, 0, 512, 256);
+        hasNewImgData = true;
+    };
+    threeletCaster.updateLoop(3); // loop with the spcified FPS
+
+    //
+
+    const threelet = new Threelet({
+        canvas: document.getElementById("canvas"),
+        optCameraPosition: [0, 1, 1.2],
+    });
+
+    threelet.setup('mod-controls', THREE.OrbitControls);
+    threelet.setup('mod-stats', window.Stats, {panelType: 0}); // 0: fps, 1: ms, 2: mb, 3+: custom
+    threelet.setup('mod-webvr', window.WEBVR);
+    threelet.setup('mod-sky', THREE.Sky);
+
+    threelet.enableInteractiveGroup('drag');
+    const group = threelet.getInteractiveGroup();
+    group.add(sp);
+    threelet.scene.add(group);
+
+    threelet.update = (t, dt) => {
+        console.log('@@ check hasNewImgData:', hasNewImgData);
+        if (hasNewImgData) {
+            hasNewImgData = false;
+            // https://github.com/KhronosGroup/WebGL/issues/1533
+            texData.set(new Uint8Array(imgData.data.buffer));
+            sp.material.map.needsUpdate = true;
+        }
+    };
+    threelet.updateLoop(4);
+
+    </script>
+</body>
+</html>
