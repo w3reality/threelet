@@ -14,10 +14,10 @@
     <script src="../deps/WebVR.js"></script>
     <script src="../deps/Sky.js"></script>
 
-    <!-- <script src="../../dist/threelet.min.js"></script> -->
+    <script src="../../dist/threelet.min.js"></script>
     <!-- ==== prod/dev ==== -->
     <script type="module">
-    import Threelet from '../../src/index.js';
+    // import Threelet from '../../src/index.js';
 
     const createDataSprite = (texData, shape, pixelsPerUnit=512) => {
         const mat = new THREE.SpriteMaterial({
@@ -66,7 +66,6 @@
     threeletCaster.update = (t, dt) => {
         cube.position.set(Math.cos(t), 0.5, Math.sin(t)-1.5);
 
-        threeletCaster.render(); // make sure image is avail; https://stackoverflow.com/questions/30628064/how-to-toggle-preservedrawingbuffer-in-three-js
         ctx2d.drawImage(threeletCaster.canvas, 0, 0);
         // if (t > 2 && t < 3) { console.log(can2d.toDataURL('image/png')); }
         imgData = ctx2d.getImageData(0, 0, 512, 256);
@@ -92,7 +91,7 @@
     threelet.scene.add(group);
 
     threelet.update = (t, dt) => {
-        console.log('@@ check hasNewImgData:', hasNewImgData);
+        // console.log('@@ check hasNewImgData:', hasNewImgData);
         if (hasNewImgData) {
             hasNewImgData = false;
             // https://github.com/KhronosGroup/WebGL/issues/1533

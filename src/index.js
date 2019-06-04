@@ -345,10 +345,10 @@ class Threelet {
                     return this.updateLoop(this.fpsDesktopLast);
                 }
 
+                this.render(true);
                 this.updateMechanics();
                 this._vrcHelper.intersectObjects();
                 this._vrcHelper.updateControllers();
-                this.render(true);
             });
             return;
         }
@@ -356,8 +356,8 @@ class Threelet {
         // FIXME for this naive dev version, not looping with rAF()...
         this.fpsDesktopLast = fps;
         this.iid = setInterval(() => {
+            this.render(); // make sure image dump is available; https://stackoverflow.com/questions/30628064/how-to-toggle-preservedrawingbuffer-in-three-js
             this.updateMechanics();
-            this.render();
         }, 1000/fps);
         // console.log('@@ updateLoop(): new interval:', this.iid);
     }
