@@ -9,7 +9,7 @@ Some notable features include:
 - built-in render loop manager, and
 - mouse/vr-controller event handlers.
 
-**basic demos**
+**Basic demos**
 
 - Hello world (with the default axes and a unit lattice) [ `live <https://w3reality.github.io/threelet/examples/simple/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple/index.html>`__ | `Observable <https://observablehq.com/@j-devel/hello-world-with-threelet>`__ ]
 - Hello VR world [ `live <https://w3reality.github.io/threelet/examples/simple-webvr/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple-webvr/index.html>`__ | `Observable <https://observablehq.com/@j-devel/hello-world-with-threelet/2>`__ ]
@@ -22,7 +22,7 @@ Some notable features include:
 
 - Hello glTF animation. [ `live <https://w3reality.github.io/threelet/examples/animation-hello/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/animation-hello/index.html>`__ ]
 
-**app demos**
+**App demos**
 
 - VR app with interactive objects [ `live <https://w3reality.github.io/threelet/examples/webvr-interactive/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-interactive/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-an-interactive-vr-app>`__ ]
 
@@ -32,7 +32,7 @@ Some notable features include:
 
 - In-window VR casting. [ `live <https://w3reality.github.io/threelet/examples/vr-casting-in-window/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/vr-casting-in-window/index.html>`__ ]
 
-**screenshots**
+**Screenshots**
 
 - `App with a dynamic scene <https://w3reality.github.io/threelet/examples/simple-dynamic/index.html>`__
     .. image:: https://w3reality.github.io/threelet/examples/simple-dynamic/index.jpg
