@@ -5,9 +5,9 @@ threelet
 It can be also used as a 3D app framework for rapidly making dynamic desktop/VR applications.
 Some notable features include:
 
-- 3D scene update interface,
-- built-in render loop manager, and
-- mouse/vr-controller event handlers.
+- 3D scene programming interface,
+- built-in render loop manager (with auto VR context switching), and
+- simple mouse/vr-controller event handlers.
 
 **Basic demos**
 
@@ -125,7 +125,7 @@ More usage
 
     threelet.scene.add(myObject) // add an object to the scene
 
-render modes (passive, active, and fps-throttled) by the built-in loop controller:
+specifying render modes (passive, active, and fps-throttled) by the built-in loop controller:
 
 .. code:: js
 
@@ -133,7 +133,7 @@ render modes (passive, active, and fps-throttled) by the built-in loop controlle
 
     threelet.render(); // atomic render manually
 
-scene mechanics handler:
+programming 3D scene dynamics (`example <https://w3reality.github.io/threelet/examples/simple-dynamic/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple-dynamic/index.html>`__):
 
 .. code:: js
 
