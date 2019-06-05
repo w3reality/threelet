@@ -215,15 +215,38 @@ div element (``threelet.domElement``) that is ready to be embedded into a web pa
 
     threelet.on(eventName, null);
 
-**Utils**
-
-raycasting:
+**Raycasting**
 
 .. code:: js
 
     threelet.raycast(origin, direction, meshes, recursive=false, faceExclude=null);
     threelet.raycastFromMouse(mx, my, meshes, recursive=false); // mx, my: mouse coordinates
     threelet.raycastFromController(i, meshes, recursive=false); // i: VR controller index
+
+**Utils**
+
+animation loading (`example <https://w3reality.github.io/threelet/examples/animation-hello/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/animation-hello/index.html>`__):
+
+.. code:: js
+
+    // <script src="../deps/GLTFLoader.js"></script>
+    const data = await Threelet.Utils.loadGLTF(path, file);
+
+    // <script src="../deps/inflate.min.js"></script>
+    // <script src="../deps/FBXLoader.js"></script>
+    const data = await Threelet.Utils.loadFBX(path);
+
+    // <script src="../deps/ColladaLoader.js"></script>
+    const data = await Threelet.Utils.loadCollada(path);
+
+creating test THREE objects:
+
+.. code:: js
+
+    const obj = Threelet.Utils.createTestHemisphereLight();
+    const obj = Threelet.Utils.createTestDirectionalLight();
+    const obj = Threelet.Utils.createTestCube(size=[0.4, 0.1, 0.4], color=0xff00ff, wireframe=false);
+    const objs = Threelet.Utils.createTestObjects(offset=[0, 1, -2]);
 
 **Plugin features**
 
