@@ -88,6 +88,7 @@ Hello world
 `live <https://w3reality.github.io/threelet/examples/simple/index.html>`__ | `source code <https://github.com/w3reality/threelet/tree/master/examples/simple/index.html>`__
 
 .. image:: https://w3reality.github.io/threelet/examples/simple/img/threelet.png
+    :target: https://w3reality.github.io/threelet/examples/simple/index.html
 
 More usage
 ----------
