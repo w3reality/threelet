@@ -5,103 +5,145 @@
     <title>vr-casting-in-window</title>
 </head>
 <body>
-    <canvas id="canvas" style="width: 480px; height: 320px;"></canvas>
+    <canvas id="canvasViewer" style="width: 800px; height: 380px;"></canvas>
+    <div>
+        Stylized hand painted scene by <a href="https://sketchfab.com/Sander.Vander.Meiren" target="_blank" rel="noopener">Sander Vander Meiren</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC Attribution</a>
+    </div>
     <canvas id="canvasCaster" style="width: 512px; height: 256px;"></canvas>
+    <div>
+        Dancing Stormtrooper by <a href="https://sketchfab.com/strykerdoesgames" target="_blank" rel="noopener">StrykerDoesAnimation</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC Attribution</a>
+    </div>
 
     <script src="../deps/stats.min.js"></script>
     <script src="../deps/three.min.js"></script>
     <script src="../deps/OrbitControls.js"></script>
     <script src="../deps/WebVR.js"></script>
     <script src="../deps/Sky.js"></script>
+    <script src="../deps/GLTFLoader.js"></script>
 
-    <!-- <script src="../../dist/threelet.min.js"></script> -->
+    <script src="../../dist/threelet.min.js"></script>
     <!-- ==== prod/dev ==== -->
     <script type="module">
-    import Threelet from '../../src/index.js';
+    // import Threelet from '../../src/index.js';
 
-    const createDataSprite = (texData, shape, pixelsPerUnit=512) => {
-        const mat = new THREE.SpriteMaterial({
-            map: new THREE.DataTexture(texData, shape[0], shape[1], THREE.RGBAFormat),
-            // opacity: 0.7,
-            color: 0xffffff,
-        });
-        // console.log('@@ map:', mat.map);
-        mat.map.needsUpdate = true;
+    class Caster extends Threelet {
+        onCreate(params) {
+            this.setup('mod-controls', THREE.OrbitControls);
+            this.setup('mod-stats', window.Stats, {panelType: 0});
 
-        const sp = new THREE.Sprite(mat);
-        sp.scale.set(shape[0]/pixelsPerUnit, shape[1]/pixelsPerUnit, 1.0);
-        return sp;
-    };
+            const cube = Threelet.Utils.createTestCube([0.4, 0.1, 0.4], 0xff00ff);
+            this.scene.add(cube);
 
-    //
+            this.scene.add(new THREE.GridHelper(10, 20));
+            this.scene.add(Threelet.Utils.createTestHemisphereLight());
+            this.scene.add(Threelet.Utils.createTestDirectionalLight());
 
-    const threeletCaster = new Threelet({
-        canvas: document.getElementById("canvasCaster"),
-    });
-    threeletCaster.setup('mod-controls', THREE.OrbitControls);
-    threeletCaster.setup('mod-stats', window.Stats, {panelType: 0});
+            let mixer = null;
+            Threelet.Utils.loadGLTF('../media/dancing-stormtrooper/', 'scene.gltf', data => {
+                console.log('@@ data:', data);
+                mixer = data.mixer;
+                const obj = data.object;
+                obj.scale.set(0.5, 0.5, 0.5);
+                this.scene.add(obj);
+            });
 
-    const cube = Threelet.Utils.createTestCube([0.4, 0.1, 0.4], 0xff00ff);
-    threeletCaster.scene.add(cube);
+            // https://stackoverflow.com/questions/40137378/three-js-webgl-and-2d-canvas-passing-getimagedata-array-into-three-datatext
+            // https://stackoverflow.com/questions/40273927/read-pixel-information-from-a-webgl-3d-canvas-return-all-0-0-0-255
+            const shape = [ this.canvas.width, this.canvas.height, 4];
+            const can2d = document.createElement("canvas");
+            can2d.width = shape[0];
+            can2d.height = shape[1];
+            const ctx2d = can2d.getContext("2d");
 
-    //
+            this.castInfo = {
+                shape: shape,
+                data: null,
+                timeStamp: null,
+            }
 
-    const shape = [ threeletCaster.canvas.width, threeletCaster.canvas.height, 4];
-    const can2d = document.createElement("canvas");
-    can2d.width = shape[0];
-    can2d.height = shape[1];
+            this.update = (t, dt) => {
+                if (mixer) mixer.update(dt);
 
-    const texData = new Uint8Array(shape[0] * shape[1] * shape[2]);
-    const sp = createDataSprite(texData, shape);
-    const posPanel = Threelet.isVrSupported() ? [0, 0.5, -0.6] : [0, 0.5, 0.6];
-    sp.position.set(...posPanel);
+                cube.position.set(Math.cos(t), 0.5, Math.sin(t)-1.5);
 
-    // https://stackoverflow.com/questions/40137378/three-js-webgl-and-2d-canvas-passing-getimagedata-array-into-three-datatext
-    // https://stackoverflow.com/questions/40273927/read-pixel-information-from-a-webgl-3d-canvas-return-all-0-0-0-255
-    const ctx2d = can2d.getContext("2d");
+                ctx2d.drawImage(this.canvas, 0, 0);
+                // if (t > 2 && t < 3) { console.log(can2d.toDataURL('image/png')); }
 
-    let imgData = null;
-    let hasNewImgData = false;
-    threeletCaster.update = (t, dt) => {
-        cube.position.set(Math.cos(t), 0.5, Math.sin(t)-1.5);
-
-        ctx2d.drawImage(threeletCaster.canvas, 0, 0);
-        // if (t > 2 && t < 3) { console.log(can2d.toDataURL('image/png')); }
-
-        // https://github.com/KhronosGroup/WebGL/issues/1533
-        // createDataFlipY(): Uint8ClampedArray -> Uint8Array
-        imgData = Threelet.Utils.createDataFlipY(
-            ctx2d.getImageData(0, 0, shape[0], shape[1]).data, shape);
-        hasNewImgData = true;
-    };
-    threeletCaster.updateLoop(3); // loop with the spcified FPS
-
-    //
-
-    const threelet = new Threelet({
-        canvas: document.getElementById("canvas"),
-        optCameraPosition: [0, 1, 1.2],
-    });
-
-    threelet.setup('mod-controls', THREE.OrbitControls);
-    threelet.setup('mod-stats', window.Stats, {panelType: 0}); // 0: fps, 1: ms, 2: mb, 3+: custom
-    threelet.setup('mod-webvr', window.WEBVR);
-    threelet.setup('mod-sky', THREE.Sky);
-
-    threelet.enableInteractiveGroup('drag');
-    const group = threelet.getInteractiveGroup();
-    group.add(sp);
-    threelet.scene.add(group);
-
-    threelet.update = (t, dt) => {
-        // console.log('@@ check hasNewImgData:', hasNewImgData);
-        if (hasNewImgData) {
-            hasNewImgData = false;
-            texData.set(imgData);
-            sp.material.map.needsUpdate = true;
+                // https://github.com/KhronosGroup/WebGL/issues/1533
+                // createDataFlipY(): Uint8ClampedArray -> Uint8Array
+                this.castInfo.data = Threelet.Utils.createDataFlipY(
+                    ctx2d.getImageData(0, 0, shape[0], shape[1]).data, shape);
+                this.castInfo.timeStamp = t.toString();
+            };
+            this.updateLoop(20); // loop with the spcified FPS
+            // this.updateLoop(2); // debug
         }
-    };
-    threelet.updateLoop(4);
+        getCastInfo() {
+            return this.castInfo;
+        }
+    }
+
+    class Viewer extends Threelet {
+        onCreate(params) {
+            const castInfo = params.castInfo;
+
+            this.setup('mod-controls', THREE.OrbitControls);
+            this.setup('mod-stats', window.Stats, {panelType: 0}); // 0: fps, 1: ms, 2: mb, 3+: custom
+            this.setup('mod-webvr', window.WEBVR);
+            this.setup('mod-sky', THREE.Sky);
+
+            this.enableInteractiveGroup('drag');
+            const group = this.getInteractiveGroup();
+            this.scene.add(group);
+
+            const shape = castInfo.shape;
+            const texData = new Uint8Array(shape[0] * shape[1] * shape[2]);
+            const sp = Threelet.Utils.createDataSprite(texData, shape, 128);
+            sp.position.set(0, 1.0, -3.0);
+            group.add(sp);
+
+            this.scene.add(Threelet.Utils.createTestHemisphereLight());
+            this.scene.add(Threelet.Utils.createTestDirectionalLight());
+
+            let mixer = null;
+            Threelet.Utils.loadGLTF('../media/stylized-hand-painted-scene/', 'scene.gltf', data => {
+                console.log('@@ data:', data);
+                mixer = data.mixer;
+                const obj = data.object;
+                obj.position.set(-5, -3, -5);
+                obj.rotation.set(0, Math.PI, 0);
+                obj.scale.set(0.1, 0.1, 0.1);
+                this.scene.add(obj);
+            });
+
+            let timeStampLast = null;
+            this.update = (t, dt) => {
+                if (mixer) mixer.update(dt);
+
+                // console.log('@@ check castInfo.timeStamp:', castInfo.timeStamp);
+                if (castInfo.timeStamp && castInfo.timeStamp !== timeStampLast) {
+                    timeStampLast = castInfo.timeStamp;
+                    texData.set(castInfo.data);
+                    sp.material.map.needsUpdate = true;
+                } else {
+                    // console.log('@@ no new cast data');
+                }
+            };
+            this.updateLoop(30);
+            // this.updateLoop(3); // debug
+        }
+    }
+
+    const caster = new Caster({
+        canvas: document.getElementById("canvasCaster"),
+        optAxes: false,
+    });
+
+    const viewer = new Viewer({
+        canvas: document.getElementById("canvasViewer"),
+        optAxes: false,
+        castInfo: caster.getCastInfo(),
+    });
 
     </script>
 </body>

@@ -160,6 +160,20 @@ class Utils {
         return out;
     }
 
+    static createDataSprite(texData, shape, pixelsPerUnit=512) {
+        const mat = new THREE.SpriteMaterial({
+            map: new THREE.DataTexture(texData, shape[0], shape[1], THREE.RGBAFormat),
+            // opacity: 0.7,
+            color: 0xffffff,
+        });
+        // console.log('@@ map:', mat.map);
+        mat.map.needsUpdate = true;
+
+        const sp = new THREE.Sprite(mat);
+        sp.scale.set(shape[0]/pixelsPerUnit, shape[1]/pixelsPerUnit, 1.0);
+        return sp;
+    }
+
 
 }
 

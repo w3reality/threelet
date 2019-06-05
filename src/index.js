@@ -1,7 +1,7 @@
 // Threelet - https://github.com/w3reality/threelet
 // A three.js scene viewer with batteries (MIT License)
 
-const __version = "0.9.13dev";
+const __version = "0.9.13";
 
 import VRControlHelper from './VRControlHelper.js';
 import SkyHelper from './SkyHelper.js';
@@ -149,9 +149,9 @@ class Threelet {
             // this.dolly.add(this.camera);
 
         // api
-        this.onCreate();
+        this.onCreate(params);
     }
-    onCreate() {
+    onCreate(params) {
         this.render(); // _first _time
     }
     onDestroy() {
