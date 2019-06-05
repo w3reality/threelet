@@ -40,6 +40,7 @@
     const pos = Threelet.isVrSupported() ? [0, 0.5, -1.0] : [0, 0, 1.0];
     const scale = [0.2, 0.2, 0.2];
     let mixer = null;
+
     Threelet.Utils.loadGLTF('../media/welcome-to-mora-animated-gltf/', 'scene.gltf', data => {
         console.log('@@ data:', data);
         mixer = data.mixer;
@@ -48,6 +49,12 @@
         obj.scale.set(...scale);
         threelet.scene.add(obj);
     });
+    // async/await also supported for the animation loader functions
+    // e.g.
+    // (async () => {
+    //     const data = await Threelet.Utils.loadGLTF(...);
+    //     // ...
+    // })();
 
     threelet.update = (t, dt) => {
         if (mixer) mixer.update(dt);
