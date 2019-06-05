@@ -239,7 +239,7 @@ animation loading (`example <https://w3reality.github.io/threelet/examples/anima
     // <script src="../deps/ColladaLoader.js"></script>
     const data = await Threelet.Utils.loadCollada(path);
 
-creating test THREE objects:
+creating test THREE objects (used in the examples for shortcuts):
 
 .. code:: js
 
