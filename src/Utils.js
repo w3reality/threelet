@@ -146,6 +146,21 @@ class Utils {
             raw: raw,
         };
     }
+
+    static createDataFlipY(data, shape) {
+        const [w, h, size] = shape;
+        const out = new Uint8Array(data.length);
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w * size; x += size) {
+                for (let i = 0; i < size; i++) {
+                    out[(h-1-y) * w * size + x + i] = data[y * w * size + x + i];
+                }
+            }
+        }
+        return out;
+    }
+
+
 }
 
 export default Utils;

@@ -14,14 +14,14 @@
     <script src="../deps/WebVR.js"></script>
     <script src="../deps/Sky.js"></script>
 
-    <script src="../../dist/threelet.min.js"></script>
+    <!-- <script src="../../dist/threelet.min.js"></script> -->
     <!-- ==== prod/dev ==== -->
     <script type="module">
-    // import Threelet from '../../src/index.js';
+    import Threelet from '../../src/index.js';
 
     const createDataSprite = (texData, shape, pixelsPerUnit=512) => {
         const mat = new THREE.SpriteMaterial({
-            map: new THREE.DataTexture(texData, ...shape, THREE.RGBAFormat),
+            map: new THREE.DataTexture(texData, shape[0], shape[1], THREE.RGBAFormat),
             // opacity: 0.7,
             color: 0xffffff,
         });
@@ -46,13 +46,12 @@
 
     //
 
-    const shape = [ threeletCaster.canvas.width, threeletCaster.canvas.height];
-
+    const shape = [ threeletCaster.canvas.width, threeletCaster.canvas.height, 4];
     const can2d = document.createElement("canvas");
     can2d.width = shape[0];
     can2d.height = shape[1];
 
-    const texData = new Uint8Array(shape[0] * shape[1] * 4);
+    const texData = new Uint8Array(shape[0] * shape[1] * shape[2]);
     const sp = createDataSprite(texData, shape);
     const posPanel = Threelet.isVrSupported() ? [0, 0.5, -0.6] : [0, 0.5, 0.6];
     sp.position.set(...posPanel);
@@ -68,7 +67,11 @@
 
         ctx2d.drawImage(threeletCaster.canvas, 0, 0);
         // if (t > 2 && t < 3) { console.log(can2d.toDataURL('image/png')); }
-        imgData = ctx2d.getImageData(0, 0, 512, 256);
+
+        // https://github.com/KhronosGroup/WebGL/issues/1533
+        // createDataFlipY(): Uint8ClampedArray -> Uint8Array
+        imgData = Threelet.Utils.createDataFlipY(
+            ctx2d.getImageData(0, 0, shape[0], shape[1]).data, shape);
         hasNewImgData = true;
     };
     threeletCaster.updateLoop(3); // loop with the spcified FPS
@@ -94,8 +97,7 @@
         // console.log('@@ check hasNewImgData:', hasNewImgData);
         if (hasNewImgData) {
             hasNewImgData = false;
-            // https://github.com/KhronosGroup/WebGL/issues/1533
-            texData.set(new Uint8Array(imgData.data.buffer));
+            texData.set(imgData);
             sp.material.map.needsUpdate = true;
         }
     };
