@@ -5,7 +5,7 @@ threelet
 It can be also used as a 3D app framework for rapidly making dynamic desktop/VR applications.
 Some notable features include:
 
-- 3D scene programming interface,
+- function interface for 3D scene programming,
 - built-in render loop manager (with auto VR context switching), and
 - simple mouse/vr-controller event handlers.
 
