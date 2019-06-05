@@ -158,6 +158,8 @@ Calling the constructor with the default parameters looks as:
 
 Without the ``canvas`` parameter, the constructor creates an inline-block
 div element (``threelet.domElement``) that is ready to be embedded into a web page.
+(`single case <https://w3reality.github.io/threelet/examples/embed-inline-block/index.html>`__ |
+`multiple case <https://w3reality.github.io/threelet/examples/embed-multiple/index.html>`__)
 
 .. code:: html
 
@@ -231,7 +233,7 @@ OrbitControls, stats, and WebVR:
     threelet.setup('mod-webvr', window.WEBVR); // show the desktop/VR switch button
 
 
-Sky based on the `shaders/sky <https://threejs.org/examples/?q=sky#webgl_shaders_sky>`__ example in three.js:
+Sky based on the `shaders/sky example <https://threejs.org/examples/?q=sky#webgl_shaders_sky>`__ in three.js:
 
 .. code:: html
 
