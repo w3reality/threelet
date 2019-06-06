@@ -132,21 +132,9 @@ Supported controllers:
 
         return can;
     };
-    const createPanelSprite = (can, pixelsPerUnit=512) => {
-        const mat = new THREE.SpriteMaterial({
-            map: new THREE.Texture(can),
-            opacity: 0.7,
-            color: 0xffffff,
-        });
-        mat.map.needsUpdate = true;
-        const sp = new THREE.Sprite(mat);
-        sp.scale.set(
-            can.width/pixelsPerUnit, can.height/pixelsPerUnit, 1.0);
-        return sp;
-    };
 
     const panelCanvas = createTextCanvas('', 512, 256, {tfg: '#000'});
-    const sp = createPanelSprite(panelCanvas);
+    const sp = Threelet.Utils.createCanvasSprite(panelCanvas);
     sp.position.set(0, 0.5, -0.5);
 
 

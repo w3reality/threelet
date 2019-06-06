@@ -161,19 +161,27 @@ class Utils {
     }
 
     static createDataSprite(texData, shape, pixelsPerUnit=512) {
+        return Utils._createSprite(shape,
+            new THREE.DataTexture(texData, shape[0], shape[1], THREE.RGBAFormat),
+            pixelsPerUnit);
+    }
+    static createCanvasSprite(can, pixelsPerUnit=512) {
+        return Utils._createSprite(
+            [can.width, can.height], // shape
+            new THREE.Texture(can), // map
+            pixelsPerUnit);
+    }
+    static _createSprite(shape, map, pixelsPerUnit) {
         const mat = new THREE.SpriteMaterial({
-            map: new THREE.DataTexture(texData, shape[0], shape[1], THREE.RGBAFormat),
+            map: map,
             // opacity: 0.7,
             color: 0xffffff,
         });
-        // console.log('@@ map:', mat.map);
         mat.map.needsUpdate = true;
-
         const sp = new THREE.Sprite(mat);
         sp.scale.set(shape[0]/pixelsPerUnit, shape[1]/pixelsPerUnit, 1.0);
         return sp;
     }
-
 
 }
 
