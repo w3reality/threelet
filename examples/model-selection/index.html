@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>model-selection</title>
+</head>
+<body>
+    <canvas id="canvasViewer" style="width: 800px; height: 380px;"></canvas>
+    <div>
+        Stylized hand painted scene by <a href="https://sketchfab.com/Sander.Vander.Meiren" target="_blank" rel="noopener">Sander Vander Meiren</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC Attribution</a>
+    </div>
+    <canvas id="canvasCaster" style="width: 512px; height: 256px;"></canvas>
+    <div>
+        Dancing Stormtrooper by <a href="https://sketchfab.com/strykerdoesgames" target="_blank" rel="noopener">StrykerDoesAnimation</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC Attribution</a>
+    </div>
+
+    <script src="../deps/stats.min.js"></script>
+    <script src="../deps/three.min.js"></script>
+    <script src="../deps/OrbitControls.js"></script>
+    <script src="../deps/WebVR.js"></script>
+    <script src="../deps/Sky.js"></script>
+    <script src="../deps/GLTFLoader.js"></script>
+
+    <!-- <script src="../../dist/threelet.min.js"></script> -->
+    <!-- ==== prod/dev ==== -->
+    <script type="module">
+    import Threelet from '../../src/index.js';
+
+    class Viewer extends Threelet {
+        onCreate(params) {
+            this.setup('mod-controls', THREE.OrbitControls);
+            this.setup('mod-stats', window.Stats, {panelType: 0}); // 0: fps, 1: ms, 2: mb, 3+: custom
+            this.setup('mod-webvr', window.WEBVR);
+            this.setup('mod-sky', THREE.Sky);
+
+            this.enableInteractiveGroup('drag');
+            const group = this.getInteractiveGroup();
+            this.scene.add(group);
+
+            Threelet.Utils.createCanvasFromImage('../media/img/selection-512x256.jpg', (can) => {
+                const sp = Threelet.Utils.createCanvasSprite(can, 128); // 4x2 u^2
+                sp.position.set(0, 1.0, -3.0);
+                group.add(sp);
+            });
+
+            this.scene.add(Threelet.Utils.createTestHemisphereLight());
+            this.scene.add(Threelet.Utils.createTestDirectionalLight());
+
+            let mixer = null;
+            Threelet.Utils.loadGLTF('../media/stylized-hand-painted-scene/', 'scene.gltf', data => {
+                console.log('@@ data:', data);
+                mixer = data.mixer;
+                const obj = data.object;
+                obj.position.set(-5, -3, -5);
+                obj.rotation.set(0, Math.PI, 0);
+                obj.scale.set(0.1, 0.1, 0.1);
+                this.scene.add(obj);
+            });
+
+            this.update = (t, dt) => {
+                if (mixer) mixer.update(dt);
+            };
+            // this.updateLoop(30);
+            this.updateLoop(1); // debug
+        }
+    }
+
+    const viewer = new Viewer({
+        canvas: document.getElementById("canvasViewer"),
+        optAxes: false,
+    });
+
+    </script>
+</body>
+</html>

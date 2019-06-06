@@ -5,9 +5,9 @@ threelet
 It can be also used as a 3D app framework for rapidly making dynamic desktop/VR applications.
 Some notable features include:
 
-- function interface ``.update = (t, dt) => {}`` for 3D scene programming,
-- built-in render loop manager (with auto VR context switching), and
-- simple mouse/vr-controller event handlers.
+- built-in render loop manager (with auto VR context switching),
+- function interface ``.update = (t, dt) => {}`` for programming temporal 3D scenes, and
+- easy-to-use mouse/vr-controller event handlers.
 
 **Basic demos**
 

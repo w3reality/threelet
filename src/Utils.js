@@ -160,6 +160,24 @@ class Utils {
         return out;
     }
 
+
+    static createCanvasFromImage(src, cb=null, cbError=null) {
+        const doLoad = (_src, onSuccess, onError) => {
+            const img = new Image();
+            img.onload = () => {
+                const can = document.createElement('canvas');
+                can.width = img.width;
+                can.height = img.height;
+                can.getContext('2d').drawImage(img, 0, 0, img.width, img.height);
+                onSuccess(can);
+            };
+            img.onerror = (event) => onError ? onError(event) : null;
+            img.src = _src;
+        };
+        return cb ? doLoad(src, cb, cbError) :
+            new Promise((res, rej) => doLoad(src, res, rej));
+    }
+
     static createDataSprite(texData, shape, pixelsPerUnit=512) {
         return Utils._createSprite(shape,
             new THREE.DataTexture(texData, shape[0], shape[1], THREE.RGBAFormat),
