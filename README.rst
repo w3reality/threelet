@@ -179,7 +179,7 @@ div element (``threelet.domElement``) that is ready to be embedded into a web pa
     <script>
     const threelet = new Threelet({width: 480, height: 320});
     document.getElementById('viewer').appendChild(threelet.domElement);
-    </scritp>
+    </script>
 
 **Event listeners**
 
