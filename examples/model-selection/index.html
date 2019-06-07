@@ -38,46 +38,37 @@
             this.setup('mod-webvr', window.WEBVR);
             this.setup('mod-sky', THREE.Sky);
 
-            const selector = new THREE.Group();
-            // selector.position.set(0, 1, -0.4);
-            // selector.rotation.x = -Math.PI * 0.3;
-            this.scene.add(selector);
-            this.selector = selector;
-
-            let plane = null;
-            Threelet.Utils.createCanvasFromImage('../media/img/selection-512x256.jpg', (can) => {
-                plane = Threelet.Utils.createCanvasPlane(can, 4, 2, 2, 2);
-                plane.material.transparent = true;
-                plane.material.opacity = 0.9;
-                selector.add(plane);
-            });
+            this.selector = Viewer.createSelector();
+            this.scene.add(this.selector);
 
             this.scene.add(Threelet.Utils.createTestHemisphereLight());
             this.scene.add(Threelet.Utils.createTestDirectionalLight());
             this.scene.add(new THREE.GridHelper(10, 20));
 
             this.on('mouse-click', (x, y) => {
-                if (plane) {
-                    const isec = this.raycastFromMouse(x, y, [plane], false);
-                    // console.log('@@ isec:', isec);
-                    if (isec) {
-                        // console.log('@@ isec.faceIndex:', isec.faceIndex);
-                        switch (isec.faceIndex) {
-                            case 0: case 1: this.updateModel('stormtrooper'); break;
-                            case 2: case 3: this.updateModel('mora'); break;
-                            case 4: case 5: this.updateModel('stylized'); break;
-                            case 6: case 7: this.updateModel('forest'); break;
-                            default: console.log('@@ woops');
-                        }
-                    }
+                const plane = this.selector.getObjectByName('thumbnails');
+                if (! plane) return;
+
+                const isec = this.raycastFromMouse(x, y, [plane], false);
+                // console.log('@@ isec:', isec);
+                if (! isec) return;
+
+                // console.log('@@ isec.faceIndex:', isec.faceIndex);
+                switch (isec.faceIndex) {
+                    case 0: case 1: this.updateModel('stormtrooper'); break;
+                    case 2: case 3: this.updateModel('mora'); break;
+                    case 4: case 5: this.updateModel('stylized'); break;
+                    case 6: case 7: this.updateModel('forest'); break;
+                    default: console.log('@@ woops');
                 }
             });
 
-            let mixer = null;
             // const path = '../media/dancing-stormtrooper/';
             // const path = '../media/welcome-to-mora-animated-gltf/';
             // const path = '../media/stylized-hand-painted-scene/';
             const path = '../media/forest-house/';
+
+            let mixer = null;
             Threelet.Utils.loadGLTF(path, 'scene.gltf', data => {
                 console.log('@@ data:', data);
                 mixer = data.mixer;
@@ -107,7 +98,58 @@
         }
 
         updateModel(key) {
-            console.log('@@ updateModel(): key:', key);
+            // console.log('@@ updateModel(): key:', key);
+            const marker = this.selector.getObjectByName('marker');
+            let markerPos = null;
+
+            switch (key) {
+                case 'stormtrooper':
+                    markerPos = [-1, 0.05, 0.01];
+                    break;
+                case 'mora':
+                    markerPos = [-1+2, 0.05, 0.01];
+                    break;
+                case 'stylized':
+                    markerPos = [-1, 0.05-1, 0.01];
+                    break;
+                case 'forest':
+                    markerPos = [-1+2, 0.05-1, 0.01];
+                    break;
+                default:
+                    return; // woops
+            }
+
+            if (marker) {
+                marker.position.set(...markerPos);
+            }
+
+            this.render();
+        }
+
+        static createSelector() {
+            const selector = new THREE.Group();
+            selector.position.set(0, 1, -0.4);
+            selector.rotation.x = -Math.PI * 0.3;
+
+            const markerCanvas = document.createElement('canvas');
+            const ctx = markerCanvas.getContext('2d');
+            ctx.fillStyle = '#cc0';
+            ctx.fillRect(0, 0, markerCanvas.width, markerCanvas.height);
+            const marker = Threelet.Utils.createCanvasPlane(markerCanvas, 2, 0.1);
+            marker.position.set(-1, 0.05, 0.01);
+            marker.name = 'marker';
+            selector.add(marker);
+
+            let plane = null;
+            Threelet.Utils.createCanvasFromImage('../media/img/selection-512x256.jpg', (can) => {
+                plane = Threelet.Utils.createCanvasPlane(can, 4, 2, 2, 2);
+                plane.material.transparent = true;
+                plane.material.opacity = 0.9;
+                plane.name = 'thumbnails';
+                selector.add(plane);
+            });
+
+            return selector;
         }
     }
 
