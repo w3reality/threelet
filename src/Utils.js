@@ -114,16 +114,15 @@ class Utils {
     // filter: raw => [object, raw]
     static fetchModelData(loader, file, filter, cb=null, cbError=null) {
         // e.g. https://threejs.org/docs/#examples/loaders/GLTFLoader
-        const doLoad = (url, onLoaded, onProgress, onError) => {
+        const _doLoad = (url, onSuccess, onError, onProgress=null) => {
             loader.load(url,
-                raw => onLoaded(Utils._resolveAnimations(...filter(raw))),
+                raw => onSuccess(Utils._resolveAnimations(...filter(raw))),
                 onProgress, // (xhr) => {}
                 onError); // (error) => {}
         };
-        // console.log('@@ cb:', cb, cb ? 1 : 0);
-        return cb ?
-            doLoad(file, cb, null, cbError) :
-            new Promise((res, rej) => doLoad(file, res, null, rej));
+
+        // not using onProgress
+        return Utils._cbOrPromise(_doLoad, file, cb, cbError);
     }
 
     // https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_gltf_extensions.html
@@ -160,9 +159,13 @@ class Utils {
         return out;
     }
 
+    static _cbOrPromise(f, arg0, cb, cbError) {
+        return cb ? f(arg0, cb, cbError) :
+            new Promise((res, rej) => f(arg0, res, rej));
+    }
 
     static createCanvasFromImage(src, cb=null, cbError=null) {
-        const doLoad = (_src, onSuccess, onError) => {
+        const _doLoad = (_src, onSuccess, onError) => {
             const img = new Image();
             img.onload = () => {
                 const can = document.createElement('canvas');
@@ -174,19 +177,31 @@ class Utils {
             img.onerror = (event) => onError ? onError(event) : null;
             img.src = _src;
         };
-        return cb ? doLoad(src, cb, cbError) :
-            new Promise((res, rej) => doLoad(src, res, rej));
+        return Utils._cbOrPromise(_doLoad, src, cb, cbError);
     }
 
-    static createDataSprite(texData, shape, pixelsPerUnit=512) {
-        return Utils._createSprite(shape,
-            new THREE.DataTexture(texData, shape[0], shape[1], THREE.RGBAFormat),
-            pixelsPerUnit);
+    // https://threejs.org/docs/#api/en/geometries/PlaneGeometry
+    static createCanvasPlane(can, width=1, height=1,
+        widthSegments=1, heightSegments=1) {
+        const geom = new THREE.PlaneGeometry(
+            width, height, widthSegments, heightSegments);
+        const mat = new THREE.MeshBasicMaterial({
+            map: new THREE.Texture(can),
+            // color: 0xffff00,
+            side: THREE.DoubleSide});
+        mat.map.needsUpdate = true;
+        return new THREE.Mesh(geom, mat);
     }
+
     static createCanvasSprite(can, pixelsPerUnit=512) {
         return Utils._createSprite(
             [can.width, can.height], // shape
             new THREE.Texture(can), // map
+            pixelsPerUnit);
+    }
+    static createDataSprite(texData, shape, pixelsPerUnit=512) {
+        return Utils._createSprite(shape,
+            new THREE.DataTexture(texData, shape[0], shape[1], THREE.RGBAFormat),
             pixelsPerUnit);
     }
     static _createSprite(shape, map, pixelsPerUnit) {
@@ -200,7 +215,6 @@ class Utils {
         sp.scale.set(shape[0]/pixelsPerUnit, shape[1]/pixelsPerUnit, 1.0);
         return sp;
     }
-
 }
 
 export default Utils;

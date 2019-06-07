@@ -5,13 +5,18 @@
     <title>model-selection</title>
 </head>
 <body>
-    <canvas id="canvasViewer" style="width: 800px; height: 380px;"></canvas>
+    <canvas id="canvasViewer" style="width: 100%; height: 100%;"></canvas>
+    <div>
+        Dancing Stormtrooper by <a href="https://sketchfab.com/strykerdoesgames" target="_blank" rel="noopener">StrykerDoesAnimation</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC Attribution</a>
+    </div>
+    <div>
+        Welcome to Mora - Animated by <a href="https://sketchfab.com/ediediedi" target="_blank" rel="noopener">ediediedi</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC Attribution</a>
+    </div>
     <div>
         Stylized hand painted scene by <a href="https://sketchfab.com/Sander.Vander.Meiren" target="_blank" rel="noopener">Sander Vander Meiren</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC Attribution</a>
     </div>
-    <canvas id="canvasCaster" style="width: 512px; height: 256px;"></canvas>
     <div>
-        Dancing Stormtrooper by <a href="https://sketchfab.com/strykerdoesgames" target="_blank" rel="noopener">StrykerDoesAnimation</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC Attribution</a>
+        Forest House by <a href="https://sketchfab.com/Wesai" target="_blank" rel="noopener">Wesai</a> is licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC Attribution</a>
     </div>
 
     <script src="../deps/stats.min.js"></script>
@@ -33,27 +38,64 @@
             this.setup('mod-webvr', window.WEBVR);
             this.setup('mod-sky', THREE.Sky);
 
-            this.enableInteractiveGroup('drag');
-            const group = this.getInteractiveGroup();
-            this.scene.add(group);
+            const selector = new THREE.Group();
+            // selector.position.set(0, 1, -0.4);
+            // selector.rotation.x = -Math.PI * 0.3;
+            this.scene.add(selector);
+            this.selector = selector;
 
+            let plane = null;
             Threelet.Utils.createCanvasFromImage('../media/img/selection-512x256.jpg', (can) => {
-                const sp = Threelet.Utils.createCanvasSprite(can, 128); // 4x2 u^2
-                sp.position.set(0, 1.0, -3.0);
-                group.add(sp);
+                plane = Threelet.Utils.createCanvasPlane(can, 4, 2, 2, 2);
+                plane.material.transparent = true;
+                plane.material.opacity = 0.9;
+                selector.add(plane);
             });
 
             this.scene.add(Threelet.Utils.createTestHemisphereLight());
             this.scene.add(Threelet.Utils.createTestDirectionalLight());
+            this.scene.add(new THREE.GridHelper(10, 20));
+
+            this.on('mouse-click', (x, y) => {
+                if (plane) {
+                    const isec = this.raycastFromMouse(x, y, [plane], false);
+                    // console.log('@@ isec:', isec);
+                    if (isec) {
+                        // console.log('@@ isec.faceIndex:', isec.faceIndex);
+                        switch (isec.faceIndex) {
+                            case 0: case 1: this.updateModel('stormtrooper'); break;
+                            case 2: case 3: this.updateModel('mora'); break;
+                            case 4: case 5: this.updateModel('stylized'); break;
+                            case 6: case 7: this.updateModel('forest'); break;
+                            default: console.log('@@ woops');
+                        }
+                    }
+                }
+            });
 
             let mixer = null;
-            Threelet.Utils.loadGLTF('../media/stylized-hand-painted-scene/', 'scene.gltf', data => {
+            // const path = '../media/dancing-stormtrooper/';
+            // const path = '../media/welcome-to-mora-animated-gltf/';
+            // const path = '../media/stylized-hand-painted-scene/';
+            const path = '../media/forest-house/';
+            Threelet.Utils.loadGLTF(path, 'scene.gltf', data => {
                 console.log('@@ data:', data);
                 mixer = data.mixer;
                 const obj = data.object;
-                obj.position.set(-5, -3, -5);
-                obj.rotation.set(0, Math.PI, 0);
-                obj.scale.set(0.1, 0.1, 0.1);
+
+                if (path.includes('stormtrooper')) {
+                    obj.position.set(0, 0, 1);
+                    obj.scale.set(0.3, 0.3, 0.3);
+                } else if (path.includes('mora')) {
+                    obj.position.set(0, 0.2, 1);
+                    obj.scale.set(0.2, 0.2, 0.2);
+                } else if (path.includes('stylized')) {
+                    obj.position.set(-5, -3, -3);
+                    obj.rotation.set(0, Math.PI, 0);
+                    obj.scale.set(0.1, 0.1, 0.1);
+                } else if (path.includes('forest')) {
+                    obj.position.set(0, 0.1, -5.5);
+                }
                 this.scene.add(obj);
             });
 
@@ -63,11 +105,15 @@
             // this.updateLoop(30);
             this.updateLoop(1); // debug
         }
+
+        updateModel(key) {
+            console.log('@@ updateModel(): key:', key);
+        }
     }
 
     const viewer = new Viewer({
         canvas: document.getElementById("canvasViewer"),
-        optAxes: false,
+        // optAxes: false,
     });
 
     </script>
