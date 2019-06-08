@@ -80,8 +80,9 @@
             this.update = (t, dt) => {
                 if (this.mixer) this.mixer.update(dt);
             };
-            // this.updateLoop(30);
-            this.updateLoop(1); // debug
+
+            this.updateLoop(20);
+            // this.updateLoop(1); // debug
         }
 
         async loadModel(key) {
