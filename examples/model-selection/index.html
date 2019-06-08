@@ -56,7 +56,7 @@
                 forest: '../media/forest-house/',
             };
             this.keyLast = 'invalid';
-            this.updateModel('forest'); // default
+            // this.updateModel('forest'); // default for dev
 
             this.on('mouse-click', (x, y) => {
                 const plane = this.selector.getObjectByName('thumbnails');
@@ -146,6 +146,7 @@
                 case 'forest': markerPos = [-1+2, 0.05-1, 0.01]; break;
                 default: return; // woops
             }
+            marker.visible = true;
             marker.position.set(...markerPos);
             this.render();
         }
@@ -173,6 +174,7 @@
             const marker = Threelet.Utils.createCanvasPlane(markerCanvas, 2, 0.1);
             marker.position.set(-1, 0.05, 0.01);
             marker.name = 'marker';
+            marker.visible = false;
             selector.add(marker);
 
             let plane = null;
@@ -190,7 +192,7 @@
 
     const viewer = new Viewer({
         canvas: document.getElementById("canvasViewer"),
-        // optAxes: false,
+        optAxes: false,
     });
 
     </script>
