@@ -7,7 +7,7 @@ Some notable features include:
 
 - built-in render loop manager (with auto VR context switching),
 - function interface ``.update = (t, dt) => {}`` for programming temporal 3D scenes, and
-- easy-to-use mouse/vr-controller event handlers.
+- easy-to-use mouse/vr-controller event listeners.
 
 **Basic demos**
 
@@ -183,10 +183,11 @@ div element (``threelet.domElement``) that is ready to be embedded into a web pa
 
 **Event listeners**
 
+setting mouse listeners (`example <https://w3reality.github.io/threelet/examples/model-selection/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/model-selection/index.html>`__):
+
 .. code:: js
 
-    // setting mouse listeners
-    //   mx, my: mouse coordinates
+    // mx, my: mouse coordinates
 
     threelet.on('mouse-click', (mx, my) => { /* ... */ }); // alias of 'mouse-click-left'
     threelet.on('mouse-click-left', (mx, my) => { /* ... */ });
@@ -201,9 +202,12 @@ div element (``threelet.domElement``) that is ready to be embedded into a web pa
     threelet.on('mouse-move', (mx, my) => { /* ... */ });
     threelet.on('mouse-drag-end', (mx, my) => { /* ... */ });
 
-    // setting VR controller listeners
-    //   i: controller index
-    //   x, y: touchpad coordinates
+setting VR controller listeners (`example <https://w3reality.github.io/threelet/examples/webvr-controllers/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-controllers/index.html>`__):
+
+.. code:: js
+
+    // i: controller index
+    // x, y: touchpad coordinates
 
     threelet.on('vr-touchpad-touch-start', (i, x, y) => { /* ... */ });
     threelet.on('vr-touchpad-touch-end', (i, x, y) => { /* ... */ });
@@ -213,7 +217,9 @@ div element (``threelet.domElement``) that is ready to be embedded into a web pa
     threelet.on('vr-trigger-press-start', (i) => { /* ... */ });
     threelet.on('vr-trigger-press-end', (i) => { /* ... */ });
 
-    // cancelling
+unsetting listeners:
+
+.. code:: js
 
     threelet.on(eventName, null);
 
