@@ -217,6 +217,8 @@
             selector.rotation.x = -Math.PI * 0.3;
 
             const markerCanvas = document.createElement('canvas');
+            markerCanvas.width = 256;
+            markerCanvas.height = 128;
             const ctx = markerCanvas.getContext('2d');
             ctx.fillStyle = '#cc0';
             ctx.fillRect(0, 0, markerCanvas.width, markerCanvas.height);

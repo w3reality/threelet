@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>panel-draw</title>
+</head>
+<body>
+    <canvas id="viewer" style="width: 100%; height: 100%;"></canvas>
+
+    <script src="../deps/stats.min.js"></script>
+    <script src="../deps/three.min.js"></script>
+    <!-- <script src="../deps/OrbitControls.js"></script> -->
+    <script src="../deps/WebVR.js"></script>
+    <script src="../deps/GLTFLoader.js"></script>
+
+    <script src="../../dist/threelet.min.js"></script>
+    <!-- ==== prod/dev ==== -->
+    <script type="module">
+    // import Threelet from '../../src/index.js';
+
+    class Viewer extends Threelet {
+        onCreate(params) {
+            // this.setup('mod-controls', THREE.OrbitControls);
+            this.setup('mod-stats', window.Stats, {panelType: 0}); // 0: fps, 1: ms, 2: mb, 3+: custom
+            this.setup('mod-webvr', window.WEBVR);
+
+            this.selector = Viewer.createSelector();
+            const group = this.getInteractiveGroup();
+            group.add(this.selector); // for ray not passing ghrough the selector surface
+            this.scene.add(group);
+            if (Threelet.isVrSupported()) group.position.z -= 2.5;
+
+            this.scene.add(Threelet.Utils.createTestHemisphereLight());
+            this.scene.add(Threelet.Utils.createTestDirectionalLight());
+            this.scene.add(new THREE.GridHelper(10, 20));
+
+            const _plane = this.selector.getObjectByName('plane');
+            this.setupMouseInterface(
+                (x, y) => { // onClick
+                    const isec = this.raycastFromMouse(x, y, [_plane], false);
+                    if (isec) {
+                        // console.log('@@ isec.faceIndex:', isec.faceIndex);
+                        this.onPlaneClicked(isec.faceIndex);
+                    }
+                },
+                (x, y) => { // onDrag
+                    const isec = this.raycastFromMouse(x, y, [_plane], false);
+                    if (isec) {
+                        console.log('@@ isec.point:', isec.point);
+                        // x,y:
+                        // -2,2    0,2    2,2
+                        //     left   right
+                        // -2,0    0,0    2,0
+                    }
+                });
+
+            this._planeClickStart = [-1, -1]; // faceIndex per controller i
+            this.on('vr-trigger-press-start', (i) => {
+                const isect = this.raycastFromController(i, [_plane], false)[0];
+                if (isect) {
+                    console.log('@@ click-start');
+                    this._planeClickStart[i] = isect.faceIndex;
+                } else {
+                    this._planeClickStart[i] = -1;
+                }
+            });
+            this.on('vr-trigger-press-end', (i) => {
+                const isect = this.raycastFromController(i, [_plane], false)[0];
+                if (isect) {
+                    const faceIndex = isect.faceIndex;
+                    console.log('@@ click-end; faceIndex:', faceIndex);
+                    if (Math.floor(faceIndex/2) ===
+                        Math.floor(this._planeClickStart[i]/2)) {
+                        console.log('@@ click fulfilled for faceIndex:', faceIndex);
+                        this.onPlaneClicked(faceIndex);
+                    }
+                }
+                this._planeClickStart[i] = -1;
+            });
+
+
+            this.mixer = null;
+            this.update = (t, dt) => {
+                if (this.mixer) this.mixer.update(dt);
+            };
+
+            // this.updateLoop(20);
+            this.updateLoop(1); // debug
+        }
+
+        setupMouseInterface(onClick, onDrag) {
+            let _mouseDragging = false;
+            this.on('mouse-down', (x, y) => {
+                _mouseDragging = true;
+                console.log('@@ mouse down:', x, y);
+            });
+            this.on('mouse-move', (x, y) => {
+                // console.log('@@ mouse move:');
+                if (_mouseDragging) onDrag(x, y);
+            });
+            this.on('mouse-drag-end', (x, y) => {
+                _mouseDragging = false;
+                console.log('@@ mouse drag end:', x, y);
+            });
+            this.on('mouse-click', (x, y) => {
+                _mouseDragging = false;
+                console.log('@@ mouse click:', x, y);
+                onClick(x, y);
+            });
+        }
+
+        onPlaneClicked(faceIndex) {
+            switch (faceIndex) {
+                case 0: case 1: this.updateMarker('uleft'); break;
+                case 2: case 3: this.updateMarker('uright'); break;
+                case 4: case 5: this.updateMarker('lleft'); break;
+                case 6: case 7: this.updateMarker('lright'); break;
+                default: console.log('@@ woops');
+            }
+        }
+
+        updateMarker(key) {
+            const marker = this.selector.getObjectByName('marker');
+            if (! marker) return;
+
+            let markerPos = null;
+            switch (key) {
+                case 'uleft': markerPos = [-1, 0.05, 0.01]; break;
+                case 'uright': markerPos = [-1+2, 0.05, 0.01]; break;
+                case 'lleft': markerPos = [-1, 0.05-1, 0.01]; break;
+                case 'lright': markerPos = [-1+2, 0.05-1, 0.01]; break;
+                default: return; // woops
+            }
+            marker.visible = true;
+            marker.position.set(...markerPos);
+            this.render();
+        }
+
+        static createSelector() {
+            const selector = new THREE.Group();
+            selector.position.set(0, 1, -0.4);
+
+            const markerCanvas = document.createElement('canvas');
+            markerCanvas.width = 256;
+            markerCanvas.height = 128;
+            const ctx = markerCanvas.getContext('2d');
+            ctx.fillStyle = '#cc0';
+            ctx.fillRect(0, 0, markerCanvas.width, markerCanvas.height);
+            const marker = Threelet.Utils.createCanvasPlane(markerCanvas, 2, 0.1);
+            marker.position.set(-1, 0.05, 0.01);
+            marker.name = 'marker';
+            marker.visible = false;
+            selector.add(marker);
+
+            const planeCanvas = document.createElement('canvas');
+            planeCanvas.width = 512;
+            planeCanvas.height = 256;
+            const ctxPlane = planeCanvas.getContext('2d');
+            ctxPlane.fillStyle = '#ccc';
+            ctxPlane.fillRect(0, 0, 512, 256);
+            ctxPlane.fillStyle = '#0c0';
+            ctxPlane.fillRect(0, 0, 256, 256);
+            const plane = Threelet.Utils.createCanvasPlane(planeCanvas, 4, 2, 2, 2);
+            plane.material.transparent = true;
+            plane.material.opacity = 0.9;
+            plane.name = 'plane';
+            selector.add(plane);
+
+            return selector;
+        }
+    }
+
+    const viewer = new Viewer({
+        canvas: document.getElementById("viewer"),
+        // optAxes: false,
+    });
+
+    </script>
+</body>
+</html>
