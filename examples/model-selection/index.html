@@ -43,7 +43,10 @@
             this.setup('mod-sky', THREE.Sky);
 
             this.selector = Viewer.createSelector();
-            this.scene.add(this.selector);
+            const group = this.getInteractiveGroup();
+            group.add(this.selector); // for ray not passing ghrough the selector surface
+            this.scene.add(group);
+            if (Threelet.isVrSupported()) group.position.z -= 2.5;
 
             this.scene.add(Threelet.Utils.createTestHemisphereLight());
             this.scene.add(Threelet.Utils.createTestDirectionalLight());
@@ -58,25 +61,48 @@
             this.keyLast = 'invalid';
             // this.updateModel('forest'); // default for dev
 
-            // TODO !!!! vr controller listeners
-
             this.on('mouse-click', (x, y) => {
-                const plane = this.selector.getObjectByName('thumbnails');
+                const plane = this.getPlane();
                 if (! plane) return;
 
                 const isec = this.raycastFromMouse(x, y, [plane], false);
-                // console.log('@@ isec:', isec);
-                if (! isec) return;
-
-                // console.log('@@ isec.faceIndex:', isec.faceIndex);
-                switch (isec.faceIndex) {
-                    case 0: case 1: this.updateModel('stormtrooper'); break;
-                    case 2: case 3: this.updateModel('mora'); break;
-                    case 4: case 5: this.updateModel('stylized'); break;
-                    case 6: case 7: this.updateModel('forest'); break;
-                    default: console.log('@@ woops');
+                console.log('@@ isec:', isec);
+                if (isec) {
+                    // console.log('@@ isec.faceIndex:', isec.faceIndex);
+                    this.onPlaneClicked(isec.faceIndex);
                 }
             });
+
+            this._planeClickStart = [-1, -1]; // faceIndex per controller i
+            this.on('vr-trigger-press-start', (i) => {
+                const plane = this.getPlane();
+                if (! plane) return;
+
+                const isect = this.raycastFromController(i, [plane], false)[0];
+                if (isect) {
+                    console.log('@@ click-start');
+                    this._planeClickStart[i] = isect.faceIndex;
+                } else {
+                    this._planeClickStart[i] = -1;
+                }
+            });
+            this.on('vr-trigger-press-end', (i) => {
+                const plane = this.getPlane();
+                if (! plane) return;
+
+                const isect = this.raycastFromController(i, [plane], false)[0];
+                if (isect) {
+                    const faceIndex = isect.faceIndex;
+                    console.log('@@ click-end; faceIndex:', faceIndex);
+                    if (Math.floor(faceIndex/2) ===
+                        Math.floor(this._planeClickStart[i]/2)) {
+                        console.log('@@ click fulfilled for faceIndex:', faceIndex);
+                        this.onPlaneClicked(faceIndex);
+                    }
+                }
+                this._planeClickStart[i] = -1;
+            });
+
 
             this.mixer = null;
             this.update = (t, dt) => {
@@ -87,6 +113,20 @@
             // this.updateLoop(1); // debug
         }
 
+        getPlane() {
+            return this.selector.getObjectByName('thumbnails');
+        }
+
+        onPlaneClicked(faceIndex) {
+            switch (faceIndex) {
+                case 0: case 1: this.updateModel('stormtrooper'); break;
+                case 2: case 3: this.updateModel('mora'); break;
+                case 4: case 5: this.updateModel('stylized'); break;
+                case 6: case 7: this.updateModel('forest'); break;
+                default: console.log('@@ woops');
+            }
+        }
+
         async loadModel(key) {
             const data = await Threelet.Utils.loadGLTF(
                 this.paths[key], 'scene.gltf');
@@ -95,22 +135,23 @@
             obj.name = key;
             obj.userData.mixer = data.mixer;
 
+            const dz = Threelet.isVrSupported() ? -2.5 : 0;
             switch (key) {
                 case 'stormtrooper':
-                    obj.position.set(0, 0, 1);
+                    obj.position.set(0, 0, 1+dz);
                     obj.scale.set(0.3, 0.3, 0.3);
                     break;
                 case 'mora':
-                    obj.position.set(0, 0.2, 1);
+                    obj.position.set(0, 0.2, 1+dz);
                     obj.scale.set(0.2, 0.2, 0.2);
                     break;
                 case 'stylized':
-                    obj.position.set(-5, -3, -3);
+                    obj.position.set(-5, -3, -3+dz);
                     obj.rotation.set(0, Math.PI, 0);
                     obj.scale.set(0.1, 0.1, 0.1);
                     break;
                 case 'forest':
-                    obj.position.set(0, 0.1, -5.5);
+                    obj.position.set(0, 0.1, -5.5+dz);
                     break;
                 default: // nop
             }
