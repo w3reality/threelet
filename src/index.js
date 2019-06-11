@@ -64,7 +64,7 @@ class Threelet {
         // render function
         this.render = (isPresenting=false) => {
             // console.log('@@ render(): isPresenting:', isPresenting);
-            if (this.stats) { this.stats.update(); }
+            if (this._stats) { this._stats.update(); }
             if (! isPresenting) { this.resizeCanvas(canvas); }
             this.renderer.render(this.scene, this.camera);
         };
@@ -132,10 +132,10 @@ class Threelet {
         };
 
         // for controls module
-        this.controls = null;
+        this._controls = null;
 
         // for stats module
-        this.stats = null;
+        this._stats = null;
 
         // for sky module
         this.skyHelper = null;
@@ -161,20 +161,21 @@ class Threelet {
     // plugin module setup function
     setup(modTitle, Module, opts={}) {
         if (modTitle in this.modTable) {
-            this.modTable[modTitle].bind(this)(Module, opts);
+            return this.modTable[modTitle].bind(this)(Module, opts);
         } else {
             console.warn('setup(): unsupported module title:', modTitle);
         }
     }
 
     _setupControls(Module, opts) {
-        this.controls = new Module(this.camera, this.renderer.domElement);
-        this.controls.addEventListener('change', this.render.bind(null, false));
+        this._controls = new Module(this.camera, this.renderer.domElement);
+        this._controls.addEventListener('change', this.render.bind(null, false));
         if (Threelet.isVrSupported()) {
             // FIXME - OrbitControl breaks _initMouseListeners() on Oculus Go
             console.warn('not enabling OrbitControls (although requested) on this VR-capable browser.');
-            this.controls.enabled = false; // https://stackoverflow.com/questions/20058579/threejs-disable-orbit-camera-while-using-transform-control
+            this._controls.enabled = false; // https://stackoverflow.com/questions/20058579/threejs-disable-orbit-camera-while-using-transform-control
         }
+        return this._controls;
     }
 
     _setupStats(Module, opts) {
@@ -184,7 +185,7 @@ class Threelet {
         };
         const actual = Object.assign({}, defaults, opts);
 
-        const stats = this.stats = new Module();
+        const stats = this._stats = new Module();
         stats.showPanel(actual.panelType);
         if (actual.appendTo !== document.body) {
             stats.dom.style.position = 'absolute';
@@ -198,10 +199,12 @@ class Threelet {
         this.skyHelper = new SkyHelper(Module);
         // console.log('@@ this.skyHelper:', this.skyHelper);
 
-        this.scene.add(...this.skyHelper.init());
+        const [sky, sunSphere] = this.skyHelper.init();
+        this.scene.add(sky, sunSphere);
         this.skyHelper.updateUniforms({
             turbidity: 1,
         });
+        return [sky, sunSphere];
     }
 
     setupVRControlHelperTest() {
@@ -550,13 +553,13 @@ class Threelet {
         this.updateLoop(0); // stop the loop
         this.update = null;
 
-        if (this.controls) {
-            this.controls.dispose();
-            this.controls = null;
+        if (this._controls) {
+            this._controls.dispose();
+            this._controls = null;
         }
 
-        if (this.stats) {
-            this.stats.dom.remove();
+        if (this._stats) {
+            this._stats.dom.remove();
         }
 
         if (this.vrButton) {
