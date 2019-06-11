@@ -11,7 +11,7 @@
     <script src="../deps/three.min.js"></script>
     <!-- <script src="../deps/OrbitControls.js"></script> -->
     <script src="../deps/WebVR.js"></script>
-    <script src="../deps/GLTFLoader.js"></script>
+    <script src="../deps/signature_pad.min.js"></script>
 
     <script src="../../dist/threelet.min.js"></script>
     <!-- ==== prod/dev ==== -->
@@ -24,7 +24,9 @@
             this.setup('mod-stats', window.Stats, {panelType: 0}); // 0: fps, 1: ms, 2: mb, 3+: custom
             this.setup('mod-webvr', window.WEBVR);
 
-            this.selector = Viewer.createSelector();
+            const _planeCanvas = Viewer.createPlaneCanvas();
+            this.selector = Viewer.createSelector(_planeCanvas);
+
             const group = this.getInteractiveGroup();
             group.add(this.selector); // for ray not passing ghrough the selector surface
             this.scene.add(group);
@@ -34,6 +36,7 @@
             this.scene.add(Threelet.Utils.createTestDirectionalLight());
             this.scene.add(new THREE.GridHelper(10, 20));
 
+            const [_sigPad, _sigCanvas] = Viewer.createSigObjects();
             const _plane = this.selector.getObjectByName('plane');
             this.setupMouseInterface(
                 (x, y) => { // onClick
@@ -45,12 +48,29 @@
                 },
                 (x, y) => { // onDrag
                     const isec = this.raycastFromMouse(x, y, [_plane], false);
-                    if (isec) {
-                        console.log('@@ isec.point:', isec.point);
-                        // x,y:
-                        // -2,2    0,2    2,2
-                        //     left   right
-                        // -2,0    0,0    2,0
+                    if (! isec) return;
+
+                    // console.log('@@ isec.point:', isec.point);
+                    // x,y:
+                    // -2,2    0,2    2,2
+                    //     left   right
+                    // -2,0    0,0    2,0
+                    if (isec.point.x > 0) { // in right square
+                        // TODO x, y --> data !!!!!!!!
+                        const penColor = 'rgb(0, 200, 0)';
+                        const dataTest = [
+                           [{x: 119, y: 45, color: penColor}, // stroke 0
+                           {x: 128, y: 43, color: penColor},
+                           {x: 136, y: 42, color: penColor},
+                           {x: 141, y: 42, color: penColor},
+                           {x: 128, y: 43, color: penColor}],
+                           [{x: 119, y: 125, color: penColor}, // stroke 1
+                           {x: 128, y: 123, color: penColor},
+                           {x: 136, y: 122, color: penColor},
+                           {x: 141, y: 122, color: penColor},
+                           {x: 128, y: 123, color: penColor}],
+                        ];
+                        _sigPad.fromData(dataTest);
                     }
                 });
 
@@ -78,14 +98,22 @@
                 this._planeClickStart[i] = -1;
             });
 
-
-            this.mixer = null;
+            const planeCtx = _planeCanvas.getContext('2d');
             this.update = (t, dt) => {
-                if (this.mixer) this.mixer.update(dt);
+                // console.log('@@ update(): hi');
+                if (1) {
+                    planeCtx.fillStyle = '#0cc';
+                    planeCtx.fillRect(256*Math.random(), 256*Math.random(), 4, 20);
+                    _plane.material.map.needsUpdate = true;
+                }
+                if (1) {
+                    planeCtx.drawImage(_sigCanvas, 256, 0);
+                    _plane.material.map.needsUpdate = true;
+                }
             };
 
             // this.updateLoop(20);
-            this.updateLoop(1); // debug
+            this.updateLoop(4); // debug
         }
 
         setupMouseInterface(onClick, onDrag) {
@@ -136,7 +164,7 @@
             this.render();
         }
 
-        static createSelector() {
+        static createSelector(planeCanvas) {
             const selector = new THREE.Group();
             selector.position.set(0, 1, -0.4);
 
@@ -152,14 +180,6 @@
             marker.visible = false;
             selector.add(marker);
 
-            const planeCanvas = document.createElement('canvas');
-            planeCanvas.width = 512;
-            planeCanvas.height = 256;
-            const ctxPlane = planeCanvas.getContext('2d');
-            ctxPlane.fillStyle = '#ccc';
-            ctxPlane.fillRect(0, 0, 512, 256);
-            ctxPlane.fillStyle = '#0c0';
-            ctxPlane.fillRect(0, 0, 256, 256);
             const plane = Threelet.Utils.createCanvasPlane(planeCanvas, 4, 2, 2, 2);
             plane.material.transparent = true;
             plane.material.opacity = 0.9;
@@ -167,6 +187,60 @@
             selector.add(plane);
 
             return selector;
+        }
+
+        static createPlaneCanvas() {
+            const planeCanvas = document.createElement('canvas');
+            planeCanvas.width = 512;
+            planeCanvas.height = 256;
+            const ctxPlane = planeCanvas.getContext('2d');
+            ctxPlane.fillStyle = '#000';
+            ctxPlane.fillRect(0, 0, 512, 256);
+            ctxPlane.fillStyle = '#ccc';
+            ctxPlane.fillRect(0, 0, 256, 256);
+            return planeCanvas;
+        }
+        static createSigObjects() {
+            const sigCanvas = document.createElement('canvas');
+            sigCanvas.width = 256;
+            sigCanvas.height = 256;
+            document.body.appendChild(sigCanvas);
+
+            const penColor = 'rgb(200, 0, 200)';
+            const dataTest = [
+               [{x: 119, y: 85, color: penColor}, // stroke 0
+               {x: 128, y: 83, color: penColor},
+               {x: 136, y: 82, color: penColor},
+               {x: 141, y: 82, color: penColor},
+               {x: 128, y: 83, color: penColor}],
+               [{x: 119, y: 185, color: penColor}, // stroke 1
+               {x: 128, y: 183, color: penColor},
+               {x: 136, y: 182, color: penColor},
+               {x: 141, y: 182, color: penColor},
+               {x: 128, y: 183, color: penColor}],
+            ];
+            console.log('@@ dataTest:', dataTest);
+
+            const sigPad = new SignaturePad(sigCanvas, {
+                minWidth: 10, // orig
+                // minWidth: 4,
+                // backgroundColor: 'rgba(255, 255, 255, 0)', // transparent
+                backgroundColor: 'rgba(0, 0, 0, 255)', // debug
+                penColor: penColor,
+                onEnd: () => {
+                    console.log('@@ onEnd(): hi');
+                    const data = sigPad.toData();
+                    console.log('@@ orig data:', data);
+
+                    if (0) { // test restore
+                        sigPad.clear();
+                        sigPad.fromData(data);
+                    }
+                },
+            });
+            sigPad.fromData(dataTest);
+
+            return [sigPad, sigCanvas];
         }
     }
 
