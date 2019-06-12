@@ -29,6 +29,7 @@
 
             const _planeCanvas = Viewer.createPlaneCanvas();
             this.selector = Viewer.createSelector(_planeCanvas);
+            this.plane = this.selector.getObjectByName('plane');
 
             const group = this.getInteractiveGroup();
             group.add(this.selector); // for ray not passing ghrough the selector surface
@@ -39,47 +40,47 @@
             this.scene.add(Threelet.Utils.createTestDirectionalLight());
             this.scene.add(new THREE.GridHelper(10, 20));
 
-            const [_sigPad, _sigCanvas] = Viewer.createSigObjects();
-            const _plane = this.selector.getObjectByName('plane');
-            this.setupMouseInterface(
-                (x, y) => { // onClick
-                    const isec = this.raycastFromMouse(x, y, [_plane], false);
+            this.sigData = Viewer.createSigObjects();
+            this.setupMouseInterface({
+                onClick: (mx, my) => {
+                    const isec = this.mouseToPlaneIntersect(mx, my);
                     if (isec) {
                         // console.log('@@ isec.faceIndex:', isec.faceIndex);
                         this.onPlaneClicked(isec.faceIndex);
                     }
                 },
-                (x, y) => { // onDrag
-                    const isec = this.raycastFromMouse(x, y, [_plane], false);
-                    if (! isec) return;
-
-                    // console.log('@@ isec.point:', isec.point);
+                onDrag: (mx, my) => {
                     // x,y:
                     // -2,2    0,2    2,2
                     //     left   right
                     // -2,0    0,0    2,0
-                    if (isec.point.x > 0) { // in right square
-                        // TODO x, y --> data !!!!!!!!
-                        const penColor = 'rgb(0, 200, 0)';
-                        const dataTest = [
-                           [{x: 119, y: 45, color: penColor}, // stroke 0
-                           {x: 128, y: 43, color: penColor},
-                           {x: 136, y: 42, color: penColor},
-                           {x: 141, y: 42, color: penColor},
-                           {x: 128, y: 43, color: penColor}],
-                           [{x: 119, y: 125, color: penColor}, // stroke 1
-                           {x: 128, y: 123, color: penColor},
-                           {x: 136, y: 122, color: penColor},
-                           {x: 141, y: 122, color: penColor},
-                           {x: 128, y: 123, color: penColor}],
-                        ];
-                        _sigPad.fromData(dataTest);
+                    const isec = this.mouseToPlaneIntersect(mx, my);
+                    if (isec && isec.point.x > 0) { // in right square
+                        // console.log('@@ dragging:', isec.point);
+                        this.applySigPadCall('_strokeUpdate', isec);
                     }
-                });
+                },
+                onDragStart: (mx, my) => {
+                    console.log('@@ onDragStart(): hi');
+                    const isec = this.mouseToPlaneIntersect(mx, my);
+                    if (isec && isec.point.x > 0) { // in right square
+                        console.log('@@ drag start:', isec.point);
+                        this.applySigPadCall('_strokeBegin', isec);
+                    }
+                },
+                onDragEnd: (mx, my) => {
+                    console.log('@@ onDragEnd(): hi');
+                    const isec = this.mouseToPlaneIntersect(mx, my);
+                    if (isec && isec.point.x > 0) { // in right square
+                        console.log('@@ drag end:', isec.point);
+                        this.applySigPadCall('_strokeEnd', isec);
+                    }
+                },
+            });
 
             this._planeClickStart = [-1, -1]; // faceIndex per controller i
             this.on('vr-trigger-press-start', (i) => {
-                const isect = this.raycastFromController(i, [_plane], false)[0];
+                const isect = this.raycastFromController(i, [this.plane], false)[0];
                 if (isect) {
                     console.log('@@ click-start');
                     this._planeClickStart[i] = isect.faceIndex;
@@ -88,7 +89,7 @@
                 }
             });
             this.on('vr-trigger-press-end', (i) => {
-                const isect = this.raycastFromController(i, [_plane], false)[0];
+                const isect = this.raycastFromController(i, [this.plane], false)[0];
                 if (isect) {
                     const faceIndex = isect.faceIndex;
                     console.log('@@ click-end; faceIndex:', faceIndex);
@@ -107,36 +108,60 @@
                 if (1) {
                     planeCtx.fillStyle = '#0cc';
                     planeCtx.fillRect(256*Math.random(), 256*Math.random(), 4, 20);
-                    _plane.material.map.needsUpdate = true;
+                    this.plane.material.map.needsUpdate = true;
                 }
                 if (1) {
-                    planeCtx.drawImage(_sigCanvas, 256, 0);
-                    _plane.material.map.needsUpdate = true;
+                    planeCtx.drawImage(this.sigData.canvas, 256, 0);
+                    this.plane.material.map.needsUpdate = true;
                 }
             };
 
             // this.updateLoop(20);
-            this.updateLoop(4); // debug
+            this.updateLoop(34); // debug
         }
 
-        setupMouseInterface(onClick, onDrag) {
+        applySigPadCall(method, isec) {
+            this.sigData.pad[method](
+                Viewer.createSigPadEvent(isec, this.sigData.canvas));
+        }
+        static createSigPadEvent(isec, sigCanvas, width=256, height=256) {
+            const x = Math.floor(isec.point.x / 2 * width);
+            const y = Math.floor(isec.point.y / 2 * height);
+            const rect = sigCanvas.getBoundingClientRect();
+            // console.log('@@ rect:', rect);
+            return {
+                clientX: x + rect.left,
+                clientY: height - y + rect.top,
+            };
+        }
+
+        mouseToPlaneIntersect(mx, my) {
+            const isec = this.raycastFromMouse(mx, my, [this.plane], false);
+            return isec ? isec : null;
+        }
+
+        setupMouseInterface(callbacks) {
+            const { onClick, onDrag, onDragStart, onDragEnd } = callbacks;
             let _mouseDragging = false;
-            this.on('mouse-down', (x, y) => {
+            this.on('mouse-down', (mx, my) => {
                 _mouseDragging = true;
-                console.log('@@ mouse down:', x, y);
+                console.log('@@ mouse down:', mx, my);
+                onDragStart(mx, my);
             });
-            this.on('mouse-move', (x, y) => {
+            this.on('mouse-move', (mx, my) => {
                 // console.log('@@ mouse move:');
-                if (_mouseDragging) onDrag(x, y);
+                if (_mouseDragging) onDrag(mx, my);
             });
-            this.on('mouse-drag-end', (x, y) => {
+            this.on('mouse-drag-end', (mx, my) => {
                 _mouseDragging = false;
-                console.log('@@ mouse drag end:', x, y);
+                console.log('@@ mouse drag end:', mx, my);
+                onDragEnd(mx, my);
             });
-            this.on('mouse-click', (x, y) => {
+            this.on('mouse-click', (mx, my) => {
                 _mouseDragging = false;
-                console.log('@@ mouse click:', x, y);
-                onClick(x, y);
+                console.log('@@ mouse click:', mx, my);
+                onClick(mx, my);
+                onDragEnd(mx, my);
             });
         }
 
@@ -225,15 +250,18 @@
             console.log('@@ dataTest:', dataTest);
 
             const sigPad = new SignaturePad(sigCanvas, {
-                minWidth: 10, // orig
-                // minWidth: 4,
+                // minWidth: 10, // orig
+                minWidth: 4,
                 // backgroundColor: 'rgba(255, 255, 255, 0)', // transparent
                 backgroundColor: 'rgba(0, 0, 0, 255)', // debug
                 penColor: penColor,
-                onEnd: () => {
-                    console.log('@@ onEnd(): hi');
+                onBegin: (event) => {
+                    console.log('@@ onBegin(): event:', event);
+                },
+                onEnd: (event) => {
+                    console.log('@@ onEnd(): event:', event);
                     const data = sigPad.toData();
-                    console.log('@@ orig data:', data);
+                    console.log('@@ onEnd(): data:', data);
 
                     if (0) { // test restore
                         sigPad.clear();
@@ -241,9 +269,10 @@
                     }
                 },
             });
+            console.log('@@ sigPad:', sigPad);
             sigPad.fromData(dataTest);
 
-            return [sigPad, sigCanvas];
+            return {pad: sigPad, canvas: sigCanvas};
         }
     }
 
