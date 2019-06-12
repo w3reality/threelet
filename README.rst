@@ -1,8 +1,12 @@
 threelet
 ===================
 
-**threelet** is a `three.js <https://github.com/mrdoob/three.js/>`__ based scene viewer.
-It can be also used as a 3D app framework for rapidly making dynamic desktop/VR applications.
+**threelet** is a `three.js <https://github.com/mrdoob/three.js/>`__ based
+VR app framework for rapidly making dynamic 3D browser/WebVR applications.
+
+Using the threelet's built-in features, developers who have a minimal
+knowledge of three.js can immediately start writing interactive 3D apps with less code.
+
 Some notable features include:
 
 - built-in render loop manager (with auto VR context switching),

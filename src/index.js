@@ -1,5 +1,5 @@
 // Threelet - https://github.com/w3reality/threelet
-// A three.js scene viewer with batteries (MIT License)
+// VR app framework based on three.js (MIT License)
 
 const __version = "0.9.15dev";
 
