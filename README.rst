@@ -2,9 +2,9 @@ threelet
 ===================
 
 **threelet** is a `three.js <https://github.com/mrdoob/three.js/>`__ based
-VR app framework for rapidly making dynamic 3D browser/WebVR applications.
+VR app framework for rapidly making 3D browser/WebVR applications.
 
-Using the threelet's built-in features, developers who have a minimal
+Using threelet's built-in features, developers who have a minimal
 knowledge of three.js can immediately start writing interactive 3D apps with less code.
 
 Some notable features include:

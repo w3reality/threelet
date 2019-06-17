@@ -41,6 +41,7 @@
             this.scene.add(new THREE.GridHelper(10, 20));
 
             this.sigData = Viewer.createSigObjects();
+            console.warn('@@ TODO touch screen support....');
             this.setupMouseInterface({
                 onClick: (mx, my) => {
                     const isec = this.mouseToPlaneIntersect(mx, my);
