@@ -14,10 +14,10 @@
     <script src="../deps/Sky.js"></script>
     <script src="../deps/signature_pad.min.js"></script>
 
-    <!-- <script src="../../dist/threelet.min.js"></script> -->
+    <script src="../../dist/threelet.min.js"></script>
     <!-- ==== prod/dev ==== -->
     <script type="module">
-    import Threelet from '../../src/index.js';
+    // import Threelet from '../../src/index.js';
 
 
     const __webColors = [ // https://en.wikipedia.org/wiki/Web_colors
@@ -136,8 +136,8 @@
                 }
             };
 
-            // this.updateLoop(20);
-            this.updateLoop(3); // debug
+            this.updateLoop(30);
+            // this.updateLoop(3); // debug
         } // end onCreate()
 
         applySigPadCall(method, isec) {
@@ -358,7 +358,9 @@
             const sigCanvas = document.createElement('canvas');
             sigCanvas.width = 256;
             sigCanvas.height = 256;
-            document.body.appendChild(sigCanvas);
+            if (0) {
+                document.body.appendChild(sigCanvas);
+            }
 
             const penColor = 'rgb(0, 0, 128)';
             const sigPad = new SignaturePad(sigCanvas, {
@@ -388,7 +390,7 @@
             });
             console.log('@@ sigPad:', sigPad);
 
-            if (1) {
+            if (0) {
                 const dataTest = [
                    [{x: 119, y: 85, color: penColor}, // stroke 0
                    {x: 128, y: 83, color: penColor},
