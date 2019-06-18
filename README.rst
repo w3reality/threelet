@@ -128,7 +128,7 @@ More usage
 
     const threelet = new Threelet({
         canvas: myCanvas,
-        scene: myScene, // instantiate with a custom scene
+        optScene: myScene, // instantiate with a custom scene
     });
 
     threelet.scene.add(myObject) // add an object to the scene
