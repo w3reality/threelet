@@ -77,12 +77,23 @@ class Threelet {
             'mouse-down-left',
             'mouse-down-middle',
             'mouse-down-right',
+            'mouse-move',
+            'mouse-up',
             'mouse-click', // alias of 'mouse-click-left'
             'mouse-click-left',
             'mouse-click-middle',
             'mouse-click-right',
-            'mouse-move',
             'mouse-drag-end',
+            'pointer-down',
+            'pointer-move',
+            'pointer-up',
+            'pointer-click',
+            'pointer-drag-end',
+            'touch-start',
+            'touch-move',
+            'touch-end',
+            'touch-click',
+            'touch-drag-end',
             'vr-touchpad-touch-start',
             'vr-touchpad-touch-end',
             'vr-touchpad-press-start',
@@ -443,6 +454,7 @@ class Threelet {
             console.error('@@ on(): unsupported eventName:', eventName);
         }
     }
+    static _callIfDefined(fn, coords) { if (fn) fn(...coords); }
     _initMouseListeners(canvas) {
         // https://stackoverflow.com/questions/6042202/how-to-distinguish-mouse-click-and-drag
         let isDragging = false; // in closure
@@ -451,54 +463,57 @@ class Threelet {
             const coords = Threelet.getMouseCoords(e, canvas);
             // console.log('@@ mouse down:', ...coords);
             if (e.button === 0) {
-                if (this._eventListeners['mouse-down-left']) {
-                    this._eventListeners['mouse-down-left'](...coords);
-                }
+                Threelet._callIfDefined(this._eventListeners['mouse-down-left'], coords);
             } else if (e.button === 1) {
-                if (this._eventListeners['mouse-down-middle']) {
-                    this._eventListeners['mouse-down-middle'](...coords);
-                }
+                Threelet._callIfDefined(this._eventListeners['mouse-down-middle'], coords);
             } else if (e.button === 2) {
-                if (this._eventListeners['mouse-down-right']) {
-                    this._eventListeners['mouse-down-right'](...coords);
-                }
+                Threelet._callIfDefined(this._eventListeners['mouse-down-right'], coords);
             }
         }, false);
         canvas.addEventListener("mousemove", e => {
             isDragging = true;
             const coords = Threelet.getMouseCoords(e, canvas);
             // console.log('@@ mouse move:', ...coords);
-            if (this._eventListeners['mouse-move']) {
-                this._eventListeners['mouse-move'](...coords);
-            }
+            Threelet._callIfDefined(this._eventListeners['mouse-move'], coords);
         }, false);
         canvas.addEventListener("mouseup", e => {
             // console.log('e:', e);
             const coords = Threelet.getMouseCoords(e, canvas);
+
+            // console.log('@@ mouse up:', ...coords);
+            Threelet._callIfDefined(this._eventListeners['mouse-up'], coords);
+
             if (isDragging) {
                 // console.log("mouseup: drag");
-                if (this._eventListeners['mouse-drag-end']) {
-                    this._eventListeners['mouse-drag-end'](...coords);
-                }
+                Threelet._callIfDefined(this._eventListeners['mouse-drag-end'], coords);
             } else {
                 // console.log("mouseup: click");
                 if (e.button === 0) {
                     // console.log('@@ mouse click left:', ...coords);
-                    if (this._eventListeners['mouse-click-left']) {
-                        this._eventListeners['mouse-click-left'](...coords);
-                    }
+                    Threelet._callIfDefined(this._eventListeners['mouse-click-left'], coords);
                 } else if (e.button === 1) {
-                    if (this._eventListeners['mouse-click-middle']) {
-                        this._eventListeners['mouse-click-middle'](...coords);
-                    }
+                    Threelet._callIfDefined(this._eventListeners['mouse-click-middle'], coords);
                 } else if (e.button === 2) {
                     // console.log('@@ mouse click right:', ...coords);
-                    if (this._eventListeners['mouse-click-right']) {
-                        this._eventListeners['mouse-click-right'](...coords);
-                    }
+                    Threelet._callIfDefined(this._eventListeners['mouse-click-right'], coords);
                 }
             }
         }, false);
+    }
+    _initPointerListeners(canvas) {
+        // 'pointer-down',
+        // 'pointer-move',
+        // 'pointer-up',
+        // 'pointer-click',
+        // 'pointer-drag-end',
+
+    }
+    _initTouchListeners(canvas) {
+        // 'touch-start',
+        // 'touch-move',
+        // 'touch-end',
+        // 'touch-click',
+        // 'touch-drag-end',
     }
 
     _raycast(meshes, recursive, faceExclude) {
