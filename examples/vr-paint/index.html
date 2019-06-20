@@ -53,10 +53,12 @@
             this.scene.add(new THREE.GridHelper(10, 20));
 
             this.sigData = Viewer.createSigObjects();
-            console.warn('@@ TODO mobile touch screen support....');
-            this.setupMouseInterface({
+
+            const inputCallbacks = {
                 onClick: (mx, my) => {
+                    // console.log('@@ onClick(): mx, my:', mx, my);
                     const isec = this.mouseToPlaneIntersect(mx, my);
+                    // console.log('@@ onClick(): isec:', isec);
                     if (isec && isec.point.x < 0) { // in left square
                         // console.log('@@ isec.faceIndex:', isec.faceIndex);
                         this.onLeftPlaneClicked(isec.faceIndex);
@@ -89,7 +91,14 @@
                         this.applySigPadCall('_strokeEnd', isec);
                     }
                 },
-            });
+            };
+            if (1) {
+                this.setupMouseInterface(inputCallbacks);
+                this.setupTouchInterface(inputCallbacks);
+            } else { // requires iOS >= 13
+                this.setupPointerInterface(inputCallbacks);
+            }
+
 
             this._planeClickStart = [-1, -1]; // faceIndex per controller i
             this.on('vr-trigger-press-start', (i) => {
@@ -158,31 +167,6 @@
         mouseToPlaneIntersect(mx, my) {
             const isec = this.raycastFromMouse(mx, my, [this.plane], false);
             return isec ? isec : null;
-        }
-
-        setupMouseInterface(callbacks) {
-            const { onClick, onDrag, onDragStart, onDragEnd } = callbacks;
-            let _mouseDragging = false;
-            this.on('mouse-down', (mx, my) => {
-                _mouseDragging = true;
-                console.log('@@ mouse down:', mx, my);
-                onDragStart(mx, my);
-            });
-            this.on('mouse-move', (mx, my) => {
-                // console.log('@@ mouse move:');
-                if (_mouseDragging) onDrag(mx, my);
-            });
-            this.on('mouse-drag-end', (mx, my) => {
-                _mouseDragging = false;
-                console.log('@@ mouse drag end:', mx, my);
-                onDragEnd(mx, my);
-            });
-            this.on('mouse-click', (mx, my) => {
-                _mouseDragging = false;
-                console.log('@@ mouse click:', mx, my);
-                onClick(mx, my);
-                onDragEnd(mx, my);
-            });
         }
 
         onLeftPlaneClicked(faceIndex) {

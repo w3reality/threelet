@@ -201,14 +201,19 @@ setting mouse listeners (`example <https://w3reality.github.io/threelet/examples
     threelet.on('mouse-click-left', (mx, my) => { /* ... */ });
     threelet.on('mouse-click-middle', (mx, my) => { /* ... */ });
     threelet.on('mouse-click-right', (mx, my) => { /* ... */ });
-
     threelet.on('mouse-down', (mx, my) => { /* ... */ });  // alias of 'mouse-down-left'
     threelet.on('mouse-down-left', (mx, my) => { /* ... */ });
     threelet.on('mouse-down-middle', (mx, my) => { /* ... */ });
     threelet.on('mouse-down-right', (mx, my) => { /* ... */ });
-
     threelet.on('mouse-move', (mx, my) => { /* ... */ });
+    threelet.on('mouse-up', (mx, my) => { /* ... */ });
     threelet.on('mouse-drag-end', (mx, my) => { /* ... */ });
+
+    threelet.on('touch-start', (mx, my) => { /* ... */ });
+    threelet.on('touch-move', (mx, my) => { /* ... */ });
+    threelet.on('touch-end', (mx, my) => { /* ... */ });
+    threelet.on('touch-click', (mx, my) => { /* ... */ });
+    threelet.on('touch-drag-end', (mx, my) => { /* ... */ });
 
 setting VR controller listeners (`example <https://w3reality.github.io/threelet/examples/webvr-controllers/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-controllers/index.html>`__):
 
