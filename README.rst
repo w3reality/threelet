@@ -189,7 +189,27 @@ div element (``threelet.domElement``) that is ready to be embedded into a web pa
     document.getElementById('viewer').appendChild(threelet.domElement);
     </script>
 
-**Event listeners**
+**High-level input management**
+
+(`example <https://w3reality.github.io/threelet/examples/vr-paint/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/vr-paint/index.html>`__):
+
+.. code:: js
+
+    threelet.setupMouseInterface({
+        onClick: (mx, my) => { /* ... */ },
+        onDrag: (mx, my) => { /* ... */ },
+        onDragStart: (mx, my) => { /* ... */ },
+        onDragEnd: (mx, my) => { /* ... */ },
+    });
+
+    threelet.setupTouchInterface({
+        onClick: (mx, my) => { /* ... */ },
+        onDrag: (mx, my) => { /* ... */ },
+        onDragStart: (mx, my) => { /* ... */ },
+        onDragEnd: (mx, my) => { /* ... */ },
+    });
+
+**Low-level Event listeners**
 
 setting mouse listeners (`example <https://w3reality.github.io/threelet/examples/model-selection/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/model-selection/index.html>`__):
 
