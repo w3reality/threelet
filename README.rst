@@ -240,7 +240,7 @@ setting VR controller listeners (`example <https://w3reality.github.io/threelet/
 .. code:: js
 
     // i: controller index
-    // x, y: touchpad coordinates
+    // x, y: controller touchpad coordinates
 
     threelet.on('vr-touchpad-touch-start', (i, x, y) => { /* ... */ });
     threelet.on('vr-touchpad-touch-end', (i, x, y) => { /* ... */ });
