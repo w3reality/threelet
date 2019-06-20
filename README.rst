@@ -209,7 +209,7 @@ div element (``threelet.domElement``) that is ready to be embedded into a web pa
         onDragEnd: (mx, my) => { /* ... */ },
     });
 
-**Low-level Event listeners**
+**Low-level event listeners**
 
 setting mouse listeners (`example <https://w3reality.github.io/threelet/examples/model-selection/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/model-selection/index.html>`__):
 

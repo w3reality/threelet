@@ -59,37 +59,29 @@
                     // console.log('@@ onClick(): mx, my:', mx, my);
                     const isec = this.mouseToPlaneIntersect(mx, my);
                     // console.log('@@ onClick(): isec:', isec);
-                    if (isec && isec.point.x < 0) { // in left square
+                    if (isec && Viewer.isPointOnLeftSquare(isec.point)) {
                         // console.log('@@ isec.faceIndex:', isec.faceIndex);
                         this.onLeftPlaneClicked(isec.faceIndex);
                     }
                 },
                 onDrag: (mx, my) => {
-                    // x,y:
-                    // -2,2    0,2    2,2
-                    //     left   right
-                    // -2,0    0,0    2,0
                     const isec = this.mouseToPlaneIntersect(mx, my);
-                    if (isec && isec.point.x > 0) { // in right square
+                    if (isec && Viewer.isPointOnRightSquare(isec.point)) {
                         // console.log('@@ dragging:', isec.point);
-                        this.applySigPadCall('_strokeUpdate', isec);
+                        this.invokeSigPadCall('_strokeUpdate', isec.point.x, isec.point.y);
                     }
                 },
                 onDragStart: (mx, my) => {
                     console.log('@@ onDragStart(): hi');
                     const isec = this.mouseToPlaneIntersect(mx, my);
-                    if (isec && isec.point.x > 0) { // in right square
+                    if (isec && Viewer.isPointOnRightSquare(isec.point)) {
                         console.log('@@ drag start:', isec.point);
-                        this.applySigPadCall('_strokeBegin', isec);
+                        this.invokeSigPadCall('_strokeBegin', isec.point.x, isec.point.y);
                     }
                 },
                 onDragEnd: (mx, my) => {
                     console.log('@@ onDragEnd(): hi');
-                    const isec = this.mouseToPlaneIntersect(mx, my);
-                    if (isec && isec.point.x > 0) { // in right square
-                        console.log('@@ drag end:', isec.point);
-                        this.applySigPadCall('_strokeEnd', isec);
-                    }
+                    this.invokeSigPadCall('_strokeEnd', -1, -1);
                 },
             };
             if (1) {
@@ -100,62 +92,78 @@
             }
 
 
-            this._planeClickStart = [-1, -1]; // faceIndex per controller i
+            this._vrPressPlaneStart = [-1, -1]; // faceIndex per controller i
             this.on('vr-trigger-press-start', (i) => {
-                const isect = this.raycastFromController(i, [this.plane], false)[0];
-                if (isect) {
-                    console.log('@@ click-start');
-                    this._planeClickStart[i] = isect.faceIndex;
+                const isec = this.vrcontrollerToPlaneIntersect(i);
+                if (isec) {
+                    console.log('@@ vr-press-start');
+                    this._vrPressPlaneStart[i] = isec.faceIndex;
+                    this.invokeSigPadCall('_strokeBegin', isec.point.x, isec.point.y);
                 } else {
-                    this._planeClickStart[i] = -1;
+                    this._vrPressPlaneStart[i] = -1;
                 }
             });
             this.on('vr-trigger-press-end', (i) => {
-                const isect = this.raycastFromController(i, [this.plane], false)[0];
-                if (isect) {
-                    const faceIndex = isect.faceIndex;
-                    console.log('@@ click-end; faceIndex:', faceIndex);
+                this.invokeSigPadCall('_strokeEnd', -1, -1);
+                if (this._vrPressPlaneStart[i] < 0) return;
+
+                const lastFaceIndex = this._vrPressPlaneStart[i];
+                this._vrPressPlaneStart[i] = -1;
+
+                // check vr-click
+                const isec = this.vrcontrollerToPlaneIntersect(i);
+                if (isec) {
+                    const faceIndex = isec.faceIndex;
+                    console.log('@@ vr-press-end; faceIndex:', faceIndex);
                     if (Math.floor(faceIndex/2) ===
-                        Math.floor(this._planeClickStart[i]/2)) {
-                        console.log('@@ click fulfilled for faceIndex:', faceIndex);
-                        // TODO onLeftPlaneClicked(faceIndex)
+                        Math.floor(lastFaceIndex/2)) {
+                        console.log('@@ vr-click fulfilled for faceIndex:', faceIndex);
+                        if (isec && Viewer.isPointOnLeftSquare(isec.point)) {
+                            this.onLeftPlaneClicked(isec.faceIndex);
+                        }
                     }
                 }
-                this._planeClickStart[i] = -1;
             });
+
+            this.planeCtx = _planeCanvas.getContext('2d');
+            this.update = (t, dt) => {
+                for (let i of [0, 1]) {
+                    if (this._vrPressPlaneStart[i] >= 0) {
+                        const isec = this.vrcontrollerToPlaneIntersect(i);
+                        if (isec && Viewer.isPointOnRightSquare(isec.point)) {
+                            this.invokeSigPadCall('_strokeUpdate', isec.point.x, isec.point.y);
+                        }
+                    }
+                }
+                if (0) { // test random stroking
+                    this.planeCtx.fillStyle = this.sigData.pad.penColor;
+                    this.planeCtx.fillRect(
+                        Math.floor(256*Math.random()) + 256,
+                        Math.floor(256*Math.random()),
+                        this.sigData.pad.minWidth * 2, 20);
+                    this.plane.material.map.needsUpdate = true;
+                }
+
+                // transfer texture from sigPad to 3D canvas
+                this.planeCtx.drawImage(this.sigData.canvas, 256, 0);
+                this.plane.material.map.needsUpdate = true;
+            };
 
             // defaults
             this.onSelect('width-4');
             this.onSelect('color-3');
 
-            this.planeCtx = _planeCanvas.getContext('2d');
-            this.update = (t, dt) => {
-                // console.log('@@ update(): hi');
-                if (0) { // test random stroking
-                    this.planeCtx.fillStyle = '#0cc';
-                    this.planeCtx.fillRect(
-                        Math.floor(256*Math.random()),
-                        Math.floor(256*Math.random()),
-                        this.sigData.pad.minWidth * 2, 20);
-                    this.plane.material.map.needsUpdate = true;
-                }
-                if (1) { // transfer texture from sigPad to 3D canvas
-                    this.planeCtx.drawImage(this.sigData.canvas, 256, 0);
-                    this.plane.material.map.needsUpdate = true;
-                }
-            };
-
             this.updateLoop(30);
             // this.updateLoop(3); // debug
         } // end onCreate()
 
-        applySigPadCall(method, isec) {
+        invokeSigPadCall(method, px, py) {
             this.sigData.pad[method](
-                Viewer.createSigPadEvent(isec, this.sigData.canvas));
+                Viewer.createSigPadEvent(px, py, this.sigData.canvas));
         }
-        static createSigPadEvent(isec, sigCanvas, width=256, height=256) {
-            const x = Math.floor(isec.point.x / 2 * width);
-            const y = Math.floor(isec.point.y / 2 * height);
+        static createSigPadEvent(px, py, sigCanvas, width=256, height=256) {
+            const x = Math.floor(px / 2 * width);
+            const y = Math.floor(py / 2 * height);
             const rect = sigCanvas.getBoundingClientRect();
             // console.log('@@ rect:', rect);
             return {
@@ -164,10 +172,23 @@
             };
         }
 
+        // px, py:
+        // -2,2    0,2    2,2
+        //     left   right
+        // -2,0    0,0    2,0
+        static isPointOnLeftSquare(pt) {
+            return pt.x < 0 && pt.x > -2 && pt.y > 0 && pt.y < 2;
+        }
+        static isPointOnRightSquare(pt) {
+            return pt.x > 0 && pt.x < 2 && pt.y > 0 && pt.y < 2;
+        }
         mouseToPlaneIntersect(mx, my) {
             const isec = this.raycastFromMouse(mx, my, [this.plane], false);
             return isec ? isec : null;
         }
+        vrcontrollerToPlaneIntersect(i) {
+            return this.raycastFromController(i, [this.plane], false)[0];
+        };
 
         onLeftPlaneClicked(faceIndex) {
             // console.log('faceIndex:', faceIndex);
