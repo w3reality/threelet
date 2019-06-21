@@ -84,9 +84,18 @@
                     this.invokeSigPadCall('_strokeEnd', -1, -1);
                 },
             };
+
             if (1) {
-                this.setupMouseInterface(inputCallbacks);
-                this.setupTouchInterface(inputCallbacks);
+                if (Threelet.isVrSupported()) {
+                    // KLUDGE - when in desktop mode, Oculus browser triggers
+                    //   both mouse/touch events at a time.
+                    //   also, mouse-drag events seems not being fired...
+                    //   So, enabling only touch events here.
+                    this.setupTouchInterface(inputCallbacks);
+                } else {
+                    this.setupMouseInterface(inputCallbacks);
+                    this.setupTouchInterface(inputCallbacks);
+                }
             } else { // requires iOS >= 13
                 this.setupPointerInterface(inputCallbacks);
             }
@@ -135,6 +144,7 @@
                         }
                     }
                 }
+
                 if (0) { // test random stroking
                     this.planeCtx.fillStyle = this.sigData.pad.penColor;
                     this.planeCtx.fillRect(
@@ -191,7 +201,7 @@
         };
 
         onLeftPlaneClicked(faceIndex) {
-            // console.log('faceIndex:', faceIndex);
+            console.log('faceIndex:', faceIndex);
 
             if (faceIndex >=64) {
                 // map faceIndex to colorIndex: [0, 1, ..., 15]
@@ -224,7 +234,9 @@
                     this.planeCtx.fillStyle = '#fff';
                     this.planeCtx.fillRect(256, 0, 256, 256);
                 } else if (what.endsWith('save')) {
-                    // TODO !!!!!!!!
+                    Threelet.Utils.downloadDataURL(
+                        this.sigData.canvas.toDataURL('image/png'),
+                        `vr-paint-${Threelet.Utils.formatDate(new Date())}.png`);
                 }
             } else if (what.startsWith('width-')) {
                 this.sigData.pad.minWidth =
@@ -374,7 +386,8 @@
                 // minWidth: 4,
                 minWidth: 2,
                 //----
-                backgroundColor: 'rgba(255, 255, 255, 0)', // transparent
+                backgroundColor: 'rgba(255, 255, 255, 255)', // white
+                // backgroundColor: 'rgba(255, 255, 255, 0)', // transparent; "incovenient" for capture()
                 // backgroundColor: 'rgba(0, 0, 0, 255)', // debug
                 penColor: penColor,
                 onBegin: (event) => {
