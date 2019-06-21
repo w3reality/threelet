@@ -181,6 +181,12 @@
                 obj = await this.loadModel(key);
             }
             this.mixer = obj.userData.mixer;
+
+            // now, make sure only the model corresponding to the 'key' is visible
+            for (name of Object.keys(this.paths)) {
+                const obj = this.scene.getObjectByName(name);
+                if (obj) obj.visible = obj.name === key;
+            }
         }
 
         updateMarker(key) {
