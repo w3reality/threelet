@@ -429,7 +429,7 @@
 
     const viewer = new Viewer({
         canvas: document.getElementById("viewer"),
-        // optAxes: false,
+        optAxes: false,
     });
     if (! Threelet.isVrSupported()) { viewer.camera.position.z = 2; }
 
