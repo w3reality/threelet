@@ -38,7 +38,7 @@ Some notable features include:
 
 - In-window VR casting. [ `live <https://w3reality.github.io/threelet/examples/vr-casting-in-window/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/vr-casting-in-window/index.html>`__ ]
 
-- 🔥 vr-paint app [ `live <https://w3reality.github.io/threelet/examples/vr-paint/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/vr-paint/index.html>`__ ]
+- 🔥 vr-paint app [ `live <https://w3reality.github.io/threelet/examples/vr-paint/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/vr-paint>`__ ]
 
 **Screenshots**
 
