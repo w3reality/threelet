@@ -155,6 +155,7 @@
                 }
 
                 // transfer texture from sigPad to 3D canvas
+                Viewer.clearPaintArea(this.planeCtx);
                 this.planeCtx.drawImage(this.sigData.canvas, 256, 0);
                 this.plane.material.map.needsUpdate = true;
             };
@@ -231,8 +232,7 @@
             if (what.startsWith('command-')) {
                 if (what.endsWith('clear')) {
                     this.sigData.pad.clear();
-                    this.planeCtx.fillStyle = '#fff';
-                    this.planeCtx.fillRect(256, 0, 256, 256);
+                    Viewer.clearPaintArea(this.planeCtx);
                 } else if (what.endsWith('save')) {
                     Threelet.Utils.downloadDataURL(
                         this.sigData.canvas.toDataURL('image/png'),
@@ -354,15 +354,19 @@
                 ctx.fillRect(r*64, q*32+128, 64, 32);
             });
         }
+        static clearPaintArea(ctx) {
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(256, 0, 256, 256);
+        }
         static createPlaneCanvas() {
             const planeCanvas = document.createElement('canvas');
             planeCanvas.width = 512;
             planeCanvas.height = 256;
+
             const planeCtx = planeCanvas.getContext('2d');
-            planeCtx.fillStyle = '#fff';
-            planeCtx.fillRect(0, 0, 512, 256);
             planeCtx.fillStyle = '#222';
             planeCtx.fillRect(0, 0, 256, 256);
+            Viewer.clearPaintArea(planeCtx);
 
             Viewer.drawTitle(planeCtx);
             Viewer.drawSelectionCommands(planeCtx);
