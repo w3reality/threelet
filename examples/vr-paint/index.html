@@ -155,9 +155,12 @@
                 }
 
                 // transfer texture from sigPad to 3D canvas
-                Viewer.clearPaintArea(this.planeCtx);
-                this.planeCtx.drawImage(this.sigData.canvas, 256, 0);
-                this.plane.material.map.needsUpdate = true;
+                if (this.sigData.needsUpdate) {
+                    this.sigData.needsUpdate = false;
+                    Viewer.clearPaintArea(this.planeCtx);
+                    this.planeCtx.drawImage(this.sigData.canvas, 256, 0);
+                    this.plane.material.map.needsUpdate = true;
+                }
             };
 
             // defaults
@@ -169,8 +172,14 @@
         } // end onCreate()
 
         invokeSigPadCall(method, px, py) {
-            this.sigData.pad[method](
-                Viewer.createSigPadEvent(px, py, this.sigData.canvas));
+            try {
+                this.sigData.pad[method](
+                    Viewer.createSigPadEvent(px, py, this.sigData.canvas));
+            } catch (e) {
+                console.warn('@@ woops: e:', e);
+                return;
+            }
+            this.sigData.needsUpdate = true;
         }
         static createSigPadEvent(px, py, sigCanvas, width=256, height=256) {
             const x = Math.floor(px / 2 * width);
@@ -427,7 +436,7 @@
                 sigPad.fromData(dataTest);
             }
 
-            return {pad: sigPad, canvas: sigCanvas};
+            return {pad: sigPad, canvas: sigCanvas, needsUpdate: false};
         }
     }
 
