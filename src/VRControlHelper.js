@@ -186,6 +186,7 @@ class VRControlHelper {
             if ( gamepad && ( gamepad.id === 'Daydream Controller' ||
                 gamepad.id === 'Gear VR Controller' || gamepad.id === 'Oculus Go Controller' ||
                 gamepad.id === 'OpenVR Gamepad' || gamepad.id.startsWith( 'Oculus Touch' ) ||
+                gamepad.id.startsWith( 'HTC Vive Focus' ) ||
                 gamepad.id.startsWith( 'Spatial Controller' ) ) ) {
                 if ( j === id ) return gamepad;
                 j ++;
