@@ -1,7 +1,7 @@
 // Threelet - https://github.com/w3reality/threelet
 // VR app framework based on three.js (MIT License)
 
-const __version = "0.9.16dev";
+const __version = "0.9.16";
 
 import VRControlHelper from './VRControlHelper.js';
 import SkyHelper from './SkyHelper.js';
