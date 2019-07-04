@@ -1,6 +1,6 @@
 {
     "name": "threelet",
-    "version": "0.9.16",
+    "version": "0.9.17",
     "description": "VR app framework based on three.js",
     "main": "dist/threelet.js",
     "directories": {

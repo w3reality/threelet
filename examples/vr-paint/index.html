@@ -86,13 +86,14 @@
             };
 
             if (1) {
-                if (Threelet.isVrSupported()) {
+                if (Threelet.isVrSupported()) { // Oculus Go, desktop-firefox
                     // KLUDGE - when in desktop mode, Oculus browser triggers
                     //   both mouse/touch events at a time.
                     //   also, mouse-drag events seems not being fired...
-                    //   So, enabling only touch events here.
-                    this.setupTouchInterface(inputCallbacks);
-                } else {
+                    //   So, enabling only pointer events here
+                    //   (touch events NG for desktop-firefox).
+                    this.setupPointerInterface(inputCallbacks);
+                } else { // desktop-chrome, desktop-safari
                     this.setupMouseInterface(inputCallbacks);
                     this.setupTouchInterface(inputCallbacks);
                 }

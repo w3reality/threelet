@@ -1,7 +1,7 @@
 // Threelet - https://github.com/w3reality/threelet
 // VR app framework based on three.js (MIT License)
 
-const __version = "0.9.16";
+const __version = "0.9.17";
 
 import VRControlHelper from './VRControlHelper.js';
 import SkyHelper from './SkyHelper.js';
@@ -184,11 +184,15 @@ class Threelet {
     _setupControls(Module, opts) {
         this._controls = new Module(this.camera, this.renderer.domElement);
         this._controls.addEventListener('change', this.render.bind(null, false));
-        if (Threelet.isVrSupported()) {
-            // FIXME - OrbitControl breaks _initMouseListeners() on Oculus Go
-            console.warn('not enabling OrbitControls (although requested) on this VR-capable browser.');
-            this._controls.enabled = false; // https://stackoverflow.com/questions/20058579/threejs-disable-orbit-camera-while-using-transform-control
-        }
+
+        Threelet.hasVrDisplay(tf => {
+            if (tf) {
+                // KLUDGE - OrbitControl breaks _initMouseListeners() on Oculus Go
+                console.warn('not enabling OrbitControls (although requested) on this browser with VR display.');
+                this._controls.enabled = false; // https://stackoverflow.com/questions/20058579/threejs-disable-orbit-camera-while-using-transform-control
+            }
+        });
+
         return this._controls;
     }
 
@@ -273,8 +277,12 @@ class Threelet {
         };
         const actual = Object.assign({}, defaults, opts);
 
-        // https://threejs.org/docs/manual/en/introduction/How-to-create-VR-content.html
-        this.renderer.vr.enabled = Threelet.isVrSupported();
+        Threelet.hasVrDisplay(tf => {
+            console.log('hasVrDisplay():', tf);
+            // https://threejs.org/docs/manual/en/introduction/How-to-create-VR-content.html
+            // note: do make sure vr.enabled === false when enabling OrbitControls, or they interfere badly
+            this.renderer.vr.enabled = tf;
+        });
 
         const btn = this._createVRButton(Module);
         actual.appendTo.appendChild(btn);
@@ -286,6 +294,17 @@ class Threelet {
         }
     }
 
+    static hasVrDisplay(cb) {
+        if (this.isVrSupported()) {
+            // Oculus Go -> true
+            // desktop-firefox -> false (displays.length === 0)
+            navigator.getVRDisplays()
+                .then(displays => cb(displays.length > 0))
+                .catch(() => cb(false));
+        } else { // desktop-chrome, desktop-safari
+            cb(false);
+        }
+    }
     static isVrSupported() {
         // https://github.com/mrdoob/three.js/blob/dev/examples/js/vr/WebVR.js
         return 'getVRDisplays' in navigator;
