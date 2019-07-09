@@ -21,6 +21,8 @@ Some notable features include:
 - App with a static scene (mouse-event driven passive rendering) [ `live <https://w3reality.github.io/threelet/examples/simple-static/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple-static/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-a-static-3d-app>`__ ]
 - App with a dynamic scene (rendering at 30 fps) [ `live <https://w3reality.github.io/threelet/examples/simple-dynamic/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple-dynamic/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-a-dynamic-3d-app>`__ ]
 
+- App extending the ``Threelet`` class (Object-Oriented Programming) [ `live <https://w3reality.github.io/threelet/examples/simple-oop/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple-oop/index.html>`__ ]
+
 - Embedding a 3D viewer into a web page. [ `live <https://w3reality.github.io/threelet/examples/embed-inline-block/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/embed-inline-block/index.html>`__ ]
 - Embedding multiple independent viewers into a web page. [ `live <https://w3reality.github.io/threelet/examples/embed-multiple/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/embed-multiple/index.html>`__ ]
 
@@ -38,7 +40,9 @@ Some notable features include:
 
 - In-window VR casting. [ `live <https://w3reality.github.io/threelet/examples/vr-casting-in-window/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/vr-casting-in-window/index.html>`__ ]
 
-- 🔥 vr-paint app [ `live <https://w3reality.github.io/threelet/examples/vr-paint/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/vr-paint>`__ ]
+- vr-paint app [ `live <https://w3reality.github.io/threelet/examples/vr-paint/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/vr-paint>`__ ]
+
+- 🔥 ML app (MNIST with LeNet) [ `live <https://w3reality.github.io/spacial-ml/examples/lenet/index.html>`__ | `source <https://github.com/w3reality/spacial-ml/tree/master/examples/lenet/index.html>`__ ] 🔗
 
 **Screenshots**
 
@@ -172,6 +176,8 @@ Calling the constructor with the default parameters looks as:
     });
 
 **Extending the Threelet class (Object-Oriented Programming)**
+
+(`example <https://w3reality.github.io/threelet/examples/simple-oop/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple-oop/index.html>`__):
 
 .. code:: js
 
