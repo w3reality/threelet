@@ -1,7 +1,7 @@
 // Threelet - https://github.com/w3reality/threelet
 // VR app framework based on three.js (MIT License)
 
-const __version = "0.9.17";
+const __version = "0.9.18dev";
 
 import VRControlHelper from './VRControlHelper.js';
 import SkyHelper from './SkyHelper.js';
@@ -708,12 +708,12 @@ class Threelet {
         this.camera = null;
     }
     static freeScene(scene) {
-        Threelet._freeChildren(scene, scene.children);
+        Threelet.freeChildObjects(scene, scene.children);
     }
-    static _freeChildren(_parent, _children) {
+    static freeChildObjects(_parent, _children) {
         while (_children.length > 0) {
             let ch = _children[0];
-            Threelet._freeChildren(ch, ch.children);
+            Threelet.freeChildObjects(ch, ch.children);
             console.log('@@ freeing: one obj:', ch.name);
             console.log(`@@ freeing obj ${ch.uuid} of ${_parent.uuid}`);
             _parent.remove(ch);
@@ -727,8 +727,8 @@ class Threelet {
         if (obj.texture) obj.texture.dispose();
     }
     static disposeMaterial(mat) {
-        if (mat.map) mat.map.dispose();
-        mat.dispose();
+        if (mat.map && typeof mat.map.dispose === 'function') mat.map.dispose();
+        if (mat && typeof mat.dispose === 'function') mat.dispose();
     }
 }
 
