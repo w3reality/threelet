@@ -171,6 +171,27 @@ Calling the constructor with the default parameters looks as:
         optCameraPosition: [0, 1, 2], // initial camera position in desktop mode
     });
 
+**Extending the Threelet class (Object-Oriented Programming)**
+
+.. code:: js
+
+    class App extends Threelet {
+        // override
+        onCreate(params) {
+            // ...
+        }
+
+        // override
+        onUpdate(t, dt) { // note: this method is not called when this.update is defined
+            // ...
+        }
+
+        // override
+        onDestroy() {
+            // ...
+        }
+    }
+
 **Embedding**
 
 Without the ``canvas`` parameter, the constructor creates an inline-block
