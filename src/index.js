@@ -168,6 +168,12 @@ class Threelet {
     onCreate(params) {
         this.render(); // _first _time
     }
+
+    // note: onUpdate() is not called in case this.update is defined
+    onUpdate(t, dt) {
+        // nop by default
+    }
+
     onDestroy() {
         // nop for the moment
     }
@@ -355,13 +361,12 @@ class Threelet {
         _enterVR(tryCountMax, delay);
     }
 
+
     updateMechanics() { // update for the scene logic
         const time = this.clock.getElapsedTime();
         const dt = time - this.timeLast;
         this.timeLast = time;
-        if (this.update) {
-            this.update(time, dt);
-        }
+        (this.update ? this.update : this.onUpdate.bind(this))(time, dt);
     }
 
     updateLoop(fps) {
