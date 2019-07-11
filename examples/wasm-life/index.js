@@ -1,27 +1,21 @@
-const setup = () => {
-    return new Promise(async (res, rej) => {
-        // https://stackoverflow.com/questions/52239924/webassembly-instantiatestreaming-wrong-mime-type
-        const response = await fetch("./wasm_game_of_life_bg.wasm");
-        const buffer = await response.arrayBuffer();
 
-        // https://stackoverflow.com/questions/48039547/webassembly-typeerror-webassembly-instantiation-imports-argument-must-be-pres
-        const imports = await import('./wasm_game_of_life.js');
-        const obj = await WebAssembly.instantiate(buffer, {
-            './wasm_game_of_life.js': imports,
-        });
-        const wasm = obj.instance.exports;
-        console.log('wasm:', wasm);
+const initBg = (name) => new Promise(async (res, rej) => {
+    // https://stackoverflow.com/questions/52239924/webassembly-instantiatestreaming-wrong-mime-type
+    const response = await fetch(`${name}_bg.wasm`);
+    const buffer = await response.arrayBuffer();
 
-        window.wasm = wasm; // hack
-        const { Universe, Cell } = await import("./wasm_game_of_life.js");
+    // https://stackoverflow.com/questions/48039547/webassembly-typeerror-webassembly-instantiation-imports-argument-must-be-pres
+    const imports = {};
+    imports[`${name}.js`] = await import(`${name}.js`);
+    const obj = await WebAssembly.instantiate(buffer, imports);
+    const _wasm = obj.instance.exports;
+    console.log('_wasm:', _wasm);
 
-        res({
-            Universe: Universe,
-            Cell: Cell,
-            memory: wasm.memory,
-        });
-    });
-};
+    window.wasm = _wasm; // hack
+    const exports = await import(`${name}.js`);
+
+    res(Object.assign({_wasm: _wasm}, exports));
+});
 
 (async () => {
 
@@ -30,7 +24,8 @@ const setup = () => {
 // import { Universe, Cell } from "wasm-game-of-life";
 // import { memory } from "wasm-game-of-life/wasm_game_of_life_bg";
 //======== workaround wasm file loading issues; OK for normal static dev server
-const { Universe, Cell, memory } = await setup();
+const { Universe, Cell, _wasm } = await initBg('./wasm_game_of_life');
+const memory = _wasm.memory;
 //========
 
 // TODO what would be the perf difference when using the canvas via wasm??

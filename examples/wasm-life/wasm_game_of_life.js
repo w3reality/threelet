@@ -1,6 +1,6 @@
 // import * as wasm from './wasm_game_of_life_bg';
 //---- orig / hack ----
-// window.wasm exposed by index.js
+// (window.wasm exposed by index.js)
 
 const heap = new Array(32);
 
