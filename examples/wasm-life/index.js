@@ -33,6 +33,11 @@ const setup = () => {
 const { Universe, Cell, memory } = await setup();
 //========
 
+// TODO what would be the perf difference when using the canvas via wasm??
+//   https://github.com/rustwasm/wasm-bindgen/tree/master/examples/canvas
+
+// https://rustwasm.github.io/docs/book/game-of-life/implementing.html
+
 const CELL_SIZE = 5; // px
 const GRID_COLOR = "#CCCCCC";
 const DEAD_COLOR = "#FFFFFF";
