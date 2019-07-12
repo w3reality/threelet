@@ -1,31 +1,19 @@
 
-const initBg = (name) => new Promise(async (res, rej) => {
-    // https://stackoverflow.com/questions/52239924/webassembly-instantiatestreaming-wrong-mime-type
-    const response = await fetch(`${name}_bg.wasm`);
-    const buffer = await response.arrayBuffer();
-
-    // https://stackoverflow.com/questions/48039547/webassembly-typeerror-webassembly-instantiation-imports-argument-must-be-pres
-    const imports = {};
-    imports[`${name}.js`] = await import(`${name}.js`);
-    const obj = await WebAssembly.instantiate(buffer, imports);
-    const _wasm = obj.instance.exports;
-    console.log('_wasm:', _wasm);
-
-    window.wasm = _wasm; // hack
-    const exports = await import(`${name}.js`);
-
-    res(Object.assign({_wasm: _wasm}, exports));
-});
-
-(async () => {
-
 //======== npm run start (webpack-dev-server) ONLY
 // https://rustwasm.github.io/docs/book/game-of-life/hello-world.html
 // import { Universe, Cell } from "wasm-game-of-life";
 // import { memory } from "wasm-game-of-life/wasm_game_of_life_bg";
 //======== workaround wasm file loading issues; OK for normal static dev server
-const { Universe, Cell, _wasm } = await initBg('./wasm_game_of_life');
-const memory = _wasm.memory;
+(async () => {
+
+window._wasm0 = {}; // wasm object container
+const jsImports = await import('./wasm_game_of_life.js'); // uses the wasm container
+
+// import Threelet from '../../src/index.js'; // dev only
+const { Universe, Cell, wasm } = await Threelet.Utils.loadWasmBindgen(
+    './wasm_game_of_life', jsImports);
+console.log('wasm:', wasm);
+const memory = wasm.memory;
 //========
 
 // TODO what would be the perf difference when using the canvas via wasm??

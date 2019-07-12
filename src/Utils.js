@@ -235,6 +235,22 @@ class Utils {
         return format;
     }
 
+    static loadWasmBindgen(name, jsImports) {
+        return new Promise(async (res, rej) => {
+            try {
+                // https://stackoverflow.com/questions/52239924/webassembly-instantiatestreaming-wrong-mime-type
+                const response = await fetch(`${name}_bg.wasm`);
+                const buffer = await response.arrayBuffer();
+                // https://stackoverflow.com/questions/48039547/webassembly-typeerror-webassembly-instantiation-imports-argument-must-be-pres
+                const obj = await WebAssembly.instantiate(
+                    buffer, {[`${name}.js`]: jsImports});
+                Object.assign(jsImports.wasm, obj.instance.exports);
+                res(jsImports);
+            } catch (e) {
+                rej(e);
+            }
+        });
+    }
 }
 
 export default Utils;
