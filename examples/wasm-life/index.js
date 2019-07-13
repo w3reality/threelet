@@ -6,7 +6,7 @@
 //======== workaround wasm file loading issues; OK for normal static dev server
 (async () => {
 
-window._wasm0 = {}; // wasm object container
+window._wasm0 = {}; // hackish; wasm object container
 const jsImports = await import('./wasm_game_of_life.js'); // uses the wasm container
 
 // import Threelet from '../../src/index.js'; // dev only
@@ -14,6 +14,8 @@ const { Universe, Cell, wasm } = await Threelet.Utils.loadWasmBindgen(
     './wasm_game_of_life', jsImports);
 console.log('wasm:', wasm);
 const memory = wasm.memory;
+
+wasm.greet("test");
 //========
 
 // TODO what would be the perf difference when using the canvas via wasm??

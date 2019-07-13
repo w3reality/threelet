@@ -1,27 +1,8 @@
-// import * as wasm from './wasm_game_of_life_bg';
+//import * as wasm from './wasm_game_of_life_bg';
 //---- orig / hack ----
 // use window._wasm${wasmId} exposed by loadWasmBindgen()
 export const wasm = window._wasm0;
 
-
-const heap = new Array(32);
-
-heap.fill(undefined);
-
-heap.push(undefined, null, true, false);
-
-let heap_next = heap.length;
-
-function addHeapObject(obj) {
-    if (heap_next === heap.length) heap.push(heap.length + 1);
-    const idx = heap_next;
-    heap_next = heap[idx];
-
-    heap[idx] = obj;
-    return idx;
-}
-
-function getObject(idx) { return heap[idx]; }
 
 let WASM_VECTOR_LEN = 0;
 
@@ -89,6 +70,47 @@ if (typeof cachedTextEncoder.encodeInto === 'function') {
         return ptr;
     };
 }
+/**
+* @param {string} name
+* @returns {void}
+*/
+export function greet(name) {
+    const ptr0 = passStringToWasm(name);
+    const len0 = WASM_VECTOR_LEN;
+    try {
+        return wasm.greet(ptr0, len0);
+
+    } finally {
+        wasm.__wbindgen_free(ptr0, len0 * 1);
+
+    }
+
+}
+
+let cachedTextDecoder = new TextDecoder('utf-8');
+
+function getStringFromWasm(ptr, len) {
+    return cachedTextDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
+}
+
+const heap = new Array(32);
+
+heap.fill(undefined);
+
+heap.push(undefined, null, true, false);
+
+let heap_next = heap.length;
+
+function addHeapObject(obj) {
+    if (heap_next === heap.length) heap.push(heap.length + 1);
+    const idx = heap_next;
+    heap_next = heap[idx];
+
+    heap[idx] = obj;
+    return idx;
+}
+
+function getObject(idx) { return heap[idx]; }
 
 let cachegetUint32Memory = null;
 function getUint32Memory() {
@@ -96,12 +118,6 @@ function getUint32Memory() {
         cachegetUint32Memory = new Uint32Array(wasm.memory.buffer);
     }
     return cachegetUint32Memory;
-}
-
-let cachedTextDecoder = new TextDecoder('utf-8');
-
-function getStringFromWasm(ptr, len) {
-    return cachedTextDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
 }
 
 function dropObject(idx) {
@@ -195,6 +211,15 @@ export class Universe {
     }
 }
 
+export const __wbg_alert_fbbeabc2309f67cb = function(arg0, arg1) {
+    let varg0 = getStringFromWasm(arg0, arg1);
+
+    varg0 = varg0.slice();
+    wasm.__wbindgen_free(arg0, arg1 * 1);
+
+    alert(varg0);
+};
+
 export const __wbg_new_59cb74e423758ede = function() {
     return addHeapObject(new Error());
 };
@@ -226,3 +251,4 @@ export const __wbindgen_throw = function(arg0, arg1) {
     let varg0 = getStringFromWasm(arg0, arg1);
     throw new Error(varg0);
 };
+
