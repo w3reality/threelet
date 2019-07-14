@@ -10,7 +10,7 @@
 const bgName = './wasm_game_of_life';
 // (use ${bgName}.js#N (N=0,1,..) in case making multiple wasm instances)
 const { Universe, Cell, wasm } = await Threelet.Utils.loadWasmBindgen(
-    bgName, await import(`${bgName}.js`));
+    bgName, await import(`${bgName}.static.js`));
 
 console.log('wasm:', wasm);
 const memory = wasm.memory;

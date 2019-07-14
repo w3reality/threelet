@@ -1,6 +1,4 @@
-//import * as wasm from './wasm_game_of_life_bg';
-export const wasm = {_timestamp: performance.now()}; // filled by loadWasmBindgen()
-
+export const wasm = {_timestamp: performance.now()}; // to be populated by loadWasmBindgen()
 
 let WASM_VECTOR_LEN = 0;
 
@@ -211,10 +209,6 @@ export class Universe {
 
 export const __wbg_alert_fbbeabc2309f67cb = function(arg0, arg1) {
     let varg0 = getStringFromWasm(arg0, arg1);
-
-    varg0 = varg0.slice();
-    wasm.__wbindgen_free(arg0, arg1 * 1);
-
     alert(varg0);
 };
 
@@ -249,3 +243,4 @@ export const __wbindgen_throw = function(arg0, arg1) {
     let varg0 = getStringFromWasm(arg0, arg1);
     throw new Error(varg0);
 };
+
