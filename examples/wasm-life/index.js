@@ -4,14 +4,14 @@
 // import { Universe, Cell } from "wasm-game-of-life";
 // import { memory } from "wasm-game-of-life/wasm_game_of_life_bg";
 //======== workaround wasm file loading issues; OK for normal static dev server
+// import Threelet from '../../src/index.js'; // dev only
 (async () => {
 
-window._wasm0 = {}; // hackish; wasm object container
-const jsImports = await import('./wasm_game_of_life.js'); // uses the wasm container
-
-// import Threelet from '../../src/index.js'; // dev only
+const bgName = './wasm_game_of_life';
+// (use ${bgName}.js#N (N=0,1,..) in case making multiple wasm instances)
 const { Universe, Cell, wasm } = await Threelet.Utils.loadWasmBindgen(
-    './wasm_game_of_life', jsImports);
+    bgName, await import(`${bgName}.js`));
+
 console.log('wasm:', wasm);
 const memory = wasm.memory;
 

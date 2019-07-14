@@ -1,7 +1,5 @@
 //import * as wasm from './wasm_game_of_life_bg';
-//---- orig / hack ----
-// use window._wasm${wasmId} exposed by loadWasmBindgen()
-export const wasm = window._wasm0;
+export const wasm = {_timestamp: performance.now()}; // filled by loadWasmBindgen()
 
 
 let WASM_VECTOR_LEN = 0;
@@ -251,4 +249,3 @@ export const __wbindgen_throw = function(arg0, arg1) {
     let varg0 = getStringFromWasm(arg0, arg1);
     throw new Error(varg0);
 };
-
