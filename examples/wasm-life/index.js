@@ -15,7 +15,12 @@ const { Universe, Cell, wasm } = await Threelet.Utils.loadWasmBindgen(
 console.log('wasm:', wasm);
 const memory = wasm.memory;
 
-wasm.greet("test");
+if (0) {
+    wasm.greet("test"); // FIXME -- NG; name not shown!!
+    // while webpack-dev-server version (npm run start) in www works
+    //----
+    Universe.greet("test"); // OK; name shown
+}
 //========
 
 // TODO what would be the perf difference when using the canvas via wasm??
@@ -86,29 +91,11 @@ max of last 100 = ${Math.round(max)}
 
 let animationId = null;
 
-const renderLoop = () => {
-  fps.render();
-
-  drawGrid();
-  drawCells();
-
-  for (let i = 0; i < 9; i++) {
-    universe.tick();
-  }
-
-  animationId = requestAnimationFrame(renderLoop);
-};
-
 const isPaused = () => {
   return animationId === null;
 };
 
 const playPauseButton = document.getElementById("play-pause");
-
-const play = () => {
-  playPauseButton.textContent = "⏸";
-  renderLoop();
-};
 
 const pause = () => {
   playPauseButton.textContent = "▶";
@@ -117,12 +104,40 @@ const pause = () => {
 };
 
 playPauseButton.addEventListener("click", event => {
-  if (isPaused()) {
-    play();
-  } else {
-    pause();
-  }
+    if (isPaused()) {
+        universe.tick();
+        play();
+    } else {
+        pause();
+    }
 });
+
+let count = 0;
+const renderLoop = () => {
+    fps.render();
+
+    drawGrid();
+    drawCells();
+
+    //========
+    // for (let i = 0; i < 9; i++) { universe.tick(); }
+    //========
+    if (count === 0) {
+        console.log('pausing at count:', count);
+        pause();
+        return;
+    }
+    count++;
+    //========
+
+    animationId = requestAnimationFrame(renderLoop);
+};
+
+const play = () => {
+  playPauseButton.textContent = "⏸";
+  renderLoop();
+};
+
 
 const drawGrid = () => {
   ctx.beginPath();
