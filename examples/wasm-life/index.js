@@ -126,6 +126,8 @@ const renderLoop = () => {
         console.log('pausing at count:', count);
         pause();
         return;
+    } else {
+        universe.tick();
     }
     count++;
     //========
