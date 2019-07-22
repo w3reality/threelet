@@ -1,8 +1,10 @@
 all: wasm
 
+export CRATE_DIR=./wasm_game_of_life--rustwasm
+export CRATE_NAME=wasm_game_of_life
+MAKE_TARGET=$(MAKE) -f ../wasm/bindgen.mk $@
 wasm:
-	make -C ./wasm_game_of_life--rustwasm
-	cp ./wasm_game_of_life--rustwasm/pkg/wasm_game_of_life*{wasm,static.js} .
+	$(MAKE_TARGET) 
 
 clean:
-	rm -f *_bg.wasm *.static.js
+	$(MAKE_TARGET)

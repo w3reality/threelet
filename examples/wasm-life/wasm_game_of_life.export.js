@@ -108,14 +108,6 @@ function addHeapObject(obj) {
 
 function getObject(idx) { return heap[idx]; }
 
-let cachegetUint32Memory = null;
-function getUint32Memory() {
-    if (cachegetUint32Memory === null || cachegetUint32Memory.buffer !== wasm.memory.buffer) {
-        cachegetUint32Memory = new Uint32Array(wasm.memory.buffer);
-    }
-    return cachegetUint32Memory;
-}
-
 function dropObject(idx) {
     if (idx < 36) return;
     heap[idx] = heap_next;
@@ -126,6 +118,14 @@ function takeObject(idx) {
     const ret = getObject(idx);
     dropObject(idx);
     return ret;
+}
+
+let cachegetUint32Memory = null;
+function getUint32Memory() {
+    if (cachegetUint32Memory === null || cachegetUint32Memory.buffer !== wasm.memory.buffer) {
+        cachegetUint32Memory = new Uint32Array(wasm.memory.buffer);
+    }
+    return cachegetUint32Memory;
 }
 /**
 */
@@ -148,6 +148,22 @@ export class Universe {
         wasm.__wbg_universe_free(ptr);
     }
     /**
+    * @param {string} name
+    * @returns {void}
+    */
+    static greet(name) {
+        const ptr0 = passStringToWasm(name);
+        const len0 = WASM_VECTOR_LEN;
+        try {
+            return wasm.universe_greet(ptr0, len0);
+
+        } finally {
+            wasm.__wbindgen_free(ptr0, len0 * 1);
+
+        }
+
+    }
+    /**
     * @returns {void}
     */
     tick() {
@@ -162,18 +178,44 @@ export class Universe {
     /**
     * @returns {number}
     */
-    width() {
-        return wasm.universe_width(this.ptr) >>> 0;
+    cells() {
+        return wasm.universe_cells(this.ptr);
     }
     /**
-    * Set the width of the universe.
-    *
-    * Resets all cells to the dead state.
-    * @param {number} width
     * @returns {void}
     */
-    set_width(width) {
-        return wasm.universe_set_width(this.ptr, width);
+    dump_cells() {
+        return wasm.universe_dump_cells(this.ptr);
+    }
+    /**
+    * @returns {number}
+    */
+    delta_alive_ptr() {
+        return wasm.universe_delta_alive_ptr(this.ptr);
+    }
+    /**
+    * @returns {number}
+    */
+    delta_alive_size() {
+        return wasm.universe_delta_alive_size(this.ptr) >>> 0;
+    }
+    /**
+    * @returns {number}
+    */
+    delta_dead_ptr() {
+        return wasm.universe_delta_dead_ptr(this.ptr);
+    }
+    /**
+    * @returns {number}
+    */
+    delta_dead_size() {
+        return wasm.universe_delta_dead_size(this.ptr) >>> 0;
+    }
+    /**
+    * @returns {number}
+    */
+    width() {
+        return wasm.universe_width(this.ptr) >>> 0;
     }
     /**
     * @returns {number}
@@ -182,20 +224,18 @@ export class Universe {
         return wasm.universe_height(this.ptr) >>> 0;
     }
     /**
-    * Set the height of the universe.
-    *
-    * Resets all cells to the dead state.
+    * @param {number} width
+    * @returns {void}
+    */
+    set_width(width) {
+        return wasm.universe_set_width(this.ptr, width);
+    }
+    /**
     * @param {number} height
     * @returns {void}
     */
     set_height(height) {
         return wasm.universe_set_height(this.ptr, height);
-    }
-    /**
-    * @returns {number}
-    */
-    cells() {
-        return wasm.universe_cells(this.ptr);
     }
     /**
     * @param {number} row
@@ -210,6 +250,15 @@ export class Universe {
 export const __wbg_alert_fbbeabc2309f67cb = function(arg0, arg1) {
     let varg0 = getStringFromWasm(arg0, arg1);
     alert(varg0);
+};
+
+export const __wbindgen_string_new = function(arg0, arg1) {
+    let varg0 = getStringFromWasm(arg0, arg1);
+    return addHeapObject(varg0);
+};
+
+export const __wbindgen_object_drop_ref = function(arg0) {
+    takeObject(arg0);
 };
 
 export const __wbg_new_59cb74e423758ede = function() {
@@ -235,8 +284,8 @@ export const __wbg_error_4bb6c2a97407129a = function(arg0, arg1) {
     console.error(varg0);
 };
 
-export const __wbindgen_object_drop_ref = function(arg0) {
-    takeObject(arg0);
+export const __widl_f_log_2_ = function(arg0, arg1) {
+    console.log(getObject(arg0), getObject(arg1));
 };
 
 export const __wbindgen_throw = function(arg0, arg1) {
