@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>rust-canvas-hello</title>
+</head>
+<body>
+    <div> <!-- threelet ======== -->
+        <canvas id="app" style="width: 100%; height: 100%;"></canvas>
+    </div>
+
+    <div> <!-- canvas bindgen example ======== -->
+        <!-- <canvas id="canvas" height="256" width="256"></canvas> -->
+    </div>
+
+    <script src="../deps/three.min.js"></script>
+    <script src="../deps/OrbitControls.js"></script>
+    <script src="../deps/WebVR.js"></script>
+    <script src="../deps/Sky.js"></script>
+    <script src="../../dist/threelet.min.js"></script>
+
+    <script type="module">
+    // import Threelet from '../../src/index.js'; // dev only
+
+    // TODO !!!!!!!!!!!!!!
+    // refactor examples/templates/plane-app.js
+    // class App extends PlaneApp {
+    //!!!!!!!!!!!!!!
+    class App extends Threelet {
+        // override
+        onCreate(params) {
+            const controls = this.setup('mod-controls', THREE.OrbitControls);
+            controls.enableRotate = false;
+            // controls.enablePan = false;
+
+            // this.setup('mod-stats', window.Stats, {panelType: 0}); // 0: fps, 1: ms, 2: mb, 3+: custom
+            this.setup('mod-webvr', window.WEBVR);
+            this.setup('mod-sky', THREE.Sky);
+
+            const _planeCanvas = App.createPlaneCanvas(params.planeCanvasId);
+            this.planeCtx = _planeCanvas.getContext('2d');
+            this.selector = App.createSelector(_planeCanvas);
+            this.plane = this.selector.getObjectByName('plane');
+
+            this.selector.add(App.createMarker('commandMarker'));
+
+            const group = this.getInteractiveGroup();
+            group.add(this.selector); // for ray not passing ghrough the selector surface
+            this.scene.add(group);
+
+            this.scene.add(Threelet.Utils.createTestHemisphereLight());
+            this.scene.add(Threelet.Utils.createTestDirectionalLight());
+            this.scene.add(new THREE.GridHelper(10, 20));
+
+            const inputCallbacks = {
+                onClick: (mx, my) => {
+                    const isec = this.mouseToPlaneIntersect(mx, my);
+                    // console.log('@@ onClick(): isec:', isec);
+                    if (isec && App.isPointOnLeftSquare(isec.point)) {
+                        // console.log('@@ isec.faceIndex:', isec.faceIndex);
+                        this.onLeftPlaneClicked(isec.faceIndex);
+                    }
+                },
+            };
+
+            if (1) {
+                if (Threelet.isVrSupported()) { // Oculus Go, desktop-firefox
+                    // KLUDGE - when in desktop mode, Oculus browser triggers
+                    //   both mouse/touch events at a time.
+                    //   also, mouse-drag events seems not being fired...
+                    //   So, enabling only pointer events here
+                    //   (touch events NG for desktop-firefox).
+                    this.setupPointerInterface(inputCallbacks);
+                } else { // desktop-chrome, desktop-safari
+                    this.setupMouseInterface(inputCallbacks);
+                    this.setupTouchInterface(inputCallbacks);
+                }
+            } else { // requires iOS >= 13
+                this.setupPointerInterface(inputCallbacks);
+            }
+
+
+            this._vrPressPlaneStart = [-1, -1]; // faceIndex per controller i
+            this.on('vr-trigger-press-start', (i) => {
+                const isec = this.vrcontrollerToPlaneIntersect(i);
+                if (isec) {
+                    console.log('@@ vr-press-start');
+                    this._vrPressPlaneStart[i] = isec.faceIndex;
+                    // this.invokeSigPadCall('_strokeBegin', isec.point.x, isec.point.y);
+                } else {
+                    this._vrPressPlaneStart[i] = -1;
+                }
+            });
+            this.on('vr-trigger-press-end', (i) => {
+                // this.invokeSigPadCall('_strokeEnd', -1, -1);
+                if (this._vrPressPlaneStart[i] < 0) return;
+
+                const lastFaceIndex = this._vrPressPlaneStart[i];
+                this._vrPressPlaneStart[i] = -1;
+
+                // check vr-click
+                const isec = this.vrcontrollerToPlaneIntersect(i);
+                if (isec) {
+                    const faceIndex = isec.faceIndex;
+                    console.log('@@ vr-press-end; faceIndex:', faceIndex);
+                    if (Math.floor(faceIndex/2) ===
+                        Math.floor(lastFaceIndex/2)) {
+                        console.log('@@ vr-click fulfilled for faceIndex:', faceIndex);
+                        if (isec && App.isPointOnLeftSquare(isec.point)) {
+                            this.onLeftPlaneClicked(isec.faceIndex);
+                        }
+                    }
+                }
+            });
+
+            Threelet.Utils.createCanvasFromImage('./control.png', can => {
+                // console.log('@@ can:', can);
+                // document.body.appendChild(can); // debug
+                this.illustrationCanvas = can;
+            });
+
+            this.scene.add(this.getInteractiveGroup());
+
+            this.cube = Threelet.Utils.createTestCube([0.4, 0.1, 0.4], 0xff00ff);
+            this.scene.add(this.cube);
+        } // end onCreate()
+
+        // override
+        onUpdate(t, dt) {
+            this.cube.position.set(Math.cos(t), 0.5, Math.sin(t));
+            this.cube.rotation.z += dt;
+
+            if (1) { // TODO only when bindgen/clear new draw !!!!!!!!!!!!!!
+                this.plane.material.map.needsUpdate = true;
+            }
+        }
+
+        // px, py:
+        // -2,2    0,2    2,2
+        //     left   right
+        // -2,0    0,0    2,0
+        static isPointOnLeftSquare(pt) {
+            return pt.x < 0 && pt.x > -2 && pt.y > 0 && pt.y < 2;
+        }
+        static isPointOnRightSquare(pt) {
+            return pt.x > 0 && pt.x < 2 && pt.y > 0 && pt.y < 2;
+        }
+        mouseToPlaneIntersect(mx, my) {
+            const isec = this.raycastFromMouse(mx, my, [this.plane], false);
+            return isec ? isec : null;
+        }
+        vrcontrollerToPlaneIntersect(i) {
+            return this.raycastFromController(i, [this.plane], false)[0];
+        };
+
+        onLeftPlaneClicked(faceIndex) {
+            console.log('faceIndex:', faceIndex);
+            switch (faceIndex) {
+                case 32: case 33: this.onSelect('command-predict'); break;
+                case 34: case 35: this.onSelect('command-clear'); break;
+                case 36: case 37: case 38: case 39: this.onSelect('command-src'); break;
+                default: console.log('@@ nop');
+            }
+        }
+        onSelect(what) {
+            if (what.startsWith('command-')) {
+                if (what.endsWith('clear')) {
+                    this.clearPaintArea();
+                    this.updateIllustration(false);
+                } else if (what.endsWith('predict')) {
+                    this.updateIllustration(true);
+                } else if (what.endsWith('src')) {
+                    // document.location.href = 'https://github.com/w3reality';
+                }
+            } else {
+                console.log('@@ onSelect(): nop');
+                return;
+            }
+            this.updateMarker(what);
+        }
+        updateMarker(what) {
+            let name = 'invalid';
+            let markerPos = null; // relative to the selector group
+            if (what.startsWith('command-')) {
+                name = 'commandMarker';
+                if (what.endsWith('predict')) markerPos = [-2+0.25*1, 0.125+0.25, 0.005];
+                if (what.endsWith('clear')) markerPos = [-2+0.25*3, 0.125+0.25, 0.005];
+                if (what.endsWith('src')) markerPos = [-2+0.25*6, 0.125+0.25, 0.005];
+            } else {
+                console.log('@@ updateMarker(): woops'); return;
+            }
+
+            const marker = this.selector.getObjectByName(name);
+            if (! marker) return;
+            marker.position.set(...markerPos);
+            marker.visible = true;
+            marker.scale.set(what.endsWith('src') ? 2 : 1, 1, 1);
+            if (what.startsWith('command-')) {
+                setTimeout(() => { marker.visible = false; }, 500);
+            }
+            this.render();
+        }
+
+        static createMarker(name) {
+            const markerCanvas = document.createElement('canvas');
+            markerCanvas.width = 64;
+            markerCanvas.height = 32;
+            const ctx = markerCanvas.getContext('2d');
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, -6+32, markerCanvas.width, 2);
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, -4+32, markerCanvas.width, 2);
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, -2+32, markerCanvas.width, 2);
+            const marker = Threelet.Utils.createCanvasPlane(markerCanvas, 0.5, 0.25);
+            marker.material.map.magFilter = THREE.NearestFilter;
+            marker.material.map.minFilter = THREE.NearestFilter;
+            marker.material.transparent = true;
+            marker.material.opacity = 0.5;
+            marker.name = name;
+            marker.visible = false;
+            return marker;
+        }
+        static createSelector(planeCanvas) {
+            const selector = new THREE.Group();
+            Threelet.hasVrDisplay(tf => selector.position.set(0, 1, tf ? -3.5 : -0.5));
+
+            const plane = Threelet.Utils.createCanvasPlane(planeCanvas, 4, 2, 8, 8);
+            if (0) { // control tex opacity
+                plane.material.transparent = true;
+                plane.material.opacity = 0.9;
+            }
+            if (1) { // control tex sharpness
+                plane.material.map.magFilter = THREE.NearestFilter;
+                plane.material.map.minFilter = THREE.NearestFilter;
+            }
+
+            plane.name = 'plane';
+            selector.add(plane);
+
+            return selector;
+        }
+
+        drawInfo(lines) {
+            const ctx = this.planeCtx;
+            ctx.fillStyle = '#cccccc';
+            ctx.font = '13px monospace';
+
+            let offset = 3;
+            for (let line of lines) {
+                ctx.fillText(line, 8, (offset++)*32+20);
+            }
+        }
+        updateIllustration(tf) {
+            const ctx = this.planeCtx;
+            if (tf && this.illustrationCanvas) {
+                // draw a 128 x 256 image
+                ctx.drawImage(this.illustrationCanvas, 0, 128);
+            } else { // 'hide' the illustration
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 128, 256, 128);
+            }
+        }
+        clearPaintArea(ctx) {
+            App._clearPaintArea(this.planeCtx);
+        }
+        static _clearPaintArea(ctx) {
+            // ctx.fillStyle = '#000';
+            // ctx.fillRect(256, 0, 256, 256);
+            // ctx.fillStyle = '#fff';
+            // ctx.fillRect(256+16, 16, 224, 224);
+            //----
+            // const clearColor = '#fff';
+            const clearColor = `#${Math.floor(Math.random()*9)}${Math.floor(Math.random()*9)}${Math.floor(Math.random()*9)}`;
+            console.log('clearColor:', clearColor);
+            ctx.fillStyle = clearColor;
+            ctx.fillRect(256, 0, 256, 256);
+        }
+
+        static drawTitle(ctx) {
+            ctx.fillStyle = '#cccccc';
+            ctx.font = '18px monospace';
+            ctx.fillText('🦀rust-canvas-hello', 16, 32+8);
+        }
+        static drawSelectionCommands(ctx) {
+            ctx.fillStyle = '#444444';
+            ctx.fillRect(0*64, 2*32, 64, 32);
+            ctx.fillRect(1*64, 2*32, 64, 32);
+            ctx.fillRect(2*64, 2*32, 64, 32);
+            ctx.fillRect(3*64, 2*32, 64, 32);
+            ctx.fillStyle = '#cccccc';
+            ctx.font = '13px monospace';
+            ctx.fillText('Predict', 0*64+8, 2*32+20);
+            ctx.fillText('Clear', 1*64+8, 2*32+20);
+            ctx.fillText('(source code)', 2*64+8, 2*32+20);
+            // ctx.fillText('-', 3*64+8, 2*32+20);
+        }
+        static createPlaneCanvas(id) {
+            const planeCanvas = document.createElement('canvas');
+            planeCanvas.width = 512;
+            planeCanvas.height = 256;
+            if (1) { // canvas bindgen
+                planeCanvas.id = id;
+                document.body.appendChild(planeCanvas);
+            }
+
+            const planeCtx = planeCanvas.getContext('2d');
+            planeCtx.fillStyle = '#222';
+            planeCtx.fillRect(0, 0, 256, 256);
+            App._clearPaintArea(planeCtx);
+
+            App.drawTitle(planeCtx);
+            App.drawSelectionCommands(planeCtx);
+            return planeCanvas;
+        }
+    }
+
+    const planeCanvasId = 'plane';
+    const app = new App({
+        canvas: document.getElementById("app"),
+        // optAxes: false,
+        planeCanvasId: planeCanvasId,
+    });
+    // app.updateLoop(30);
+    app.updateLoop(2); // debug
+
+    (async () => {
+        const mod = await Threelet.Utils.loadWasmBindgen(
+            './canvas', await import(`./canvas.export.js`));
+        console.log('canvas mod:', mod);
+
+        // mod.draw(planeCanvasId);
+        setTimeout(() => { mod.draw(planeCanvasId); }, 2000);
+
+        const mod2 = await Threelet.Utils.loadWasmBindgen(
+            './julia_set', await import(`./julia_set.export.js`));
+        console.log('mod2:', mod2);
+    })();
+    </script>
+</body>
+</html>
