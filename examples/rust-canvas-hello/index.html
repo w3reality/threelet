@@ -416,39 +416,41 @@
                 const command = what.replace('cmd-', '');
                 switch (command) {
                     case 'resub': {
-                        console.log('re-');
+                        // console.log('re-');
                         this.jsetData.re -= 0.01;
                         this.updateJset();
                         break;
                     }
                     case 'readd': {
-                        console.log('re+');
+                        // console.log('re+');
                         this.jsetData.re += 0.01;
                         this.updateJset();
                         break;
                     }
                     case 'imsub': {
-                        console.log('im-');
+                        // console.log('im-');
                         this.jsetData.im -= 0.01;
                         this.updateJset();
                         break;
                     }
                     case 'imadd': {
-                        console.log('im+');
+                        // console.log('im+');
                         this.jsetData.im += 0.01;
                         this.updateJset();
                         break;
                     }
                     case 'reset': {
+                        // console.log('reset');
                         // this.clearPaintArea();
                         this.jsetData.re = this.reIni;
                         this.jsetData.im = this.imIni;
                         this.updateJset();
-                        console.log('reset'); break;
+                        break;
                     }
                     case 'src': {
-                        // document.location.href = 'https://github.com/w3reality';
-                        console.log('src'); break;
+                        // console.log('src');
+                        document.location.href = 'https://github.com/w3reality/threelet/tree/master/examples/rust-canvas-juliaset';
+                        break;
                     }
                     default: console.log('@@ unknown command:', command);
                 }
