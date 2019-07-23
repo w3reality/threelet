@@ -262,6 +262,35 @@
             //     // document.body.appendChild(can); // debug
             //     this.illustrationCanvas = can;
             // });
+
+            this.reIni = -0.15;
+            this.imIni = 0.65;
+            this.jsetData = {
+                mod: null,
+                re: this.reIni,
+                im: this.imIni,
+            };
+            (async () => {
+                const mod = await Threelet.Utils.loadWasmBindgen(
+                    './julia_set', await import(`./julia_set.export.js`));
+                console.log('juliaset mod:', mod);
+                this.jsetData.mod = mod;
+                this.updateJset();
+            })();
+        }
+
+        updateJset() {
+            const data = this.jsetData;
+            console.log('@@ data:', data);
+            this.updateC(data.re, data.im);
+
+            if (! data.mod) return;
+            if (! this.planeCtx) return;
+            data.mod.draw(this.planeCtx, 256, 256, 0.005*2.4, data.re, data.im);
+        }
+
+        updateC(re, im) {
+            // TODO!!!!!!!!
         }
 
         // updateIllustration(tf) {
@@ -284,6 +313,7 @@
 
         // impl
         drawCommands(ctx) {
+            // TODO fancy refactored method to skip this brute hardcoding...
             //-------- 2nd row
             ctx.fillStyle = '#444444';
             // ctx.fillRect(0*64, 2*32, 64, 32);
@@ -337,7 +367,7 @@
             ctx.fillRect(0*64, 7*32, 64, 32);
             ctx.fillRect(1*64, 7*32, 64, 32);
             ctx.fillStyle = '#cccccc'; //---- bg
-            ctx.fillText('(source code)', 0*64+8, 7*32+20);
+            ctx.fillText('source code', 0*64+8, 7*32+20);
         }
 
         updateMarker(what, row, col, width=1) {
@@ -379,19 +409,34 @@
                 const command = what.replace('cmd-', '');
                 switch (command) {
                     case 'resub': {
-                        console.log('re-'); break;
+                        console.log('re-');
+                        this.jsetData.re -= 0.01;
+                        this.updateJset();
+                        break;
                     }
                     case 'readd': {
-                        console.log('re+'); break;
+                        console.log('re+');
+                        this.jsetData.re += 0.01;
+                        this.updateJset();
+                        break;
                     }
                     case 'imsub': {
-                        console.log('im-'); break;
+                        console.log('im-');
+                        this.jsetData.im -= 0.01;
+                        this.updateJset();
+                        break;
                     }
                     case 'imadd': {
-                        console.log('im+'); break;
+                        console.log('im+');
+                        this.jsetData.im += 0.01;
+                        this.updateJset();
+                        break;
                     }
                     case 'reset': {
-                        this.clearPaintArea();
+                        // this.clearPaintArea();
+                        this.jsetData.re = this.reIni;
+                        this.jsetData.im = this.imIni;
+                        this.updateJset();
                         console.log('reset'); break;
                     }
                     case 'src': {
@@ -423,25 +468,6 @@
 
             // mod.draw(planeCanvasId);
             setTimeout(() => { mod.draw(planeCanvasId); }, 2000);
-        }
-
-        if (1) { // julia_set bindgen example
-            const mod = await Threelet.Utils.loadWasmBindgen(
-                './julia_set', await import(`./julia_set.export.js`));
-            console.log('juliaset mod:', mod);
-
-            const ctx = demo.planeCtx;
-            const scale = 0.005*2.4;
-            mod.draw(ctx, 256, 256, scale, -0.15, 0.65);
-
-            // const realInput = document.getElementById('real');
-            // const imaginaryInput = document.getElementById('imaginary');
-            // const renderBtn = document.getElementById('render');
-            // renderBtn.addEventListener('click', () => {
-            //     const real = parseFloat(realInput.value) || 0;
-            //     const imaginary = parseFloat(imaginaryInput.value) || 0;
-            //     mod.draw(ctx, 256, 256, scale, real, imaginary);
-            // });
         }
     })();
     </script>
