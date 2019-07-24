@@ -28,6 +28,8 @@ Some notable features include:
 
 - Hello glTF animation. [ `live <https://w3reality.github.io/threelet/examples/animation-hello/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/animation-hello/index.html>`__ ]
 
+- 🦀 rust-canvas-hello: Drawing on a 3D plane via `wasm-bindgen <https://github.com/rustwasm/wasm-bindgen>`__ and Rust. [ `live <https://w3reality.github.io/threelet/examples/rust-canvas-hello/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/rust-canvas-hello>`__ ]
+
 **App demos**
 
 - VR app with interactive objects [ `live <https://w3reality.github.io/threelet/examples/webvr-interactive/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-interactive/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-an-interactive-vr-app>`__ ]
@@ -43,6 +45,8 @@ Some notable features include:
 - vr-paint app [ `live <https://w3reality.github.io/threelet/examples/vr-paint/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/vr-paint>`__ ]
 
 - 🔥 ML app (MNIST with LeNet) [ `live <https://w3reality.github.io/spacial-ml/examples/lenet/index.html>`__ | `source <https://github.com/w3reality/spacial-ml/tree/master/examples/lenet/index.html>`__ ] 🔗
+
+- 🦀 rust-canvas-juliaset: Interactive 3D app that can visualize Julia sets. [ `live <https://w3reality.github.io/threelet/examples/rust-canvas-juliaset/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/rust-canvas-juliaset>`__ ]
 
 **Screenshots**
 
