@@ -68,12 +68,9 @@ if (typeof cachedTextEncoder.encodeInto === 'function') {
 }
 /**
 * @param {string} id
-* @returns {void}
 */
 export function draw(id) {
-    const ptr0 = passStringToWasm(id);
-    const len0 = WASM_VECTOR_LEN;
-    return wasm.draw(ptr0, len0);
+    wasm.draw(passStringToWasm(id), WASM_VECTOR_LEN);
 }
 
 const heap = new Array(32);
@@ -121,12 +118,12 @@ function isLikeNone(x) {
     return x === undefined || x === null;
 }
 
-let cachegetUint32Memory = null;
-function getUint32Memory() {
-    if (cachegetUint32Memory === null || cachegetUint32Memory.buffer !== wasm.memory.buffer) {
-        cachegetUint32Memory = new Uint32Array(wasm.memory.buffer);
+let cachegetInt32Memory = null;
+function getInt32Memory() {
+    if (cachegetInt32Memory === null || cachegetInt32Memory.buffer !== wasm.memory.buffer) {
+        cachegetInt32Memory = new Int32Array(wasm.memory.buffer);
     }
-    return cachegetUint32Memory;
+    return cachegetInt32Memory;
 }
 
 function debugString(val) {
@@ -199,11 +196,13 @@ export const __wbindgen_object_drop_ref = function(arg0) {
 };
 
 export const __widl_instanceof_Window = function(arg0) {
-    return getObject(arg0) instanceof Window;
+    const ret = getObject(arg0) instanceof Window;
+    return ret;
 };
 
 export const __widl_instanceof_CanvasRenderingContext2D = function(arg0) {
-    return getObject(arg0) instanceof CanvasRenderingContext2D;
+    const ret = getObject(arg0) instanceof CanvasRenderingContext2D;
+    return ret;
 };
 
 export const __widl_f_begin_path_CanvasRenderingContext2D = function(arg0) {
@@ -218,7 +217,7 @@ export const __widl_f_arc_CanvasRenderingContext2D = function(arg0, arg1, arg2, 
     try {
         getObject(arg0).arc(arg1, arg2, arg3, arg4, arg5);
     } catch (e) {
-        handleError(e);
+        handleError(e)
     }
 };
 
@@ -227,101 +226,98 @@ export const __widl_f_move_to_CanvasRenderingContext2D = function(arg0, arg1, ar
 };
 
 export const __widl_f_get_element_by_id_Document = function(arg0, arg1, arg2) {
-    let varg1 = getStringFromWasm(arg1, arg2);
-
-    const val = getObject(arg0).getElementById(varg1);
-    return isLikeNone(val) ? 0 : addHeapObject(val);
-
+    const ret = getObject(arg0).getElementById(getStringFromWasm(arg1, arg2));
+    return isLikeNone(ret) ? 0 : addHeapObject(ret);
 };
 
 export const __widl_instanceof_HTMLCanvasElement = function(arg0) {
-    return getObject(arg0) instanceof HTMLCanvasElement;
+    const ret = getObject(arg0) instanceof HTMLCanvasElement;
+    return ret;
 };
 
 export const __widl_f_get_context_HTMLCanvasElement = function(arg0, arg1, arg2) {
-    let varg1 = getStringFromWasm(arg1, arg2);
     try {
-
-        const val = getObject(arg0).getContext(varg1);
-        return isLikeNone(val) ? 0 : addHeapObject(val);
-
+        const ret = getObject(arg0).getContext(getStringFromWasm(arg1, arg2));
+        return isLikeNone(ret) ? 0 : addHeapObject(ret);
     } catch (e) {
-        handleError(e);
+        handleError(e)
     }
 };
 
 export const __widl_f_document_Window = function(arg0) {
-
-    const val = getObject(arg0).document;
-    return isLikeNone(val) ? 0 : addHeapObject(val);
-
+    const ret = getObject(arg0).document;
+    return isLikeNone(ret) ? 0 : addHeapObject(ret);
 };
 
-export const __wbg_call_836fa928f74337e5 = function(arg0, arg1) {
+export const __wbg_call_1fc553129cb17c3c = function(arg0, arg1) {
     try {
-        return addHeapObject(getObject(arg0).call(getObject(arg1)));
+        const ret = getObject(arg0).call(getObject(arg1));
+        return addHeapObject(ret);
     } catch (e) {
-        handleError(e);
+        handleError(e)
     }
 };
 
 export const __wbindgen_object_clone_ref = function(arg0) {
-    return addHeapObject(getObject(arg0));
+    const ret = getObject(arg0);
+    return addHeapObject(ret);
 };
 
-export const __wbg_newnoargs_8d1797b163dbc9fb = function(arg0, arg1) {
-    let varg0 = getStringFromWasm(arg0, arg1);
-    return addHeapObject(new Function(varg0));
+export const __wbg_newnoargs_368b05293a3f44de = function(arg0, arg1) {
+    const ret = new Function(getStringFromWasm(arg0, arg1));
+    return addHeapObject(ret);
 };
 
-export const __wbg_globalThis_9ddb3fffb60b1a36 = function() {
+export const __wbg_globalThis_8df2c73db5eac245 = function() {
     try {
-        return addHeapObject(globalThis.globalThis);
+        const ret = globalThis.globalThis;
+        return addHeapObject(ret);
     } catch (e) {
-        handleError(e);
+        handleError(e)
     }
 };
 
-export const __wbg_self_0575d7e8e3453fe9 = function() {
+export const __wbg_self_937dd9f384d2384a = function() {
     try {
-        return addHeapObject(self.self);
+        const ret = self.self;
+        return addHeapObject(ret);
     } catch (e) {
-        handleError(e);
+        handleError(e)
     }
 };
 
-export const __wbg_window_b43c0cab39940cfc = function() {
+export const __wbg_window_425d3fa09c43ece4 = function() {
     try {
-        return addHeapObject(window.window);
+        const ret = window.window;
+        return addHeapObject(ret);
     } catch (e) {
-        handleError(e);
+        handleError(e)
     }
 };
 
-export const __wbg_global_cc4dfb2588e840fb = function() {
+export const __wbg_global_2c090b42ef2744b9 = function() {
     try {
-        return addHeapObject(global.global);
+        const ret = global.global;
+        return addHeapObject(ret);
     } catch (e) {
-        handleError(e);
+        handleError(e)
     }
 };
 
 export const __wbindgen_is_undefined = function(arg0) {
-    return getObject(arg0) === undefined;
+    const ret = getObject(arg0) === undefined;
+    return ret;
 };
 
-export const __wbindgen_debug_string = function(ret, arg0) {
-
-    const retptr = passStringToWasm(debugString(getObject(arg0)));
-    const retlen = WASM_VECTOR_LEN;
-    const mem = getUint32Memory();
-    mem[ret / 4] = retptr;
-    mem[ret / 4 + 1] = retlen;
-
+export const __wbindgen_debug_string = function(arg0, arg1) {
+    const ret = debugString(getObject(arg1));
+    const ret0 = passStringToWasm(ret);
+    const ret1 = WASM_VECTOR_LEN;
+    getInt32Memory()[arg0 / 4 + 0] = ret0;
+    getInt32Memory()[arg0 / 4 + 1] = ret1;
 };
 
 export const __wbindgen_throw = function(arg0, arg1) {
-    let varg0 = getStringFromWasm(arg0, arg1);
-    throw new Error(varg0);
+    throw new Error(getStringFromWasm(arg0, arg1));
 };
 
