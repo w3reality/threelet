@@ -20,17 +20,13 @@ function addBorrowedObject(obj) {
 * @param {number} scale
 * @param {number} real
 * @param {number} imaginary
-* @returns {void}
 */
 export function draw(ctx, width, height, scale, real, imaginary) {
     try {
-        return wasm.draw(addBorrowedObject(ctx), width, height, scale, real, imaginary);
-
+        wasm.draw(addBorrowedObject(ctx), width, height, scale, real, imaginary);
     } finally {
         heap[stack_pointer++] = undefined;
-
     }
-
 }
 
 function getObject(idx) { return heap[idx]; }
@@ -96,22 +92,21 @@ export const __widl_f_put_image_data_CanvasRenderingContext2D = function(arg0, a
     try {
         getObject(arg0).putImageData(getObject(arg1), arg2, arg3);
     } catch (e) {
-        handleError(e);
+        handleError(e)
     }
 };
 
 export const __widl_f_new_with_u8_clamped_array_and_sh_ImageData = function(arg0, arg1, arg2, arg3) {
-    let varg0 = getClampedArrayU8FromWasm(arg0, arg1);
     try {
-        return addHeapObject(new ImageData(varg0, arg2 >>> 0, arg3 >>> 0));
+        const ret = new ImageData(getClampedArrayU8FromWasm(arg0, arg1), arg2 >>> 0, arg3 >>> 0);
+        return addHeapObject(ret);
     } catch (e) {
-        handleError(e);
+        handleError(e)
     }
 };
 
 export const __wbindgen_throw = function(arg0, arg1) {
-    let varg0 = getStringFromWasm(arg0, arg1);
-    throw new Error(varg0);
+    throw new Error(getStringFromWasm(arg0, arg1));
 };
 
 export const __wbindgen_rethrow = function(arg0) {
