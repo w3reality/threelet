@@ -90,17 +90,21 @@ class PlaneApp extends Threelet {
 
         this.scene.add(this.getInteractiveGroup());
 
-        this.cube = Threelet.Utils.createTestCube([0.4, 0.1, 0.4], 0xff00ff);
-        this.scene.add(this.cube);
+        if (params.debugCube) {
+            this.cube = Threelet.Utils.createTestCube([0.4, 0.1, 0.4], 0xff00ff);
+            this.scene.add(this.cube);
+        }
     } // end onCreate()
+
+    setPlaneNeedsUpdate(tf) {
+        this.plane.material.map.needsUpdate = tf;
+    }
 
     // override
     onUpdate(t, dt) {
-        this.cube.position.set(Math.cos(t), 0.5, Math.sin(t));
-        this.cube.rotation.z += dt;
-
-        if (1) { // TODO only when bindgen/clear new draw !!!!!!!!!!!!!!
-            this.plane.material.map.needsUpdate = true;
+        if (this.cube) {
+            this.cube.position.set(Math.cos(t), 0.5, Math.sin(t));
+            this.cube.rotation.z += dt;
         }
     }
 
@@ -192,19 +196,12 @@ class PlaneApp extends Threelet {
         const planeCanvas = document.createElement('canvas');
         planeCanvas.width = 512;
         planeCanvas.height = 256;
-        if (0) { // only for canvas bindgen example
-            planeCanvas.id = id;
-            document.body.appendChild(planeCanvas);
-        }
 
         const planeCtx = planeCanvas.getContext('2d');
         planeCtx.fillStyle = '#222';
         planeCtx.fillRect(0, 0, 256, 256);
         PlaneApp._clearPaintArea(planeCtx);
 
-        // PlaneApp.drawTitle(planeCtx);
-        // this.drawTitle();
-        // PlaneApp.drawSelectionCommands(planeCtx);
         return planeCanvas;
     }
 

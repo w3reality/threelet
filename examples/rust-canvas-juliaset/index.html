@@ -52,6 +52,7 @@
             if (ctx && mod) {
                 Demo.drawC(ctx, re, im);
                 mod.draw(ctx, 256, 256, 0.005*2.4, re, im);
+                this.setPlaneNeedsUpdate(true);
             }
         }
 
@@ -228,6 +229,7 @@
     const demo = new Demo({
         canvas: document.getElementById("demo"),
         optAxes: false,
+        // debugCube: true,
     });
     // demo.updateLoop(30);
     demo.updateLoop(2); // debug
