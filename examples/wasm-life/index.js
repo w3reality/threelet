@@ -1,27 +1,27 @@
-// This file is a mod of
+// This is a derived work of
 // https://github.com/rustwasm/wasm_game_of_life/blob/master/www/index.js
+// with the following changes:
+//
+// - ...
+// - ...
 
-//======== npm run start (webpack-dev-server) ONLY
-// https://rustwasm.github.io/docs/book/game-of-life/hello-world.html
-// import { Universe, Cell } from "wasm-game-of-life";
-// import { memory } from "wasm-game-of-life/wasm_game_of_life_bg";
-//======== workaround wasm file loading issues; OK for normal static dev server
-// import Threelet from '../../src/index.js'; // dev only
 (async () => {
 
 const bgName = './wasm_game_of_life';
 // (use ${bgName}.js#N (N=0,1,..) in case making multiple wasm instances)
-const { Universe, Cell, wasm } = await Threelet.Utils.loadWasmBindgen(
-    bgName, await import(`${bgName}.static.js`));
+const mod = await Threelet.Utils.loadWasmBindgen(
+    bgName, await import(`${bgName}.export.js`));
+console.log('mod:', mod);
 
+const { Universe, Cell, wasm } = mod;
 console.log('wasm:', wasm);
 const memory = wasm.memory;
 
 if (0) {
-    wasm.greet("test"); // FIXME -- NG; name not shown!!
-    // while webpack-dev-server version (npm run start) in www works
+    mod.greet("expect OK"); // OK
+    wasm.greet("expect NG"); // NG; name not shown!!
     //----
-    Universe.greet("test"); // OK; name shown
+    Universe.greet("expect OK"); // OK; name shown
 }
 //========
 
@@ -71,27 +71,48 @@ const _fillCell = (ctx, row, col) => {
 const getIndex = (row, column) => {
     return row * width + column;
 };
-const drawCells = () => {
-    const cellsPtr = universe.cells();
-    const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
+const drawCells = (useDelta=true) => {
+    if (useDelta) { // delta version
+        // universe.dump_cells(); // debug
 
-    // Alive cells.
-    ctx.fillStyle = ALIVE_COLOR;
-    for (let row = 0; row < height; row++) {
-        for (let col = 0; col < width; col++) {
-            const idx = getIndex(row, col);
-            if (cells[idx] !== Cell.Alive) continue;
-            _fillCell(ctx, row, col);
+        const deltaAlive = new Uint32Array(memory.buffer,
+            universe.delta_alive_ptr(), universe.delta_alive_size());
+        const deltaDead = new Uint32Array(memory.buffer,
+            universe.delta_dead_ptr(), universe.delta_dead_size());
+        // console.log('delta:', deltaAlive, deltaDead);
+
+        ctx.fillStyle = ALIVE_COLOR;
+        for (let idx of deltaAlive) {
+            _fillCell(ctx, Math.floor(idx/width), idx % width);
         }
-    }
 
-    // Dead cells.
-    ctx.fillStyle = DEAD_COLOR;
-    for (let row = 0; row < height; row++) {
-        for (let col = 0; col < width; col++) {
-            const idx = getIndex(row, col);
-            if (cells[idx] !== Cell.Dead) continue;
-            _fillCell(ctx, row, col);
+        ctx.fillStyle = DEAD_COLOR;
+        for (let idx of deltaDead) {
+            _fillCell(ctx, Math.floor(idx/width), idx % width);
+        }
+    } else { // orig version
+        const cellsPtr = universe.cells();
+        // console.log('cellsPtr:', cellsPtr);
+        const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
+
+        // Alive cells.
+        ctx.fillStyle = ALIVE_COLOR;
+        for (let row = 0; row < height; row++) {
+            for (let col = 0; col < width; col++) {
+                const idx = getIndex(row, col);
+                if (cells[idx] !== Cell.Alive) continue;
+                _fillCell(ctx, row, col);
+            }
+        }
+
+        // Dead cells.
+        ctx.fillStyle = DEAD_COLOR;
+        for (let row = 0; row < height; row++) {
+            for (let col = 0; col < width; col++) {
+                const idx = getIndex(row, col);
+                if (cells[idx] !== Cell.Dead) continue;
+                _fillCell(ctx, row, col);
+            }
         }
     }
 };
@@ -147,7 +168,7 @@ const fps = new class {
 
         // Render the statistics.
         this.fps.textContent = `
-frame: ${frame}
+[frame: ${frame}]
 fps:
          latest = ${Math.round(fps)}
 avg of last 100 = ${Math.round(mean)}
@@ -162,31 +183,46 @@ let animationId = null;
 let _count = 0;
 let _frame = 0;
 const renderLoop = () => {
+    if (1 && _frame > 1000) {
+        console.log('reached 1000 frames:', performance.now());
+        return;
+    }
     fps.render(_frame);
 
-    console.log('renderLoop(): draw{Grid,Cells}() for frame:', _frame);
-    drawGrid();
-    drawCells();
-
-    //========
-    // for (let i = 0; i < 9; i++) {
-    //     universe.tick();
-    //     _frame++;
-    // }
-    //========
-    if (_count === 0) {
-    // if (_count === 33) {
-        console.log('pausing at _count:', _count);
-        pause();
-        return;
-    } else {
-        universe.tick();
-        _frame++;
+    if (0) { // dev
+        const useDelta = true;
+        // const useDelta = false;
+        drawGrid();
+        drawCells(useDelta);
+        console.log('renderLoop(): draw{Grid,Cells}() done for frame:', _frame);
+        if (_count === 0) {
+        // if (_count === 33) {
+            console.log('pausing at _count:', _count);
+            pause(); return;
+        } else {
+            universe.tick(); _frame++;
+        }
+        _count++;
+        //======== ========
+        // improvements:
+        // (203-170)/203 = 0.1625 (render every frame)
+        // (2815-2439)/2815 = 0.1335 (render every 10 frame)
+    } else if (1) { // 60 fps; reached 1000 frames: 17083.40
+        for (let i = 0; i < 9; i++) { // delta; [oculusGo 25fps] ~ 60 fps; 2439.93/1000frames
+            drawGrid();
+            drawCells(true);
+            universe.tick(); _frame++;
+        }
+    } else { // ~ 50 fps; reached 1000 frames: 20317.23
+        drawGrid();
+        drawCells(false);
+        for (let i = 0; i < 9; i++) { // orig; [oculusGo 7fps] ~ 45 fps; 2815.78/1000frames
+            universe.tick(); _frame++;
+        }
     }
-    _count++;
-    //========
 
     animationId = requestAnimationFrame(renderLoop);
+    // renderLoop(); // bench without rAF restriction !!!!!!!!!!!
 };
 
 const playPauseButton = document.getElementById("play-pause");
@@ -201,8 +237,7 @@ const pause = () => {
 };
 playPauseButton.addEventListener("click", event => {
     if (animationId === null) { // if paused
-        universe.tick();
-        _frame++;
+        universe.tick(); _frame++;
         play();
     } else {
         pause();

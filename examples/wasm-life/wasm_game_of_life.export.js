@@ -68,19 +68,9 @@ if (typeof cachedTextEncoder.encodeInto === 'function') {
 }
 /**
 * @param {string} name
-* @returns {void}
 */
 export function greet(name) {
-    const ptr0 = passStringToWasm(name);
-    const len0 = WASM_VECTOR_LEN;
-    try {
-        return wasm.greet(ptr0, len0);
-
-    } finally {
-        wasm.__wbindgen_free(ptr0, len0 * 1);
-
-    }
-
+    wasm.greet(passStringToWasm(name), WASM_VECTOR_LEN);
 }
 
 let cachedTextDecoder = new TextDecoder('utf-8');
@@ -120,12 +110,12 @@ function takeObject(idx) {
     return ret;
 }
 
-let cachegetUint32Memory = null;
-function getUint32Memory() {
-    if (cachegetUint32Memory === null || cachegetUint32Memory.buffer !== wasm.memory.buffer) {
-        cachegetUint32Memory = new Uint32Array(wasm.memory.buffer);
+let cachegetInt32Memory = null;
+function getInt32Memory() {
+    if (cachegetInt32Memory === null || cachegetInt32Memory.buffer !== wasm.memory.buffer) {
+        cachegetInt32Memory = new Int32Array(wasm.memory.buffer);
     }
-    return cachegetUint32Memory;
+    return cachegetInt32Memory;
 }
 /**
 */
@@ -149,112 +139,104 @@ export class Universe {
     }
     /**
     * @param {string} name
-    * @returns {void}
     */
     static greet(name) {
-        const ptr0 = passStringToWasm(name);
-        const len0 = WASM_VECTOR_LEN;
-        try {
-            return wasm.universe_greet(ptr0, len0);
-
-        } finally {
-            wasm.__wbindgen_free(ptr0, len0 * 1);
-
-        }
-
+        wasm.universe_greet(passStringToWasm(name), WASM_VECTOR_LEN);
     }
     /**
-    * @returns {void}
     */
     tick() {
-        return wasm.universe_tick(this.ptr);
+        wasm.universe_tick(this.ptr);
     }
     /**
     * @returns {Universe}
     */
     static new() {
-        return Universe.__wrap(wasm.universe_new());
+        const ret = wasm.universe_new();
+        return Universe.__wrap(ret);
     }
     /**
     * @returns {number}
     */
     cells() {
-        return wasm.universe_cells(this.ptr);
+        const ret = wasm.universe_cells(this.ptr);
+        return ret;
     }
     /**
-    * @returns {void}
     */
     dump_cells() {
-        return wasm.universe_dump_cells(this.ptr);
+        wasm.universe_dump_cells(this.ptr);
     }
     /**
     * @returns {number}
     */
     delta_alive_ptr() {
-        return wasm.universe_delta_alive_ptr(this.ptr);
+        const ret = wasm.universe_delta_alive_ptr(this.ptr);
+        return ret;
     }
     /**
     * @returns {number}
     */
     delta_alive_size() {
-        return wasm.universe_delta_alive_size(this.ptr) >>> 0;
+        const ret = wasm.universe_delta_alive_size(this.ptr);
+        return ret >>> 0;
     }
     /**
     * @returns {number}
     */
     delta_dead_ptr() {
-        return wasm.universe_delta_dead_ptr(this.ptr);
+        const ret = wasm.universe_delta_dead_ptr(this.ptr);
+        return ret;
     }
     /**
     * @returns {number}
     */
     delta_dead_size() {
-        return wasm.universe_delta_dead_size(this.ptr) >>> 0;
+        const ret = wasm.universe_delta_dead_size(this.ptr);
+        return ret >>> 0;
     }
     /**
     * @returns {number}
     */
     width() {
-        return wasm.universe_width(this.ptr) >>> 0;
+        const ret = wasm.universe_width(this.ptr);
+        return ret >>> 0;
     }
     /**
     * @returns {number}
     */
     height() {
-        return wasm.universe_height(this.ptr) >>> 0;
+        const ret = wasm.universe_height(this.ptr);
+        return ret >>> 0;
     }
     /**
     * @param {number} width
-    * @returns {void}
     */
     set_width(width) {
-        return wasm.universe_set_width(this.ptr, width);
+        wasm.universe_set_width(this.ptr, width);
     }
     /**
     * @param {number} height
-    * @returns {void}
     */
     set_height(height) {
-        return wasm.universe_set_height(this.ptr, height);
+        wasm.universe_set_height(this.ptr, height);
     }
     /**
     * @param {number} row
     * @param {number} column
-    * @returns {void}
     */
     toggle_cell(row, column) {
-        return wasm.universe_toggle_cell(this.ptr, row, column);
+        wasm.universe_toggle_cell(this.ptr, row, column);
     }
 }
 
 export const __wbg_alert_fbbeabc2309f67cb = function(arg0, arg1) {
-    let varg0 = getStringFromWasm(arg0, arg1);
-    alert(varg0);
+    alert(getStringFromWasm(arg0, arg1));
 };
 
 export const __wbindgen_string_new = function(arg0, arg1) {
-    let varg0 = getStringFromWasm(arg0, arg1);
-    return addHeapObject(varg0);
+    const ret = getStringFromWasm(arg0, arg1);
+    return addHeapObject(ret);
 };
 
 export const __wbindgen_object_drop_ref = function(arg0) {
@@ -262,26 +244,22 @@ export const __wbindgen_object_drop_ref = function(arg0) {
 };
 
 export const __wbg_new_59cb74e423758ede = function() {
-    return addHeapObject(new Error());
+    const ret = new Error();
+    return addHeapObject(ret);
 };
 
-export const __wbg_stack_558ba5917b466edd = function(ret, arg0) {
-
-    const retptr = passStringToWasm(getObject(arg0).stack);
-    const retlen = WASM_VECTOR_LEN;
-    const mem = getUint32Memory();
-    mem[ret / 4] = retptr;
-    mem[ret / 4 + 1] = retlen;
-
+export const __wbg_stack_558ba5917b466edd = function(arg0, arg1) {
+    const ret = getObject(arg1).stack;
+    const ret0 = passStringToWasm(ret);
+    const ret1 = WASM_VECTOR_LEN;
+    getInt32Memory()[arg0 / 4 + 0] = ret0;
+    getInt32Memory()[arg0 / 4 + 1] = ret1;
 };
 
 export const __wbg_error_4bb6c2a97407129a = function(arg0, arg1) {
-    let varg0 = getStringFromWasm(arg0, arg1);
-
-    varg0 = varg0.slice();
+    const v0 = getStringFromWasm(arg0, arg1).slice();
     wasm.__wbindgen_free(arg0, arg1 * 1);
-
-    console.error(varg0);
+    console.error(v0);
 };
 
 export const __widl_f_log_2_ = function(arg0, arg1) {
@@ -289,7 +267,6 @@ export const __widl_f_log_2_ = function(arg0, arg1) {
 };
 
 export const __wbindgen_throw = function(arg0, arg1) {
-    let varg0 = getStringFromWasm(arg0, arg1);
-    throw new Error(varg0);
+    throw new Error(getStringFromWasm(arg0, arg1));
 };
 
