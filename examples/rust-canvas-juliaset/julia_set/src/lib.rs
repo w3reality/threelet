@@ -1,3 +1,9 @@
+// This is a derived work of
+// https://github.com/rustwasm/wasm-bindgen/blob/master/examples/julia_set/src/lib.rs
+// with the following changes:
+//
+// - Add scale: f64 parameter in draw()
+
 use std::ops::Add;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::Clamped;
@@ -8,20 +14,18 @@ pub fn draw(
     ctx: &CanvasRenderingContext2d,
     width: u32,
     height: u32,
-    scale: f64, // !! added
+    scale: f64,
     real: f64,
     imaginary: f64,
 ) -> Result<(), JsValue> {
     // The real workhorse of this algorithm, generating pixel data
     let c = Complex { real, imaginary };
-    // let mut data = get_julia_set(width, height, c);
     let mut data = get_julia_set(width, height, scale, c);
     let data = ImageData::new_with_u8_clamped_array_and_sh(Clamped(&mut data), width, height)?;
     // ctx.put_image_data(&data, 0.0, 0.0)
     ctx.put_image_data(&data, 256.0, 0.0)
 }
 
-// fn get_julia_set(width: u32, height: u32, c: Complex) -> Vec<u8> {
 fn get_julia_set(width: u32, height: u32, scale: f64, c: Complex) -> Vec<u8> {
     let mut data = Vec::new();
 

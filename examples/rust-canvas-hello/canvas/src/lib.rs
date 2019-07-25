@@ -1,3 +1,9 @@
+// This is a derived work of
+// https://github.com/rustwasm/wasm-bindgen/blob/master/examples/canvas/src/lib.rs
+// with the following changes:
+//
+// - Add a canvas id parameter to the drawing function
+
 use std::f64;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -10,10 +16,7 @@ use wasm_bindgen::JsCast;
 pub fn draw(id: String) { // OK
     let document = web_sys::window().unwrap().document().unwrap();
 
-    // let canvas = document.get_element_by_id("canvas").unwrap();
-    //----
     let canvas = document.get_element_by_id(&id).unwrap();
-    // web_sys::console::log_2(&"id:".into(), &id.into()); // FIXME
 
     let canvas: web_sys::HtmlCanvasElement = canvas
         .dyn_into::<web_sys::HtmlCanvasElement>()
