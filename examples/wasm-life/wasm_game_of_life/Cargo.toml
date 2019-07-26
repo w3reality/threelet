@@ -26,6 +26,8 @@ wasm-bindgen-test = "0.2"
 version = "0.3"
 features = [
   "console",
+  "ImageData",
+  "CanvasRenderingContext2d",
 ]
 
 # [profile.release]

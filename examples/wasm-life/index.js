@@ -20,7 +20,6 @@ const memory = wasm.memory;
 if (0) {
     mod.greet("expect OK"); // OK
     wasm.greet("expect NG"); // NG; name not shown!!
-    //----
     Universe.greet("expect OK"); // OK; name shown
 }
 //========
@@ -37,6 +36,7 @@ const ALIVE_COLOR = "#000000";
 
 // Construct the universe, and get its width and height.
 const universe = Universe.new();
+console.log('universe:', universe);
 const width = universe.width();
 const height = universe.height();
 
@@ -72,6 +72,16 @@ const getIndex = (row, column) => {
     return row * width + column;
 };
 const drawCells = (useDelta=true) => {
+    if (1) { // draw directly in Rust
+        //---- bench for 1000 frames (bench without rAF restriction !!!!)
+        // empty return; (baseline): 522 ms
+        // direct universe.draw_cells(): ???? ms
+        // best delta method: 1157 ms
+        //----
+        universe.draw_cells();
+
+        return;//!!!!!!!!
+    }
     if (useDelta) { // delta version
         // universe.dump_cells(); // debug
 
@@ -221,8 +231,8 @@ const renderLoop = () => {
         }
     }
 
-    animationId = requestAnimationFrame(renderLoop);
-    // renderLoop(); // bench without rAF restriction !!!!!!!!!!!
+    // animationId = requestAnimationFrame(renderLoop);
+    renderLoop(); // bench without rAF restriction !!!!!!!!!!!
 };
 
 const playPauseButton = document.getElementById("play-pause");

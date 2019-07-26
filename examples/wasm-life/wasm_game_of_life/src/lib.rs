@@ -6,7 +6,8 @@ mod utils;
 
 use std::fmt;
 use wasm_bindgen::prelude::*;
-use web_sys::console;
+use wasm_bindgen::Clamped;
+use web_sys::{console, CanvasRenderingContext2d, ImageData};
 
 // use std::collections::HashMap;
 
@@ -220,6 +221,11 @@ impl Universe {
         dump
     }
 
+    pub fn draw_cells(&mut self, ctx: &CanvasRenderingContext2d) {
+        // console::log_2(&"draw_cells():".into(), &99.into());
+        // TODO !!!!!!!!
+        
+    }
 
     // TODO draw canvas via wasm -- https://github.com/rustwasm/wasm-bindgen/tree/master/examples/canvas
     // TODO fix infinite glider

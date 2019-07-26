@@ -73,17 +73,25 @@ export function greet(name) {
     wasm.greet(passStringToWasm(name), WASM_VECTOR_LEN);
 }
 
-let cachedTextDecoder = new TextDecoder('utf-8');
-
-function getStringFromWasm(ptr, len) {
-    return cachedTextDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
-}
-
 const heap = new Array(32);
 
 heap.fill(undefined);
 
 heap.push(undefined, null, true, false);
+
+let stack_pointer = 32;
+
+function addBorrowedObject(obj) {
+    if (stack_pointer == 1) throw new Error('out of js stack');
+    heap[--stack_pointer] = obj;
+    return stack_pointer;
+}
+
+let cachedTextDecoder = new TextDecoder('utf-8');
+
+function getStringFromWasm(ptr, len) {
+    return cachedTextDecoder.decode(getUint8Memory().subarray(ptr, ptr + len));
+}
 
 let heap_next = heap.length;
 
@@ -142,6 +150,16 @@ export class Universe {
     */
     static greet(name) {
         wasm.universe_greet(passStringToWasm(name), WASM_VECTOR_LEN);
+    }
+    /**
+    * @param {any} ctx
+    */
+    draw_cells(ctx) {
+        try {
+            wasm.universe_draw_cells(this.ptr, addBorrowedObject(ctx));
+        } finally {
+            heap[stack_pointer++] = undefined;
+        }
     }
     /**
     */
