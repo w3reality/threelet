@@ -224,3 +224,4 @@ class PlaneApp extends Threelet {
         throw 'onLeftPlaneClicked() not implemented';
     }
 }
+Threelet.PlaneApp = PlaneApp;
