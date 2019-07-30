@@ -254,6 +254,85 @@ class Utils {
             }
         });
     }
+
+    static pixelsToMesh(pixels, pos=[0,0,0], rot=[0,0,0], scale=[1,1,1]) {
+        const positions = [];
+        const colors = [];
+
+        // positions.push(0,0,0,  0.5,0,0,  0,0.5,0);
+        // colors.push(0,255,0,100,  0,255,0,100,  0,255,0,100);
+        //----
+        let x = 0, y = pixels.shape[1] - 1, z = 0;
+        for (let e = 0; e < pixels.data.length; e += 4) {
+            let [r, g, b, a] = [pixels.data[e], pixels.data[e+1], pixels.data[e+2], pixels.data[e+3]];
+            colors.push(r,g,b,a,  r,g,b,a,  r,g,b,a);
+            z = (r + g + b) / (255*3) * 0.01; // "normalized" intensity x maxThickness
+            positions.push(x/1000,y/1000,z,  x/1000+0.001,y/1000,z,  x/1000,y/1000+0.001,z);
+            x++;
+            if (x === pixels.shape[0]) { // wrap
+                x = 0;
+                y--;
+            }
+        }
+
+        // console.log('positions:', positions);
+        // console.log('colors:', colors);
+        return this.vertsToMesh(positions, colors, pos, rot, scale);
+    }
+
+    static vertsToMesh(positions, colors, pos=[0,0,0], rot=[0,0,0], scale=[1,1,1]) {
+        const colorAttribute = new THREE.Uint8BufferAttribute(colors, 4);
+        colorAttribute.normalized = true; // map to 0.0f - +1.0f in the shader
+        const geometry = new THREE.BufferGeometry();
+        geometry.addAttribute('position',
+            new THREE.Float32BufferAttribute(positions, 3));
+        geometry.addAttribute('color', colorAttribute);
+        const vs = `
+            precision mediump float;
+            precision mediump int;
+            uniform mat4 modelViewMatrix; // optional
+            uniform mat4 projectionMatrix; // optional
+            attribute vec3 position;
+            attribute vec4 color;
+            varying vec3 vPosition;
+            varying vec4 vColor;
+            void main()	{
+                vPosition = position;
+                vColor = color;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+            }
+        `;
+        const fs = `
+            precision mediump float;
+            precision mediump int;
+            uniform float time;
+            varying vec3 vPosition;
+            varying vec4 vColor;
+            void main()	{
+                vec4 color = vec4( vColor );
+                //color.r += sin( vPosition.x * 10.0 + time ) * 0.5;
+                gl_FragColor = color;
+            }
+        `;
+        const uni = {
+            time: { value: 1.0 },
+        };
+        const material = new THREE.RawShaderMaterial({
+            uniforms: uni,
+            vertexShader: vs,
+            fragmentShader: fs,
+            side: THREE.DoubleSide,
+            transparent: true,
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(...pos);
+        mesh.rotation.set(...rot);
+        mesh.geometry.scale(...scale);
+        return {
+            mesh: mesh,
+            uniforms: uni,
+        };
+    }
 }
 
 export default Utils;

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>rust-fern-bench</title>
+</head>
+<body>
+    <canvas id="demo" style="width: 100%; height: 100%;"></canvas>
+
+    <script src="../deps/three.min.js"></script>
+    <script src="../deps/OrbitControls.js"></script>
+    <script src="../deps/WebVR.js"></script>
+    <script src="../deps/Sky.js"></script>
+
+    <script src="../../dist/threelet.min.js"></script>
+    <script src="../templates/plane-app.js"></script>
+
+    <script type="module">
+    import { default as UtilsTmp } from "../../src/Utils.js";
+    // console.log('UtilsTmp:', UtilsTmp.pixelsToMesh);
+
+    class Demo extends Threelet.PlaneApp {
+        // override
+        onCreate(params) {
+            super.onCreate(params);
+
+            // this.scene.add(UtilsTmp.pixelsToMesh(pixels, pos, rot, scale).mesh);
+            //----
+            // const pixels = {shape: [0,0], data: []};
+            // this.scene.add(UtilsTmp.pixelsToMesh(pixels).mesh);
+            //----
+            let _now = performance.now()/1000;
+            const {positions, colors} = Demo.computeFern();
+            let now = performance.now()/1000;
+            console.log(`==== ${now.toFixed(3)} +${(now - _now).toFixed(3)} ====`);
+
+            console.log('fern:', positions.length, colors.length);
+            this.scene.add(UtilsTmp.vertsToMesh(positions, colors,
+                [0,0,0], [0,0,0], [0.2, 0.2, 0.2]).mesh);
+
+
+            // this.reIni = -0.15;
+            // this.imIni = 0.65;
+            // this.jsetData = {
+            //     mod: null,
+            //     re: this.reIni,
+            //     im: this.imIni,
+            // };
+            // (async () => {
+            //     const mod = await Threelet.Utils.loadWasmBindgen(
+            //         './julia_set', await import(`./julia_set.export.js`));
+            //     console.log('juliaset mod:', mod);
+            //     this.jsetData.mod = mod;
+            //     this.updateJset();
+            // })();
+        }
+
+        static computeFern() {
+            // const maxIter = 1000*10; // debug
+            const maxIter = 1000*100;
+            // const maxIter = 1000*1000;
+
+            const triWidth = 0.02;
+            const thickness = 0.01;
+            const baseColor = [0, 255, 0];
+
+            // https://en.wikipedia.org/wiki/Barnsley_fern
+            const f1 = [0, 0, 0, 0.16, 0, 0, 0.01]; // Stem
+            const f2 = [0.85, 0.04, -0.04, 0.85, 0, 1.60, 0.85]; // Successively smaller leaflets
+            const f3 = [0.20, -0.26, 0.23, 0.22, 0, 1.60, 0.07]; // Largest left-hand leaflet
+            const f4 = [-0.15, 0.28, 0.26, 0.24, 0, 0.44, 0.07]; // Largest right-hand leaflet
+            //---- a mutant
+            // const f1 = [0, 0, 0, 0.25, 0, -0.4, 0.02];
+            // const f2 = [0.95, 0.005, -0.005, 0.93, -0.002, 0.5, 0.84];
+            // const f3 = [0.035, -0.2, 0.16, 0.04, -0.09, 0.02, 0.07];
+            // const f4 = [-0.04, 0.2, 0.16, 0.04, 0.083, 0.12, 0.07];
+
+            const P1 = f1[6];
+            const P2 = f1[6] + f2[6];
+            const P3 = f1[6] + f2[6] + f3[6];
+            const positions = [];
+            const colors = [];
+            let _x, _y, rand, cs, color = [255,255,255];
+            for (let i = 0, x = 0, y = 0, z = 0; i < maxIter; i++) {
+                rand = Math.random();
+
+                z = thickness * rand;
+                positions.push(x,y,z,  x+triWidth,y,z,  x,y+triWidth,z);
+
+                color[0] = baseColor[0] * rand;
+                color[1] = baseColor[1] * rand;
+                color[2] = baseColor[2] * rand;
+                colors.push(
+                    color[0],color[1],color[2],100,
+                    color[0],color[1],color[2],100,
+                    color[0],color[1],color[2],100);
+
+                if (rand < P1) {
+                    cs = f1;
+                } else if (rand < P2) {
+                    cs = f2;
+                } else if (rand < P3) {
+                    cs = f3;
+                } else {
+                    cs = f4;
+                }
+                _x = cs[0] * x + cs[1] * y + cs[4];
+                _y = cs[2] * x + cs[3] * y + cs[5];
+                x = _x;
+                y = _y;
+            }
+            return {
+                positions: positions,
+                colors: colors,
+            };
+        }
+
+        updateJset() {
+            console.log('@@ this.jsetData:', this.jsetData);
+            const {mod, re, im} = this.jsetData;
+            const ctx = this.planeCtx;
+
+            if (ctx && mod) {
+                Demo.drawC(ctx, re, im);
+                mod.draw(ctx, 256, 256, 0.005*2.4, re, im);
+                this.setPlaneNeedsUpdate(true);
+            }
+        }
+
+        static drawC(ctx, re, im) {
+            // TODO fancy refactored method to skip this brute hardcoding...
+
+            //-------- 3rd row
+            ctx.fillStyle = '#222';
+            ctx.fillRect(0*64, 3*32, 64, 32);
+            ctx.fillRect(1*64, 3*32, 64, 32);
+            ctx.fillStyle = '#444444';
+            ctx.fillRect(2*64, 3*32, 64, 32);
+            ctx.fillRect(3*64, 3*32, 64, 32);
+            ctx.fillStyle = '#cccccc'; //---- fg
+            ctx.font = '13px monospace';
+            ctx.fillText(`Re(C): ${re.toFixed(2)}`, 0*64+8, 3*32+20);
+            // ctx.fillText('', 1*64+8, 3*32+20);
+            ctx.fillText('  -', 2*64+8, 3*32+20);
+            ctx.fillText('  +', 3*64+8, 3*32+20);
+            //-------- 4th row
+            ctx.fillStyle = '#222';
+            ctx.fillRect(0*64, 4*32, 64, 32);
+            ctx.fillRect(1*64, 4*32, 64, 32);
+            ctx.fillStyle = '#444444';
+            ctx.fillRect(2*64, 4*32, 64, 32);
+            ctx.fillRect(3*64, 4*32, 64, 32);
+            ctx.fillStyle = '#cccccc'; //---- fg
+            ctx.font = '13px monospace';
+            ctx.fillText(`Im(C): ${im.toFixed(2)}`, 0*64+8, 4*32+20);
+            // ctx.fillText('', 1*64+8, 4*32+20);
+            ctx.fillText('  -', 2*64+8, 4*32+20);
+            ctx.fillText('  +', 3*64+8, 4*32+20);
+        }
+
+        // impl
+        drawTitle(ctx) {
+            ctx.fillStyle = '#cccccc';
+            ctx.font = '18px monospace';
+            ctx.fillText('WIP: 🦀rust-fern-bench', 16, 32+8);
+        }
+
+        // impl
+        drawCommands(ctx) {
+            // TODO fancy refactored method to skip this brute hardcoding...
+            //
+            // //-------- 2nd row
+            // ctx.fillStyle = '#444444';
+            // // ctx.fillRect(0*64, 2*32, 64, 32);
+            // // ctx.fillRect(1*64, 2*32, 64, 32);
+            // // ctx.fillRect(2*64, 2*32, 64, 32);
+            // // ctx.fillRect(3*64, 2*32, 64, 32);
+            // ctx.fillStyle = '#cccccc'; //---- fg
+            // ctx.font = '13px monospace';
+            // ctx.fillText('Draw Julia set with', 0*64+8, 2*32+20);
+            // // ctx.fillText('', 1*64+8, 2*32+20);
+            // // ctx.fillText('', 2*64+8, 2*32+20);
+            // // ctx.fillText('', 3*64+8, 2*32+20);
+            //
+            // //-------- 5th row
+            // ctx.fillStyle = '#444444';
+            // // ctx.fillRect(0*64, 5*32, 64, 32);
+            // ctx.fillRect(1*64, 5*32, 64, 32);
+            // // ctx.fillRect(2*64, 5*32, 64, 32);
+            // // ctx.fillRect(3*64, 5*32, 64, 32);
+            // ctx.fillStyle = '#cccccc'; //---- fg
+            // ctx.font = '13px monospace';
+            // // ctx.fillText('', 0*64+8, 5*32+20);
+            // ctx.fillText('Reset', 1*64+8, 5*32+20);
+            // // ctx.fillText('', 2*64+8, 5*32+20);
+            // // ctx.fillText('', 3*64+8, 5*32+20);
+            //
+            // //-------- 7th row
+            // ctx.fillStyle = '#444444';
+            // ctx.fillRect(0*64, 7*32, 64, 32);
+            // ctx.fillRect(1*64, 7*32, 64, 32);
+            // ctx.fillStyle = '#cccccc'; //---- fg
+            // ctx.fillText('source code', 0*64+8, 7*32+20);
+        }
+
+        updateMarker(what, row, col, width=1) {
+            const marker = this.getMarker(
+                what.startsWith('cmd-') ? 'commandMarker' : 'invalid');
+            if (! marker) return;
+
+            // note: position is relative to the 'selector' group
+            marker.position.set(-2+0.25*col, 0.125+0.25*(3-row), 0.005);
+            marker.scale.set(width, 1, 1);
+            marker.visible = true;
+
+            if (what.startsWith('cmd-')) {
+                setTimeout(() => { marker.visible = false; }, 500);
+            }
+            this.render();
+        }
+
+        // impl
+        onLeftPlaneClicked(faceIndex) {
+            console.log('faceIndex:', faceIndex);
+            // const _fn = (what, row, col, width) => {
+            //     this.onSelect(what);
+            //     this.updateMarker(what, row, col, width);
+            // };
+            // switch (faceIndex) {
+            //     case 52: case 53: _fn('cmd-resub', 3, 5, 1); break;
+            //     case 54: case 55: _fn('cmd-readd', 3, 7, 1); break;
+            //     case 68: case 69: _fn('cmd-imsub', 4, 5, 1); break;
+            //     case 70: case 71: _fn('cmd-imadd', 4, 7, 1); break;
+            //     case 82: case 83: _fn('cmd-reset', 5, 3, 1); break;
+            //     case 112: case 113: case 114: case 115: _fn('cmd-src', 7, 2, 2); break;
+            //     default: console.log('@@ nop');
+            // }
+        }
+
+        onSelect(what) {
+            if (what.startsWith('cmd-')) {
+                const command = what.replace('cmd-', '');
+                switch (command) {
+                    case 'resub': {
+                        // console.log('re-');
+                        this.jsetData.re -= 0.01;
+                        this.updateJset();
+                        break;
+                    }
+                    case 'readd': {
+                        // console.log('re+');
+                        this.jsetData.re += 0.01;
+                        this.updateJset();
+                        break;
+                    }
+                    case 'imsub': {
+                        // console.log('im-');
+                        this.jsetData.im -= 0.01;
+                        this.updateJset();
+                        break;
+                    }
+                    case 'imadd': {
+                        // console.log('im+');
+                        this.jsetData.im += 0.01;
+                        this.updateJset();
+                        break;
+                    }
+                    case 'reset': {
+                        // console.log('reset');
+                        // this.clearPaintArea();
+                        this.jsetData.re = this.reIni;
+                        this.jsetData.im = this.imIni;
+                        this.updateJset();
+                        break;
+                    }
+                    case 'src': {
+                        // console.log('src');
+                        document.location.href = 'https://github.com/w3reality/threelet/tree/master/examples/rust-canvas-juliaset';
+                        break;
+                    }
+                    default: console.log('@@ unknown command:', command);
+                }
+            } else {
+                console.log('@@ onSelect(): nop');
+            }
+        }
+    }
+
+    const demo = new Demo({
+        canvas: document.getElementById("demo"),
+        // optAxes: false,
+        debugCube: true,
+    });
+    // demo.updateLoop(30);
+    demo.updateLoop(2); // debug
+
+    </script>
+</body>
+</html>
