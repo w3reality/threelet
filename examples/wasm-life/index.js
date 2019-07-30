@@ -78,7 +78,7 @@ const drawCells = (useDelta=true) => {
         // direct universe.draw_cells(): ???? ms
         // best delta method: 1157 ms
         //----
-        universe.draw_cells();
+        universe.draw_cells(ctx);
 
         return;//!!!!!!!!
     }

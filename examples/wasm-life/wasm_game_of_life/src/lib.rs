@@ -93,6 +93,7 @@ pub struct Universe {
     scores: Vec<u8>,
     delta_alive: Vec<u32>,
     delta_dead: Vec<u32>,
+    image_data: Vec<u8>,
     devmode: bool,
 }
 
@@ -221,10 +222,43 @@ impl Universe {
         dump
     }
 
-    pub fn draw_cells(&mut self, ctx: &CanvasRenderingContext2d) {
+    // fn get_julia_set(width: u32, height: u32) -> Vec<u8> {
+    //     // let mut data = Vec::new();
+    //     // for x in 0..width {
+    //     //     for y in 0..height {
+    //     //         data.push(100);
+    //     //         data.push(x as u8);
+    //     //         data.push(y as u8);
+    //     //         data.push(255);
+    //     //     }
+    //     // }
+    //     //----
+    //     // let mut data = Vec::with_capacity((width * height) as usize);
+    //     let mut data = vec![0; (width * height * 4) as usize];
+    //
+    //     data
+    // }
+
+    pub fn draw_cells(&mut self, ctx: &CanvasRenderingContext2d) -> Result<(), JsValue> {
         // console::log_2(&"draw_cells():".into(), &99.into());
-        // TODO !!!!!!!!
-        
+        // let width = 256;
+        // let height = 256;
+        // let mut data = Universe::get_julia_set(width, height);
+        // let data = ImageData::new_with_u8_clamped_array_and_sh(
+        //     Clamped(&mut data), width, height)?;
+        //----
+        // 560 ms !!!!
+        // Ok(())
+        //----
+        ctx.fill_rect(
+            (10 * (5+1)+1) as f64,
+            (20 * (5+1)+1) as f64,
+            5.0, 5.0);
+        Ok(())
+        //----
+        // let data = ImageData::new_with_u8_clamped_array_and_sh(
+        //     Clamped(&mut self.image_data), self.width*6, self.height*6)?;
+        // ctx.put_image_data(&data, 0.0, 0.0)
     }
 
     // TODO draw canvas via wasm -- https://github.com/rustwasm/wasm-bindgen/tree/master/examples/canvas
@@ -287,10 +321,16 @@ impl Universe {
                     (Cell::Alive, x) if x < 2 || x > 3 => {
                         self.delta_dead.push(idx);
                         self.cells[idx as usize] = Cell::Dead;
+                        self.image_data[(idx*4) as usize] = 0;
+                        self.image_data[(idx*4+1) as usize] = 0;
+                        self.image_data[(idx*4+2) as usize] = 0;
                     },
                     (Cell::Dead, 3) => {
                         self.delta_alive.push(idx);
                         self.cells[idx as usize] = Cell::Alive;
+                        self.image_data[(idx*4) as usize] = 255;
+                        self.image_data[(idx*4+1) as usize] = 0;
+                        self.image_data[(idx*4+2) as usize] = 0;
                     },
                     (_, _) => (),
                 }
@@ -387,6 +427,8 @@ impl Universe {
             scores: vec![0; size],
             delta_alive,
             delta_dead: Vec::with_capacity(size),
+            // image_data: vec![99; size * 4 * 5], // CELL_SIZE=5
+            image_data: vec![99; size * 4 * 6*6], // 128*6 = 768
             devmode,
         }
     }

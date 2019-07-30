@@ -280,6 +280,10 @@ export const __wbg_error_4bb6c2a97407129a = function(arg0, arg1) {
     console.error(v0);
 };
 
+export const __widl_f_fill_rect_CanvasRenderingContext2D = function(arg0, arg1, arg2, arg3, arg4) {
+    getObject(arg0).fillRect(arg1, arg2, arg3, arg4);
+};
+
 export const __widl_f_log_2_ = function(arg0, arg1) {
     console.log(getObject(arg0), getObject(arg1));
 };
