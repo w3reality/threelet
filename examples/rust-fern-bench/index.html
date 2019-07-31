@@ -34,6 +34,7 @@
             let now = performance.now()/1000;
             console.log(`==== ${now.toFixed(3)} +${(now - _now).toFixed(3)} ====`);
 
+            // js fern!!
             console.log('fern:', positions.length, colors.length);
             this.scene.add(UtilsTmp.vertsToMesh(positions, colors,
                 [0,0,0], [0,0,0], [0.2, 0.2, 0.2]).mesh);
@@ -46,13 +47,57 @@
             //     re: this.reIni,
             //     im: this.imIni,
             // };
-            // (async () => {
-            //     const mod = await Threelet.Utils.loadWasmBindgen(
-            //         './julia_set', await import(`./julia_set.export.js`));
-            //     console.log('juliaset mod:', mod);
-            //     this.jsetData.mod = mod;
-            //     this.updateJset();
-            // })();
+
+            (async () => {
+                const mod = await Threelet.Utils.loadWasmBindgen(
+                    './fern', await import(`./fern.export.js`));
+                console.log('fern - mod, wasm:', mod, mod.wasm);
+
+                // Demo.testWasmMemBuffer(mod); // ok
+                //----
+                if (1) { // testing a single triangle
+                    const vertsBuffer = new mod.VertsBuffer(3, (positions, colors) => {
+                        console.log('positions:', positions);
+                        console.log('colors:', colors);
+                        this.scene.add(UtilsTmp.vertsToMesh(positions, colors).mesh);
+                    });
+                    vertsBuffer.hash();
+                    vertsBuffer.free();
+                }
+                //----
+                if (1) { // rusty fern!!
+                    const maxIter = 1000*10;
+                    const vertsBuffer = new mod.VertsBuffer(maxIter, (positions, colors) => {
+                        console.log('positions:', positions);
+                        console.log('colors:', colors);
+                        this.scene.add(UtilsTmp.vertsToMesh(positions, colors,
+                            [0,0,0], [0,0,0], [0.2, 0.2, 0.2]).mesh);
+                    });
+                    vertsBuffer.free();
+                }
+                //========
+                // this.jsetData.mod = mod;
+                // this.updateJset();
+            })();
+        }
+
+        static testWasmMemBuffer(mod) {
+            // https://github.com/rustwasm/wasm-bindgen/issues/1079
+            // https://github.com/rustwasm/wasm-bindgen/issues/1643
+
+            // let buffer = new WasmMemBuffer(100000, array => {
+            let buffer = new mod.WasmMemBuffer(10, array => {
+              // "array" wraps a piece of wasm memory. Fill it with some values.
+                for (let i = 0; i < array.length; i++) {
+                    array[i] = Math.floor(Math.random() * 256);
+                }
+                console.log('array:', array);
+                console.log('sum of array:', array.reduce((a, b) => a + b, 0));
+            });
+            console.log('buffer:', buffer);
+            let hash = mod.compute_buffer_hash(buffer); // No buffer copy when passing this argument. Yay!
+            buffer.free();
+            console.log('hash:', hash);
         }
 
         static computeFern() {
@@ -78,23 +123,8 @@
             const P1 = f1[6];
             const P2 = f1[6] + f2[6];
             const P3 = f1[6] + f2[6] + f3[6];
-            const positions = [];
-            const colors = [];
-            let _x, _y, rand, cs, color = [255,255,255];
-            for (let i = 0, x = 0, y = 0, z = 0; i < maxIter; i++) {
-                rand = Math.random();
-
-                z = thickness * rand;
-                positions.push(x,y,z,  x+triWidth,y,z,  x,y+triWidth,z);
-
-                color[0] = baseColor[0] * rand;
-                color[1] = baseColor[1] * rand;
-                color[2] = baseColor[2] * rand;
-                colors.push(
-                    color[0],color[1],color[2],100,
-                    color[0],color[1],color[2],100,
-                    color[0],color[1],color[2],100);
-
+            const fractalUpdate = (x, y, rand) => {
+                let cs;
                 if (rand < P1) {
                     cs = f1;
                 } else if (rand < P2) {
@@ -104,10 +134,45 @@
                 } else {
                     cs = f4;
                 }
-                _x = cs[0] * x + cs[1] * y + cs[4];
-                _y = cs[2] * x + cs[3] * y + cs[5];
-                x = _x;
-                y = _y;
+                return [
+                    cs[0] * x + cs[1] * y + cs[4],
+                    cs[2] * x + cs[3] * y + cs[5],
+                ];
+            };
+
+            const positions = new Float32Array(maxIter * 9);
+            const colors = new Uint8Array(maxIter * 12);
+            for (let i = 0, x = 0, y = 0, z = 0; i < maxIter; i++) {
+                const rand = Math.random();
+
+                z = thickness * rand;
+                positions[9*i] = x;
+                positions[9*i+1] = y;
+                positions[9*i+2] = z;
+                positions[9*i+3] = x + triWidth;
+                positions[9*i+4] = y;
+                positions[9*i+5] = z;
+                positions[9*i+6] = x;
+                positions[9*i+7] = y + triWidth;
+                positions[9*i+8] = z;
+
+                const c0 = baseColor[0] * rand; // implicitly rounded
+                const c1 = baseColor[1] * rand;
+                const c2 = baseColor[2] * rand;
+                colors[12*i] = c0;
+                colors[12*i+1] = c1;
+                colors[12*i+2] = c2;
+                colors[12*i+3] = 100;
+                colors[12*i+4] = c0;
+                colors[12*i+5] = c1;
+                colors[12*i+6] = c2;
+                colors[12*i+7] = 100;
+                colors[12*i+8] = c0;
+                colors[12*i+9] = c1;
+                colors[12*i+10] = c2;
+                colors[12*i+11] = 100;
+
+                [x, y] = fractalUpdate(x, y, rand);
             }
             return {
                 positions: positions,
