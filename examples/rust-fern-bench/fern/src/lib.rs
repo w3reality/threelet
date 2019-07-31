@@ -16,10 +16,14 @@ pub struct VertsBuffer {
 #[wasm_bindgen]
 impl VertsBuffer {
     #[wasm_bindgen(constructor)]
-    pub fn new(verts_length: u32, f: &js_sys::Function) -> Self {
+    pub fn new(verts_length: u32) -> Self {
         let mut positions: Vec<f32> = Vec::with_capacity((verts_length * 3) as usize);
         let mut colors: Vec<u8> = Vec::with_capacity((verts_length * 4) as usize);
+        //---- for checking mem size only
+        // let mut positions: Vec<f32> = vec![0.0; (verts_length * 3) as usize];
+        // let mut colors: Vec<u8> = vec![0; (verts_length * 4) as usize];
 
+        // 1 vertex: 4b*3 + 1b*4 = 16 byte
         if verts_length == 3 { // testing a single triangle
             let pp = [0.0,0.0,0.0,  0.5,0.0,0.0,  0.0,0.5,0.0];
             let cc = [255,0,0,255,  0,255,0,255,  0,0,255,255];
@@ -34,14 +38,17 @@ impl VertsBuffer {
             //...
         }
 
-        unsafe {
-            let positions_js = js_sys::Float32Array::view(&mut positions);
-            let colors_js = js_sys::Uint8Array::view(&mut colors);
-            f.call2(&JsValue::NULL,
-                &JsValue::from(positions_js), &JsValue::from(colors_js))
-                .expect("no throw");
-        }
         Self { positions, colors }
+    }
+    pub fn get_positions(&self) -> wasm_bindgen::JsValue {
+        unsafe {
+            JsValue::from(js_sys::Float32Array::view(&self.positions))
+        }
+    }
+    pub fn get_colors(&self) -> wasm_bindgen::JsValue {
+        unsafe {
+            JsValue::from(js_sys::Uint8Array::view(&self.colors))
+        }
     }
     pub fn hash(&self) {
         let sum_positions = self.positions.iter().map(|&q| q as f64).sum::<f64>();

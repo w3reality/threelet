@@ -24,20 +24,22 @@
         onCreate(params) {
             super.onCreate(params);
 
-            // this.scene.add(UtilsTmp.pixelsToMesh(pixels, pos, rot, scale).mesh);
-            //----
-            // const pixels = {shape: [0,0], data: []};
-            // this.scene.add(UtilsTmp.pixelsToMesh(pixels).mesh);
-            //----
-            let _now = performance.now()/1000;
-            const {positions, colors} = Demo.computeFern();
-            let now = performance.now()/1000;
-            console.log(`==== ${now.toFixed(3)} +${(now - _now).toFixed(3)} ====`);
+            if (0) {
+                // this.scene.add(UtilsTmp.pixelsToMesh(pixels, pos, rot, scale).mesh);
+                //----
+                // const pixels = {shape: [0,0], data: []};
+                // this.scene.add(UtilsTmp.pixelsToMesh(pixels).mesh);
+                //----
+                let _now = performance.now()/1000;
+                const {positions, colors} = Demo.computeFern();
+                let now = performance.now()/1000;
+                console.log(`==== ${now.toFixed(3)} +${(now - _now).toFixed(3)} ====`);
 
-            // js fern!!
-            console.log('fern:', positions.length, colors.length);
-            this.scene.add(UtilsTmp.vertsToMesh(positions, colors,
-                [0,0,0], [0,0,0], [0.2, 0.2, 0.2]).mesh);
+                // js fern!!
+                console.log('fern:', positions.length, colors.length);
+                this.scene.add(UtilsTmp.vertsToMesh(positions, colors,
+                    [0,0,0], [0,0,0], [0.2, 0.2, 0.2]).mesh);
+            }
 
 
             // this.reIni = -0.15;
@@ -56,16 +58,20 @@
                 // Demo.testWasmMemBuffer(mod); // ok
                 //----
                 if (1) { // testing a single triangle
-                    const vertsBuffer = new mod.VertsBuffer(3, (positions, colors) => {
-                        console.log('positions:', positions);
-                        console.log('colors:', colors);
-                        this.scene.add(UtilsTmp.vertsToMesh(positions, colors).mesh);
-                    });
+                    const vertsBuffer = new mod.VertsBuffer(3); // -> 16 byte
+                    // const vertsBuffer = new mod.VertsBuffer(1024*1024*10); // -> 160 mb
+
+                    const positions = vertsBuffer.get_positions();
+                    const colors = vertsBuffer.get_colors();
+                    console.log('positions:', positions);
+                    console.log('colors:', colors);
+                    this.scene.add(UtilsTmp.vertsToMesh(positions, colors).mesh);
+
                     vertsBuffer.hash();
-                    vertsBuffer.free();
+                    // vertsBuffer.free();
                 }
                 //----
-                if (1) { // rusty fern!!
+                if (0) { // rusty fern!!
                     const maxIter = 1000*10;
                     const vertsBuffer = new mod.VertsBuffer(maxIter, (positions, colors) => {
                         console.log('positions:', positions);
