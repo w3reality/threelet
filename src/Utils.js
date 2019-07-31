@@ -281,6 +281,7 @@ class Utils {
     }
 
     static vertsToMesh(positions, colors, pos=[0,0,0], rot=[0,0,0], scale=[1,1,1]) {
+        // console.log('colors:', colors);
         const colorAttribute = new THREE.Uint8BufferAttribute(colors, 4);
         colorAttribute.normalized = true; // map to 0.0f - +1.0f in the shader
         const geometry = new THREE.BufferGeometry();
