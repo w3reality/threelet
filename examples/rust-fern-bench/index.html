@@ -58,28 +58,29 @@
                 // Demo.testWasmMemBuffer(mod); // ok
                 //----
                 if (1) { // testing a single triangle
-                    const vertsBuffer = new mod.VertsBuffer(3); // -> 16 byte
-                    // const vertsBuffer = new mod.VertsBuffer(1024*1024*10); // -> 160 mb
-
-                    const positions = vertsBuffer.get_positions();
-                    const colors = vertsBuffer.get_colors();
+                    const vb = new mod.VertsBuffer(3); // -> 16 byte
+                    const positions = vb.get_positions();
+                    const colors = vb.get_colors();
                     console.log('positions:', positions);
                     console.log('colors:', colors);
                     this.scene.add(UtilsTmp.vertsToMesh(positions, colors).mesh);
-
-                    vertsBuffer.hash();
-                    // vertsBuffer.free();
+                    vb.hash();
+                    vb.free();
                 }
                 //----
-                if (0) { // rusty fern!!
+                if (1) { // rusty fern!!
+                    // const vb = new mod.VertsBuffer(1024*1024*10); // -> 160 mb
+                    //----
                     const maxIter = 1000*10;
-                    const vertsBuffer = new mod.VertsBuffer(maxIter, (positions, colors) => {
-                        console.log('positions:', positions);
-                        console.log('colors:', colors);
-                        this.scene.add(UtilsTmp.vertsToMesh(positions, colors,
-                            [0,0,0], [0,0,0], [0.2, 0.2, 0.2]).mesh);
-                    });
-                    vertsBuffer.free();
+                    const vb = new mod.VertsBuffer(maxIter);
+
+                    const positions = vb.get_positions();
+                    const colors = vb.get_colors();
+                    console.log('positions:', positions);
+                    console.log('colors:', colors);
+                    this.scene.add(UtilsTmp.vertsToMesh(positions, colors,
+                        [0,0,0], [0,0,0], [0.2, 0.2, 0.2]).mesh);
+                    // vb.free();
                 }
                 //========
                 // this.jsetData.mod = mod;
