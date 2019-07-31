@@ -228,7 +228,14 @@ class Threelet {
         const [sky, sunSphere] = this.skyHelper.init();
         this.scene.add(sky, sunSphere);
         this.skyHelper.updateUniforms({
-            turbidity: 1,
+            //---- drawn
+            // turbidity: 1,
+            //---- yingyang
+            mieCoefficient: 0.01,
+            luminance: 1.185,
+            inclination: 0.2,
+            azimuth: 0.35,
+            //----
         });
         return [sky, sunSphere];
     }
