@@ -1,7 +1,7 @@
 all: juliaset
 
 juliaset: juliaset.mk
-	$(MAKE) -f $<
+	make -f $<
 
 clean:
-	$(MAKE) -f juliaset.mk clean
+	make -f juliaset.mk clean

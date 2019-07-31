@@ -1,7 +1,7 @@
 all: canvas
 
 canvas: canvas.mk
-	$(MAKE) -f $<
+	make -f $<
 
 clean:
-	$(MAKE) -f canvas.mk clean
+	make -f canvas.mk clean
