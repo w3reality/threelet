@@ -11,6 +11,7 @@
     <script src="../deps/OrbitControls.js"></script>
     <script src="../deps/WebVR.js"></script>
     <script src="../deps/Sky.js"></script>
+    <script src="../deps/stats.min.js"></script>
 
     <script src="../../dist/threelet.min.js"></script>
     <script src="../templates/plane-app.js"></script>
@@ -24,23 +25,7 @@
         onCreate(params) {
             super.onCreate(params);
 
-            if (0) {
-                // this.scene.add(UtilsTmp.pixelsToMesh(pixels, pos, rot, scale).mesh);
-                //----
-                // const pixels = {shape: [0,0], data: []};
-                // this.scene.add(UtilsTmp.pixelsToMesh(pixels).mesh);
-                //----
-                let _now = performance.now()/1000;
-                const {positions, colors} = Demo.computeFern();
-                let now = performance.now()/1000;
-                console.log(`==== ${now.toFixed(3)} +${(now - _now).toFixed(3)} ====`);
-
-                // js fern!!
-                console.log('fern:', positions.length, colors.length);
-                this.scene.add(UtilsTmp.vertsToMesh(positions, colors,
-                    [0,0,0], [0,0,0], [0.2, 0.2, 0.2]).mesh);
-            }
-
+            this.setup('mod-stats', window.Stats, {panelType: 2}); // 0: fps, 1: ms, 2: mb, 3+: custom
 
             // this.reIni = -0.15;
             // this.imIni = 0.65;
@@ -50,41 +35,66 @@
             //     im: this.imIni,
             // };
 
+            // const maxIter = 1; // -> 1*3*16 byte
+            // const maxIter = 1024*1024*10; // -> 480 mb
+            // const maxIter = 1024*1024; // -> 48 mb
+            // const maxIter = 1000*1000; // ~ 48 mb
+            const maxIter = 1000*100; // ~ 4.8 mb
+            // const maxIter = 1024*10; // -> 480 kb
+
+            if (1) {
+                const {positions, colors} = Demo.computeFern(maxIter);
+                // console.log('fern:', positions.length, colors.length);
+                this.scene.add(UtilsTmp.vertsToMesh(positions, colors,
+                    [0,0,0], [0,0,0], [0.2, 0.2, 0.2]).mesh);
+            }
+
             (async () => {
                 const mod = await Threelet.Utils.loadWasmBindgen(
                     './fern', await import(`./fern.export.js`));
-                console.log('fern - mod, wasm:', mod, mod.wasm);
+                // console.log('fern - mod, wasm:', mod, mod.wasm);
 
                 // Demo.testWasmMemBuffer(mod); // ok
                 //----
-                if (1) { // testing a single triangle
-                    const vb = new mod.VertsBuffer(3); // -> 16 byte
-                    const positions = vb.get_positions();
-                    const colors = vb.get_colors();
-                    console.log('positions:', positions);
-                    console.log('colors:', colors);
-                    this.scene.add(UtilsTmp.vertsToMesh(positions, colors).mesh);
-                    vb.hash();
-                    vb.free();
-                }
-                //----
                 if (1) { // rusty fern!!
-                    // const vb = new mod.VertsBuffer(1024*1024*10); // -> 160 mb
-                    //----
-                    const maxIter = 1000*10;
-                    const vb = new mod.VertsBuffer(maxIter);
+                    const numVerts = maxIter * 3; // 1 iter <-> 1 triangle
 
-                    const positions = vb.get_positions();
-                    const colors = vb.get_colors();
-                    console.log('positions:', positions);
-                    console.log('colors:', colors);
+                    UtilsTmp.log('begin: rust verts alloc');
+                    const vb = new mod.VertsBuffer(numVerts);
+                    UtilsTmp.log('end: rust verts alloc ^^^^');
+
+                    UtilsTmp.log('begin: rust verts compute');
+                    // window._log_last = performance.now()/1000;
+                    vb.compute_fern();
+                    // window._log_comp = performance.now()/1000 - window._log_last;
+                    UtilsTmp.log('end: rust verts compute ^^^^');
+                    // alert(window._log_comp);
+
+                    let positions = vb.get_positions();
+                    let colors = vb.get_colors();
+                    // return;// !!!!!!!!
+
+
+                    if (numVerts === 3) { // debug
+                        console.log('positions:', positions);
+                        console.log('colors:', colors);
+                        vb.hash();
+                    }
+                    console.log('positions.length:', positions.length);
+
                     this.scene.add(UtilsTmp.vertsToMesh(positions, colors,
                         [0,0,0], [0,0,0], [0.2, 0.2, 0.2]).mesh);
-                    // vb.free();
+                    // *** vertsToMesh() has already created buffer attributes
+                    // using the positions/colors array.
+                    // so we're done with these arrays.
+                    // ***
+
+                    // https://stackoverflow.com/questions/43918027/what-is-the-best-way-to-free-up-memory-from-a-typedarray-in-javascript
+                    positions = null; // just in case
+                    colors = null; // just in case
+
+                    vb.free(); // TODO check mem profile !!!!!!!!
                 }
-                //========
-                // this.jsetData.mod = mod;
-                // this.updateJset();
             })();
         }
 
@@ -107,11 +117,7 @@
             console.log('hash:', hash);
         }
 
-        static computeFern() {
-            // const maxIter = 1000*10; // debug
-            const maxIter = 1000*100;
-            // const maxIter = 1000*1000;
-
+        static computeFern(maxIter) {
             const triWidth = 0.02;
             const thickness = 0.01;
             const baseColor = [0, 255, 0];
@@ -147,12 +153,18 @@
                 ];
             };
 
+            UtilsTmp.log('begin: js verts alloc');
             const positions = new Float32Array(maxIter * 9);
             const colors = new Uint8Array(maxIter * 12);
+            UtilsTmp.log('end: js verts alloc ^^^^');
+
+            UtilsTmp.log('begin: js verts compute');
             for (let i = 0, x = 0, y = 0, z = 0; i < maxIter; i++) {
                 const rand = Math.random();
 
                 z = thickness * rand;
+                // positions.push(...[x0,y0,z0,  x1,y1,z1,  x2,y2,z2]);
+                // turned out to be slightly slower, so...
                 positions[9*i] = x;
                 positions[9*i+1] = y;
                 positions[9*i+2] = z;
@@ -181,6 +193,8 @@
 
                 [x, y] = fractalUpdate(x, y, rand);
             }
+            UtilsTmp.log('end: js verts compute ^^^^');
+
             return {
                 positions: positions,
                 colors: colors,
