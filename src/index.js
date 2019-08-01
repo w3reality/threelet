@@ -442,18 +442,6 @@ class Threelet {
         return [scene, camera, renderer];
     }
 
-    // log with time splits
-    log(...args) {
-        if (! this._last) { // first time
-            this._last = performance.now()/1000;
-        }
-        let now = performance.now()/1000;
-        console.log(`==== ${now.toFixed(3)} +${(now - this._last).toFixed(3)} ====`);
-        console.log(...args);
-        console.log(`========`);
-        this._last = now;
-    }
-
     resizeCanvas(canvas, force=false) {
         Threelet._resizeCanvasToDisplaySize(
             canvas, this.renderer, this.camera, force);

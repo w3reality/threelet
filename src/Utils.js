@@ -281,12 +281,11 @@ class Utils {
     }
 
     static vertsToMesh(positions, colors, pos=[0,0,0], rot=[0,0,0], scale=[1,1,1]) {
-        // console.log('colors:', colors);
-        const colorAttribute = new THREE.Uint8BufferAttribute(colors, 4);
+        const colorAttribute = new THREE.Uint8BufferAttribute(colors, 4); // note: "dupe" the colors array
         colorAttribute.normalized = true; // map to 0.0f - +1.0f in the shader
         const geometry = new THREE.BufferGeometry();
         geometry.addAttribute('position',
-            new THREE.Float32BufferAttribute(positions, 3));
+            new THREE.Float32BufferAttribute(positions, 3)); // note: "dupe" the positions array
         geometry.addAttribute('color', colorAttribute);
         const vs = `
             precision mediump float;
@@ -333,6 +332,18 @@ class Utils {
             mesh: mesh,
             uniforms: uni,
         };
+    }
+
+    // log with time splits
+    static log(...args) {
+        if (! window._threelet_log_last) { // first time
+            window._threelet_log_last = performance.now()/1000;
+        }
+        const now = performance.now()/1000;
+        const _log = console.log;
+        const header = `==== ${now.toFixed(3)} +${(now - window._threelet_log_last).toFixed(3)} ====`;
+        _log(header, ...args);
+        window._threelet_log_last = now;
     }
 }
 
