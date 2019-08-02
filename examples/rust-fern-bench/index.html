@@ -65,6 +65,7 @@
 
                     UtilsTmp.log('begin: rust verts compute');
                     // window._log_last = performance.now()/1000;
+                    // vb.compute_one_triangle(); // debug
                     vb.compute_fern();
                     // window._log_comp = performance.now()/1000 - window._log_last;
                     UtilsTmp.log('end: rust verts compute ^^^^');
@@ -78,7 +79,7 @@
                     if (numVerts === 3) { // debug
                         console.log('positions:', positions);
                         console.log('colors:', colors);
-                        vb.hash();
+                        vb.test_hash();
                     }
                     console.log('positions.length:', positions.length);
 
@@ -119,8 +120,8 @@
 
         static computeFern(maxIter) {
             const triWidth = 0.02;
-            const thickness = 0.01;
-            const baseColor = [0, 255, 0];
+            const zVariation = 0.01;
+            const baseColor = [0, 255, 0, 100];
 
             // https://en.wikipedia.org/wiki/Barnsley_fern
             const f1 = [0, 0, 0, 0.16, 0, 0, 0.01]; // Stem
@@ -133,16 +134,17 @@
             // const f3 = [0.035, -0.2, 0.16, 0.04, -0.09, 0.02, 0.07];
             // const f4 = [-0.04, 0.2, 0.16, 0.04, 0.083, 0.12, 0.07];
 
-            const P1 = f1[6];
-            const P2 = f1[6] + f2[6];
-            const P3 = f1[6] + f2[6] + f3[6];
-            const fractalUpdate = (x, y, rand) => {
+            const probAcc1 = f1[6];
+            const probAcc2 = f1[6] + f2[6];
+            const probAcc3 = f1[6] + f2[6] + f3[6];
+            const fractalUpdate = (x, y) => {
+                const prob = Math.random();
                 let cs;
-                if (rand < P1) {
+                if (prob < probAcc1) {
                     cs = f1;
-                } else if (rand < P2) {
+                } else if (prob < probAcc2) {
                     cs = f2;
-                } else if (rand < P3) {
+                } else if (prob < probAcc3) {
                     cs = f3;
                 } else {
                     cs = f4;
@@ -160,9 +162,8 @@
 
             UtilsTmp.log('begin: js verts compute');
             for (let i = 0, x = 0, y = 0, z = 0; i < maxIter; i++) {
-                const rand = Math.random();
+                z = zVariation * i / maxIter;
 
-                z = thickness * rand;
                 // positions.push(...[x0,y0,z0,  x1,y1,z1,  x2,y2,z2]);
                 // turned out to be slightly slower, so...
                 positions[9*i] = x;
@@ -175,23 +176,20 @@
                 positions[9*i+7] = y + triWidth;
                 positions[9*i+8] = z;
 
-                const c0 = baseColor[0] * rand; // implicitly rounded
-                const c1 = baseColor[1] * rand;
-                const c2 = baseColor[2] * rand;
-                colors[12*i] = c0;
-                colors[12*i+1] = c1;
-                colors[12*i+2] = c2;
-                colors[12*i+3] = 100;
-                colors[12*i+4] = c0;
-                colors[12*i+5] = c1;
-                colors[12*i+6] = c2;
-                colors[12*i+7] = 100;
-                colors[12*i+8] = c0;
-                colors[12*i+9] = c1;
-                colors[12*i+10] = c2;
-                colors[12*i+11] = 100;
+                colors[12*i] = baseColor[0];
+                colors[12*i+1] = baseColor[1];
+                colors[12*i+2] = baseColor[2];
+                colors[12*i+3] = baseColor[3];
+                colors[12*i+4] = baseColor[0];
+                colors[12*i+5] = baseColor[1];
+                colors[12*i+6] = baseColor[2];
+                colors[12*i+7] = baseColor[3];
+                colors[12*i+8] = baseColor[0];
+                colors[12*i+9] = baseColor[1];
+                colors[12*i+10] = baseColor[2];
+                colors[12*i+11] = baseColor[3];
 
-                [x, y] = fractalUpdate(x, y, rand);
+                [x, y] = fractalUpdate(x, y);
             }
             UtilsTmp.log('end: js verts compute ^^^^');
 
@@ -200,6 +198,8 @@
                 colors: colors,
             };
         }
+
+        //===================================================================
 
         updateJset() {
             console.log('@@ this.jsetData:', this.jsetData);
