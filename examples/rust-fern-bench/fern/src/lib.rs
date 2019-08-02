@@ -27,7 +27,7 @@ impl VertsBuffer {
 
         let positions: Vec<f32> = Vec::with_capacity((num_verts * 3) as usize);
         let colors: Vec<u8> = Vec::with_capacity((num_verts * 4) as usize);
-        //---- debug; for measuring mem size only
+        //---- debug; slow due to filling 0's; for test measuring mem size only
         // let positions: Vec<f32> = vec![0.0; (num_verts * 3) as usize];
         // let colors: Vec<u8> = vec![0; (num_verts * 4) as usize];
 
@@ -43,7 +43,7 @@ impl VertsBuffer {
 
         // 1 vertex: 4b*3 + 1b*4 = 16 byte
         let pp = [0.0,0.0,0.0,  0.5,0.0,0.0,  0.0,0.5,0.0];
-        let cc = [255,0,0,255,  0,255,0,255,  0,0,255,255];
+        let cc = [255,0,0,100,  0,255,0,100,  0,0,255,100];
 
         // positions = pp.to_vec(); // debug
         // colors = cc.to_vec(); // debug
@@ -56,8 +56,7 @@ impl VertsBuffer {
         let positions = &mut self.positions;
         let colors = &mut self.colors;
         let num_verts = self.num_verts;
-        let max_iter = num_verts / 3;
-        console::log_2(&"num_verts:".into(), &format!("{:?}", num_verts).into());
+        // console::log_2(&"num_verts:".into(), &format!("{:?}", num_verts).into());
 
         let tri_width = 0.02;
         let z_variation = 0.01;
@@ -73,11 +72,11 @@ impl VertsBuffer {
 
         let mut x = 0.0;
         let mut y = 0.0;
+        let max_iter = num_verts / 3; // triangles assumed
         (0..max_iter).for_each(|i| {
             let z = z_variation * (i as f32) / (max_iter as f32);
 
-            positions.extend_from_slice(
-                &[x,y,z,  x+tri_width,y,z,  x,y+tri_width,z]);
+            positions.extend_from_slice(&[x,y,z,  x+tri_width,y,z,  x,y+tri_width,z]);
             colors.extend_from_slice(&base_color);
             colors.extend_from_slice(&base_color);
             colors.extend_from_slice(&base_color);
@@ -113,9 +112,11 @@ impl VertsBuffer {
 }
 
 
-//======== ======== to be used with Demo.testWasmMemBuffer(mod)
+//======== ======== the wasm memory 'view' pattern
 // https://github.com/rustwasm/wasm-bindgen/issues/1079
 // https://github.com/rustwasm/wasm-bindgen/issues/1643
+
+// ok: tested with Demo.testWasmMemBuffer(mod)
 #[wasm_bindgen]
 pub struct WasmMemBuffer {
     buffer: Vec<u8>,

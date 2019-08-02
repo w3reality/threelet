@@ -5,6 +5,7 @@ class PlaneApp extends Threelet {
         const controls = this.setup('mod-controls', THREE.OrbitControls);
         controls.enableRotate = false;
         // controls.enablePan = false;
+        this.controls = controls;
 
         // this.setup('mod-stats', window.Stats, {panelType: 0}); // 0: fps, 1: ms, 2: mb, 3+: custom
         this.setup('mod-webvr', window.WEBVR);

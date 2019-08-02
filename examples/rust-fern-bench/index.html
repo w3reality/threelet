@@ -25,7 +25,11 @@
         onCreate(params) {
             super.onCreate(params);
 
-            this.setup('mod-stats', window.Stats, {panelType: 2}); // 0: fps, 1: ms, 2: mb, 3+: custom
+            // no stroking in this app; so enable rotate by mouse
+            this.controls.enableRotate = true;
+
+            // 0: fps, 1: ms, 2: mb, 3+: custom
+            this.setup('mod-stats', window.Stats, {panelType: 2});
 
             // this.reIni = -0.15;
             // this.imIni = 0.65;
@@ -42,7 +46,7 @@
             const maxIter = 1000*100; // ~ 4.8 mb
             // const maxIter = 1024*10; // -> 480 kb
 
-            if (1) {
+            if (1) { // js fern!!
                 const {positions, colors} = Demo.computeFern(maxIter);
                 // console.log('fern:', positions.length, colors.length);
                 this.scene.add(UtilsTmp.vertsToMesh(positions, colors,
@@ -97,25 +101,6 @@
                     vb.free(); // TODO check mem profile !!!!!!!!
                 }
             })();
-        }
-
-        static testWasmMemBuffer(mod) {
-            // https://github.com/rustwasm/wasm-bindgen/issues/1079
-            // https://github.com/rustwasm/wasm-bindgen/issues/1643
-
-            // let buffer = new WasmMemBuffer(100000, array => {
-            let buffer = new mod.WasmMemBuffer(10, array => {
-              // "array" wraps a piece of wasm memory. Fill it with some values.
-                for (let i = 0; i < array.length; i++) {
-                    array[i] = Math.floor(Math.random() * 256);
-                }
-                console.log('array:', array);
-                console.log('sum of array:', array.reduce((a, b) => a + b, 0));
-            });
-            console.log('buffer:', buffer);
-            let hash = mod.compute_buffer_hash(buffer); // No buffer copy when passing this argument. Yay!
-            buffer.free();
-            console.log('hash:', hash);
         }
 
         static computeFern(maxIter) {
@@ -197,6 +182,25 @@
                 positions: positions,
                 colors: colors,
             };
+        }
+
+        static testWasmMemBuffer(mod) {
+            // https://github.com/rustwasm/wasm-bindgen/issues/1079
+            // https://github.com/rustwasm/wasm-bindgen/issues/1643
+
+            // let buffer = new WasmMemBuffer(100000, array => {
+            let buffer = new mod.WasmMemBuffer(10, array => {
+              // "array" wraps a piece of wasm memory. Fill it with some values.
+                for (let i = 0; i < array.length; i++) {
+                    array[i] = Math.floor(Math.random() * 256);
+                }
+                console.log('array:', array);
+                console.log('sum of array:', array.reduce((a, b) => a + b, 0));
+            });
+            console.log('buffer:', buffer);
+            let hash = mod.compute_buffer_hash(buffer); // No buffer copy when passing this argument. Yay!
+            buffer.free();
+            console.log('hash:', hash);
         }
 
         //===================================================================
