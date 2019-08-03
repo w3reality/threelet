@@ -428,9 +428,7 @@ class Threelet {
         const scene = opts.optScene ? opts.optScene : new THREE.Scene();
 
         if (opts.optAxes) {
-            const walls = new THREE.LineSegments(
-                new THREE.EdgesGeometry(new THREE.BoxBufferGeometry(1, 1, 1)),
-                new THREE.LineBasicMaterial({color: 0xcccccc}));
+            const walls = Threelet.Utils.createLineBox([1, 1, 1], 0xcccccc);
             walls.position.set(0, 0, 0);
             walls.name = 'walls';
             scene.add(walls);

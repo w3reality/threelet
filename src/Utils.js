@@ -1,5 +1,10 @@
 
 class Utils {
+    static createLineBox(dim, color=0xcccccc) {
+        return new THREE.LineSegments(
+            new THREE.EdgesGeometry(new THREE.BoxBufferGeometry(...dim)),
+            new THREE.LineBasicMaterial({color: color}));
+    }
     static createTestHemisphereLight() {
         return new THREE.HemisphereLight(0x808080, 0x606060);
     }
@@ -180,6 +185,46 @@ class Utils {
         return Utils._cbOrPromise(_doLoad, src, cb, cbError);
     }
 
+    static createCanvasFromText(text, width, height, opts={}) {
+        const defaults = {
+            bg: "#fff",
+            tbg: "#fff",
+            tfg: "#000",
+            // fontFamily: "Times",
+            fontFamily: "monospace", // https://stackoverflow.com/questions/4686754/making-every-character-on-a-web-page-the-same-width
+        };
+        const actual = Object.assign({}, defaults, opts);
+
+        const can = document.createElement("canvas");
+        can.width = width;
+        can.height = height;
+
+        const ctx = can.getContext("2d");
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+
+        text = text.replace(/&lt;/g, "<")
+            .replace(/&gt;/g, ">")
+            .replace(/&quot;/, "\"");
+        const [w, h] = [ctx.measureText(text).width + 16, 45];
+
+        // ctx.font = `48px ${actual.fontFamily}`;
+        // ctx.font = `36px ${actual.fontFamily}`;
+        ctx.font = `13px ${actual.fontFamily}`;
+
+        ctx.fillStyle = actual.bg;
+        ctx.fillRect(0, 0, can.width, can.height);
+
+        ctx.fillStyle = actual.tbg;
+        ctx.fillRect(0, 0, w, 45);
+
+        ctx.fillStyle = actual.tfg;
+        // ctx.fillText(text, 25, 35+25); // ok for 256, 128
+        ctx.fillText(text, 25, 35); // ok for 256, 64
+
+        return can;
+    }
+
     // https://threejs.org/docs/#api/en/geometries/PlaneGeometry
     static createCanvasPlane(can, width=1, height=1,
         widthSegments=1, heightSegments=1) {
@@ -255,7 +300,7 @@ class Utils {
         });
     }
 
-    static pixelsToMesh(pixels, pos=[0,0,0], rot=[0,0,0], scale=[1,1,1]) {
+    static pixelsToMesh(pixels) {
         const positions = [];
         const colors = [];
 
@@ -277,10 +322,10 @@ class Utils {
 
         // console.log('positions:', positions);
         // console.log('colors:', colors);
-        return this.vertsToMesh(positions, colors, pos, rot, scale);
+        return this.vertsToMesh(positions, colors);
     }
 
-    static vertsToMesh(positions, colors, pos=[0,0,0], rot=[0,0,0], scale=[1,1,1]) {
+    static vertsToMesh(positions, colors) {
         const colorAttribute = new THREE.Uint8BufferAttribute(colors, 4); // note: "dupe" the colors array
         colorAttribute.normalized = true; // map to 0.0f - +1.0f in the shader
         const geometry = new THREE.BufferGeometry();
@@ -325,13 +370,15 @@ class Utils {
             transparent: true,
         });
         const mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(...pos);
-        mesh.rotation.set(...rot);
-        mesh.geometry.scale(...scale);
         return {
             mesh: mesh,
             uniforms: uni,
         };
+    }
+    static createBufferGeometryMesh(positions, colors, scale=1.0) {
+        const mesh = this.vertsToMesh(positions, colors).mesh;
+        mesh.geometry.scale(scale, scale, scale);
+        return mesh;
     }
 
     // log with time splits
@@ -345,6 +392,71 @@ class Utils {
         _log(header, ...args);
         window._threelet_log_last = now;
     }
+
+    // some math stuff...
+    static sum(arr) { return arr.reduce((acc, val) => acc + val, 0); }
+    static ave(arr) { return this.sum(arr) / arr.length; }
+    static std(arr, unbiased=true) {
+        // https://en.wikipedia.org/wiki/Standard_deviation#Corrected_sample_standard_deviation
+        // https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4175406/
+        const _ave = this.ave(arr);
+        return Math.sqrt(this.sum(arr.map(val => (val - _ave)**2))
+            / (unbiased ? arr.length - 1 : arr.length));
+    }
+
+    static createStatsFromSamples(samples) {
+        // tests agrees with the results in https://mathjs.org/docs/reference/functions/std.html
+        // const y = [2, 4, 6, 8];
+        // console.log(this.ave(y), this.std(y), this.std(y, false));
+        //----
+        const ave = this.ave(samples);
+        const std = this.std(samples);
+        console.log('ave, std:', ave, std);
+
+        // sprite
+        const can = this.createCanvasFromText(
+            `ave: ${ave.toFixed(3)} std: ${std.toFixed(3)}`, 256, 64, {tfg: '#0cc'});
+        const sp = this.createCanvasSprite(can, 1024*3.0);
+        sp.position.x = -0.1;
+        sp.position.y = ave + 0.02;
+
+        // bar
+        const ls = this.createLineBox([0.05, ave, 0.05], 0x00cccc);
+        ls.position.y = ave / 2;
+
+        // std bar
+        const sq = this.createLineBox([0.025, 2*std, 0.025], 0x00cccc);
+        sq.position.y = ave;
+
+        return (new THREE.Group()).add(sp, ls, sq);
+    }
+    static createSamplesObject(samples) {
+        const group = new THREE.Group();
+
+        samples.forEach((sample, idx) => {
+            const height = sample;
+            const offset = [(idx+1)/10, 0, 0]; // TODO; 10 hardcoded
+
+            // sprite
+            const can = this.createCanvasFromText(
+                `${height.toFixed(3)}`, 256, 64, {tfg: '#000'});
+            const sp = this.createCanvasSprite(can, 1024*3.0);
+            sp.position.x = offset[0];
+            sp.position.y = offset[1] + height + 0.02;
+            sp.position.z = offset[2];
+
+            // bar
+            const ls = this.createLineBox(
+                [0.05, height, 0.05], 0xcccccc); // TODO; 0.5 hardcoded
+            ls.position.x = offset[0];
+            ls.position.y = offset[1] + height/2;
+            ls.position.z = offset[2];
+
+            group.add(sp, ls);
+        });
+        return group;
+    }
+
 }
 
 export default Utils;
