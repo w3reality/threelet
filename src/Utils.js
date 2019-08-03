@@ -1,5 +1,7 @@
+// TODO to be more categorically organized in future
 
 class Utils {
+    //======== begin test obj utils ========
     static createLineBox(dim, color=0xcccccc) {
         return new THREE.LineSegments(
             new THREE.EdgesGeometry(new THREE.BoxBufferGeometry(...dim)),
@@ -49,7 +51,6 @@ class Utils {
         }
         return objs;
     }
-
     static createTestCube(size=[0.4, 0.1, 0.4], color=0xff00ff, wireframe=false) {
         const cube = new THREE.Mesh(
                 new THREE.BoxGeometry(...size),
@@ -60,7 +61,21 @@ class Utils {
         cube.position.set(0, 0.5, -1.5);
         return cube;
     }
+    //======== end test obj utils ========
 
+    // log with time splits
+    static log(...args) {
+        if (! window._threelet_log_last) { // first time
+            window._threelet_log_last = performance.now()/1000;
+        }
+        const now = performance.now()/1000;
+        const _log = console.log;
+        const header = `==== ${now.toFixed(3)} +${(now - window._threelet_log_last).toFixed(3)} ====`;
+        _log(header, ...args);
+        window._threelet_log_last = now;
+    }
+
+    //======== begin 3D model utils ========
 
     // <script src="../deps/ColladaLoader.js"></script>
     static loadCollada(path, cb=null) {
@@ -151,6 +166,10 @@ class Utils {
         };
     }
 
+    //======== end 3D model utils ========
+
+    //======== begin obj composition utils ========
+
     static createDataFlipY(data, shape) {
         const [w, h, size] = shape;
         const out = new Uint8Array(data.length);
@@ -226,8 +245,7 @@ class Utils {
     }
 
     // https://threejs.org/docs/#api/en/geometries/PlaneGeometry
-    static createCanvasPlane(can, width=1, height=1,
-        widthSegments=1, heightSegments=1) {
+    static createCanvasPlane(can, width=1, height=1, widthSegments=1, heightSegments=1) {
         const geom = new THREE.PlaneGeometry(
             width, height, widthSegments, heightSegments);
         const mat = new THREE.MeshBasicMaterial({
@@ -259,45 +277,6 @@ class Utils {
         const sp = new THREE.Sprite(mat);
         sp.scale.set(shape[0]/pixelsPerUnit, shape[1]/pixelsPerUnit, 1.0);
         return sp;
-    }
-
-    static downloadDataURL(dataURL, filename) {
-        const a = document.createElement('a');
-        a.href = dataURL;
-        a.download = filename;
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-    }
-    static formatDate(date, format='YYYY-MM-DD-hh.mm.ss') {
-        format = format.replace(/YYYY/g, date.getFullYear());
-        format = format.replace(/MM/g, ('0' + (date.getMonth() + 1)).slice(-2));
-        format = format.replace(/DD/g, ('0' + date.getDate()).slice(-2));
-        format = format.replace(/hh/g, ('0' + date.getHours()).slice(-2));
-        format = format.replace(/mm/g, ('0' + date.getMinutes()).slice(-2));
-        format = format.replace(/ss/g, ('0' + date.getSeconds()).slice(-2));
-        return format;
-    }
-
-    static loadWasmBindgen(name, jsImports) {
-        return new Promise(async (res, rej) => {
-            // https://rustwasm.github.io/docs/book/reference/deploying-to-production.html
-            // This approach is not the fastest like using WebAssembly.instantiateStreaming,
-            // but it can work around the application/wasm MIME Type requirement.
-            try {
-                // https://stackoverflow.com/questions/52239924/webassembly-instantiatestreaming-wrong-mime-type
-                const response = await fetch(`${name}_bg.wasm`);
-                const buffer = await response.arrayBuffer();
-                // https://stackoverflow.com/questions/48039547/webassembly-typeerror-webassembly-instantiation-imports-argument-must-be-pres
-                const obj = await WebAssembly.instantiate(
-                    buffer, {[`${name}.js`]: jsImports});
-                Object.assign(jsImports.wasm, obj.instance.exports);
-                res(jsImports);
-            } catch (e) {
-                rej(e);
-            }
-        });
     }
 
     static pixelsToMesh(pixels) {
@@ -381,81 +360,50 @@ class Utils {
         return mesh;
     }
 
-    // log with time splits
-    static log(...args) {
-        if (! window._threelet_log_last) { // first time
-            window._threelet_log_last = performance.now()/1000;
-        }
-        const now = performance.now()/1000;
-        const _log = console.log;
-        const header = `==== ${now.toFixed(3)} +${(now - window._threelet_log_last).toFixed(3)} ====`;
-        _log(header, ...args);
-        window._threelet_log_last = now;
+    //======== end obj composition utils ========
+
+    //======== begin misc utils ========
+
+    static downloadDataURL(dataURL, filename) {
+        const a = document.createElement('a');
+        a.href = dataURL;
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    }
+    static formatDate(date, format='YYYY-MM-DD-hh.mm.ss') {
+        format = format.replace(/YYYY/g, date.getFullYear());
+        format = format.replace(/MM/g, ('0' + (date.getMonth() + 1)).slice(-2));
+        format = format.replace(/DD/g, ('0' + date.getDate()).slice(-2));
+        format = format.replace(/hh/g, ('0' + date.getHours()).slice(-2));
+        format = format.replace(/mm/g, ('0' + date.getMinutes()).slice(-2));
+        format = format.replace(/ss/g, ('0' + date.getSeconds()).slice(-2));
+        return format;
     }
 
-    // some math stuff...
-    static sum(arr) { return arr.reduce((acc, val) => acc + val, 0); }
-    static ave(arr) { return this.sum(arr) / arr.length; }
-    static std(arr, unbiased=true) {
-        // https://en.wikipedia.org/wiki/Standard_deviation#Corrected_sample_standard_deviation
-        // https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4175406/
-        const _ave = this.ave(arr);
-        return Math.sqrt(this.sum(arr.map(val => (val - _ave)**2))
-            / (unbiased ? arr.length - 1 : arr.length));
-    }
-
-    static createStatsFromSamples(samples) {
-        // tests agrees with the results in https://mathjs.org/docs/reference/functions/std.html
-        // const y = [2, 4, 6, 8];
-        // console.log(this.ave(y), this.std(y), this.std(y, false));
-        //----
-        const ave = this.ave(samples);
-        const std = this.std(samples);
-        console.log('ave, std:', ave, std);
-
-        // sprite
-        const can = this.createCanvasFromText(
-            `ave: ${ave.toFixed(3)} std: ${std.toFixed(3)}`, 256, 64, {tfg: '#0cc'});
-        const sp = this.createCanvasSprite(can, 1024*3.0);
-        sp.position.x = -0.1;
-        sp.position.y = ave + 0.02;
-
-        // bar
-        const ls = this.createLineBox([0.05, ave, 0.05], 0x00cccc);
-        ls.position.y = ave / 2;
-
-        // std bar
-        const sq = this.createLineBox([0.025, 2*std, 0.025], 0x00cccc);
-        sq.position.y = ave;
-
-        return (new THREE.Group()).add(sp, ls, sq);
-    }
-    static createSamplesObject(samples) {
-        const group = new THREE.Group();
-
-        samples.forEach((sample, idx) => {
-            const height = sample;
-            const offset = [(idx+1)/10, 0, 0]; // TODO; 10 hardcoded
-
-            // sprite
-            const can = this.createCanvasFromText(
-                `${height.toFixed(3)}`, 256, 64, {tfg: '#000'});
-            const sp = this.createCanvasSprite(can, 1024*3.0);
-            sp.position.x = offset[0];
-            sp.position.y = offset[1] + height + 0.02;
-            sp.position.z = offset[2];
-
-            // bar
-            const ls = this.createLineBox(
-                [0.05, height, 0.05], 0xcccccc); // TODO; 0.5 hardcoded
-            ls.position.x = offset[0];
-            ls.position.y = offset[1] + height/2;
-            ls.position.z = offset[2];
-
-            group.add(sp, ls);
+    static loadWasmBindgen(name, jsImports) {
+        return new Promise(async (res, rej) => {
+            // https://rustwasm.github.io/docs/book/reference/deploying-to-production.html
+            // This approach is not the fastest like using WebAssembly.instantiateStreaming,
+            // but it can work around the application/wasm MIME Type requirement.
+            try {
+                // https://stackoverflow.com/questions/52239924/webassembly-instantiatestreaming-wrong-mime-type
+                const response = await fetch(`${name}_bg.wasm`);
+                const buffer = await response.arrayBuffer();
+                // https://stackoverflow.com/questions/48039547/webassembly-typeerror-webassembly-instantiation-imports-argument-must-be-pres
+                const obj = await WebAssembly.instantiate(
+                    buffer, {[`${name}.js`]: jsImports});
+                Object.assign(jsImports.wasm, obj.instance.exports);
+                res(jsImports);
+            } catch (e) {
+                rej(e);
+            }
         });
-        return group;
     }
+
+    //======== end misc utils ========
 
 }
 

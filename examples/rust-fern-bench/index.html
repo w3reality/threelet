@@ -15,6 +15,7 @@
 
     <script src="../../dist/threelet.min.js"></script>
     <script src="../templates/plane-app.js"></script>
+    <script src="../templates/utils.js"></script>
 
     <script type="module">
     import { default as UtilsTmp } from "../../src/Utils.js";
@@ -71,8 +72,8 @@
 
                 // stats
                 this.scene.add(
-                    UtilsTmp.createStatsFromSamples(samples),
-                    UtilsTmp.createSamplesObject(samples));
+                    Threelet.TemplateUtils.createStatsFromSamples(samples),
+                    Threelet.TemplateUtils.createSamplesObject(samples));
             }
             return;//!!!!!!!! !!!!!!!!
 
