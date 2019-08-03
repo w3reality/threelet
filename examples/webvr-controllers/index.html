@@ -93,47 +93,8 @@ Supported controllers:
 
     //
 
-    const createTextCanvas = (str, width, height, opts={}) => {
-        const defaults = {
-            bg: "#fff",
-            tbg: "#fff",
-            tfg: "#000",
-            // fontFamily: "Times",
-            fontFamily: "monospace", // https://stackoverflow.com/questions/4686754/making-every-character-on-a-web-page-the-same-width
-        };
-        const actual = Object.assign({}, defaults, opts);
-
-        const can = document.createElement("canvas");
-        can.width = width;
-        can.height = height;
-
-        const ctx = can.getContext("2d");
-        ctx.textAlign = "left";
-        ctx.textBaseline = "middle";
-
-        str = str.replace(/&lt;/g, "<")
-            .replace(/&gt;/g, ">")
-            .replace(/&quot;/, "\"");
-        const [w, h] = [ctx.measureText(str).width + 16, 45];
-
-        // ctx.font = `48px ${actual.fontFamily}`;
-        // ctx.font = `36px ${actual.fontFamily}`;
-        ctx.font = `13px ${actual.fontFamily}`;
-
-        ctx.fillStyle = actual.bg;
-        ctx.fillRect(0, 0, can.width, can.height);
-
-        ctx.fillStyle = actual.tbg;
-        ctx.fillRect(0, 0, w, 45);
-
-        ctx.fillStyle = actual.tfg;
-        // ctx.fillText(str, 25, 35+25); // ok for 256, 128
-        ctx.fillText(str, 25, 35); // ok for 256, 64
-
-        return can;
-    };
-
-    const panelCanvas = createTextCanvas('', 512, 256, {tfg: '#000'});
+    const panelCanvas = Threelet.Utils.createCanvasFromText(
+        '', 512, 256, {tfg: '#000'});
     const sp = Threelet.Utils.createCanvasSprite(panelCanvas);
     sp.position.set(0, 0.5, -0.5);
 
