@@ -395,7 +395,13 @@ class Utils {
 }
 
 class Logger {
-    constructor() {
+    constructor(opts={}) {
+        const defaults = {
+            mute: false,
+        };
+        const actual = Object.assign({}, defaults, opts);
+        this._mute = actual.mute;
+
         this.time = [];
         this.delta = [];
         this.arg0 = [];
@@ -409,9 +415,9 @@ class Logger {
         this.delta.push(delta);
         this.arg0.push(args[0]);
         this._last = now;
-        this._log(
-            `==== ${now.toFixed(3)} +${delta.toFixed(3)} ====`,
-            ...args);
+        if (! this._mute) {
+            this._log(`==== ${now.toFixed(3)} +${delta.toFixed(3)} ====`, ...args);
+        }
     }
 }
 Utils.Logger = Logger;

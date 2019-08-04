@@ -47,35 +47,36 @@
             // const maxIter = 1024*10; // -> 480 kb
 
             if (1) { // js fern!!
-                const logger = new UtilsDev.Logger();
+                const loggerAlloc = new UtilsDev.Logger();
 
-                logger.log('begin: js verts alloc');
+                loggerAlloc.log('begin: js verts alloc');
                 const positions = new Float32Array(maxIter * 9);
                 const colors = new Uint8Array(maxIter * 12);
-                logger.log('end: js verts alloc <<<<');
+                loggerAlloc.log('end: js verts alloc <<<<');
+                // console.log('positions/colors len:', positions.length, colors.length);
 
-                // console.log('fern:', positions.length, colors.length);
-
-                for (let i = 0; i < 10; i++) {
+                const logger = new UtilsDev.Logger({mute: true});
+                const numFern = 10;
+                for (let i = 0; i < numFern; i++) {
                     logger.log('begin: js verts compute');
                     Demo.computeFern(positions, colors, maxIter);
                     logger.log('end: js verts compute <<<<');
-
-                    if (0) {
-                        const fern = UtilsDev.createBufferGeometryMesh(positions, colors, 0.2);
-                        fern.position.set(i, 0, 0);
-                        this.scene.add(fern);
-                    }
                 }
-                console.log('logger:', logger);
+                // console.log('logger:', logger);
 
-                const samples = new Float32Array(10)
-                    .map(_val => 0.5 + 0.2 * (Math.random() - 0.5));
+                // const samples = new Float32Array(10).map(_val => 0.5 + 0.2 * (Math.random() - 0.5));
+                const samples = logger.delta.filter((val, idx) => logger.arg0[idx].includes('end:'))
+                console.log('samples:', samples);
 
-                // stats
-                this.scene.add(
+                // viz
+                const fern = UtilsDev.createBufferGeometryMesh(positions, colors, 0.2);
+                fern.position.set(1, 0, 0); // show only the last one computed
+
+                const resultGroup = new THREE.Group();
+                resultGroup.add(fern,
                     Threelet.TemplateUtils.createStatsFromSamples(samples),
                     Threelet.TemplateUtils.createSamplesObject(samples));
+                this.scene.add(resultGroup);
             }
             return;//!!!!!!!! !!!!!!!!
 
@@ -167,7 +168,7 @@
 
             const triWidth = 0.02;
             const zVariation = 0.01;
-            const baseColor = [0, 255, 0, 100];
+            const baseColor = [255, 255, 0, 100];
             for (let i = 0, x = 0, y = 0, z = 0; i < maxIter; i++) {
                 z = zVariation * i / maxIter;
 
