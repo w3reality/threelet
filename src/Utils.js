@@ -63,18 +63,6 @@ class Utils {
     }
     //======== end test obj utils ========
 
-    // log with time splits
-    static log(...args) {
-        if (! window._threelet_log_last) { // first time
-            window._threelet_log_last = performance.now()/1000;
-        }
-        const now = performance.now()/1000;
-        const _log = console.log;
-        const header = `==== ${now.toFixed(3)} +${(now - window._threelet_log_last).toFixed(3)} ====`;
-        _log(header, ...args);
-        window._threelet_log_last = now;
-    }
-
     //======== begin 3D model utils ========
 
     // <script src="../deps/ColladaLoader.js"></script>
@@ -168,7 +156,7 @@ class Utils {
 
     //======== end 3D model utils ========
 
-    //======== begin obj composition utils ========
+    //======== begin composition utils ========
 
     static createDataFlipY(data, shape) {
         const [w, h, size] = shape;
@@ -360,7 +348,7 @@ class Utils {
         return mesh;
     }
 
-    //======== end obj composition utils ========
+    //======== end composition utils ========
 
     //======== begin misc utils ========
 
@@ -404,7 +392,28 @@ class Utils {
     }
 
     //======== end misc utils ========
-
 }
+
+class Logger {
+    constructor() {
+        this.time = [];
+        this.delta = [];
+        this.arg0 = [];
+        this._last = performance.now()/1000;
+        this._log = console.log; // for eluding uglify
+    }
+    log(...args) {
+        const now = performance.now()/1000;
+        const delta = now - this._last;
+        this.time.push(now);
+        this.delta.push(delta);
+        this.arg0.push(args[0]);
+        this._last = now;
+        this._log(
+            `==== ${now.toFixed(3)} +${delta.toFixed(3)} ====`,
+            ...args);
+    }
+}
+Utils.Logger = Logger;
 
 export default Utils;

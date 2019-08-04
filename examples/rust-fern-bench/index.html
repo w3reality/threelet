@@ -18,8 +18,7 @@
     <script src="../templates/utils.js"></script>
 
     <script type="module">
-    import { default as UtilsTmp } from "../../src/Utils.js";
-    // console.log('UtilsTmp:', UtilsTmp.pixelsToMesh);
+    import { default as UtilsDev } from "../../src/Utils.js";
 
     class Demo extends Threelet.PlaneApp {
         // override
@@ -48,24 +47,27 @@
             // const maxIter = 1024*10; // -> 480 kb
 
             if (1) { // js fern!!
-                UtilsTmp.log('begin: js verts alloc');
+                const logger = new UtilsDev.Logger();
+
+                logger.log('begin: js verts alloc');
                 const positions = new Float32Array(maxIter * 9);
                 const colors = new Uint8Array(maxIter * 12);
-                UtilsTmp.log('end: js verts alloc <<<<');
+                logger.log('end: js verts alloc <<<<');
 
                 // console.log('fern:', positions.length, colors.length);
 
                 for (let i = 0; i < 10; i++) {
-                    UtilsTmp.log('begin: js verts compute');
+                    logger.log('begin: js verts compute');
                     Demo.computeFern(positions, colors, maxIter);
-                    UtilsTmp.log('end: js verts compute <<<<');
+                    logger.log('end: js verts compute <<<<');
 
                     if (0) {
-                        const fern = UtilsTmp.createBufferGeometryMesh(positions, colors, 0.2);
+                        const fern = UtilsDev.createBufferGeometryMesh(positions, colors, 0.2);
                         fern.position.set(i, 0, 0);
                         this.scene.add(fern);
                     }
                 }
+                console.log('logger:', logger);
 
                 const samples = new Float32Array(10)
                     .map(_val => 0.5 + 0.2 * (Math.random() - 0.5));
@@ -87,17 +89,21 @@
                 if (1) { // rusty fern!!
                     const numVerts = maxIter * 3; // 1 iter <-> 1 triangle
 
-                    UtilsTmp.log('begin: rust verts alloc');
-                    const vb = new mod.VertsBuffer(numVerts);
-                    UtilsTmp.log('end: rust verts alloc ^^^^');
+                    const logger = new UtilsDev.Logger();
 
-                    UtilsTmp.log('begin: rust verts compute');
+                    logger.log('begin: rust verts alloc');
+                    const vb = new mod.VertsBuffer(numVerts);
+                    logger.log('end: rust verts alloc ^^^^');
+
+                    logger.log('begin: rust verts compute');
                     // window._log_last = performance.now()/1000;
                     // vb.compute_one_triangle(); // debug
                     vb.compute_fern();
                     // window._log_comp = performance.now()/1000 - window._log_last;
-                    UtilsTmp.log('end: rust verts compute ^^^^');
+                    logger.log('end: rust verts compute ^^^^');
                     // alert(window._log_comp);
+
+                    console.log('logger:', logger);
 
                     let positions = vb.get_positions();
                     let colors = vb.get_colors();
@@ -111,7 +117,7 @@
                     }
                     console.log('positions.length:', positions.length);
 
-                    this.scene.add(UtilsTmp.createBufferGeometryMesh(positions, colors, 0.2));
+                    this.scene.add(UtilsDev.createBufferGeometryMesh(positions, colors, 0.2));
                     // *** vertsToMesh() has already created buffer attributes
                     // using the positions/colors array.
                     // so we're done with these arrays.
