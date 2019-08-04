@@ -19,6 +19,7 @@
 
     <script type="module">
     import { default as UtilsDev } from "../../src/Utils.js";
+    // console.log('UtilsDev:', UtilsDev);
 
     class Demo extends Threelet.PlaneApp {
         // override
@@ -47,7 +48,7 @@
             // const maxIter = 1024*10; // -> 480 kb
 
             if (1) { // js fern!!
-                const loggerAlloc = new UtilsDev.Logger();
+                const loggerAlloc = UtilsDev.createLogger({mute: false});
 
                 loggerAlloc.log('begin: js verts alloc');
                 const positions = new Float32Array(maxIter * 9);
@@ -55,7 +56,7 @@
                 loggerAlloc.log('end: js verts alloc <<<<');
                 // console.log('positions/colors len:', positions.length, colors.length);
 
-                const logger = new UtilsDev.Logger({mute: true});
+                const logger = UtilsDev.createLogger();
                 const numFern = 10;
                 for (let i = 0; i < numFern; i++) {
                     logger.log('begin: js verts compute');
@@ -64,9 +65,9 @@
                 }
                 // console.log('logger:', logger);
 
-                // const samples = new Float32Array(10).map(_val => 0.5 + 0.2 * (Math.random() - 0.5));
-                const samples = logger.delta.filter((val, idx) => logger.arg0[idx].includes('end:'))
-                console.log('samples:', samples);
+                // const samples = new Float32Array(10).map(_val => 0.5 + 0.2 * (Math.random() - 0.5)); // test
+                const samples = logger.grep('end:').splits;
+                // console.log('samples:', samples);
 
                 // viz
                 const fern = UtilsDev.createBufferGeometryMesh(positions, colors, 0.2);
