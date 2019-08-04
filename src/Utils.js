@@ -13,7 +13,6 @@ class Logger {
         this.arg0s = [];
 
         this._last = performance.now()/1000;
-        this._log = console.log; // for eluding uglify
     }
     log(...args) {
         const now = performance.now()/1000;
@@ -23,12 +22,14 @@ class Logger {
         this.arg0s.push(args[0]);
 
         this._last = now;
+        const _log = console.log; // for eluding uglify
         if (! this._mute) {
-            this._log(`==== ${now.toFixed(3)} +${splits.toFixed(3)} ====`, ...args);
+            _log(`==== ${now.toFixed(3)} +${splits.toFixed(3)} ====`, ...args);
         }
     }
     grep(query) {
         const idxs = this.arg0s.reduce((acc, val, idx) => {
+            // TODO check type of val is 'string' !!!!!
             if (val.includes(query)) acc.push(idx);
             return acc;
         }, []);

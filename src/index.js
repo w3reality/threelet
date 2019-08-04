@@ -10,10 +10,13 @@ import SkyHelper from './SkyHelper.js';
 import Utils from './Utils.js';
 
 class Threelet {
+    static _log(...args) {
+        const _log = console.log; // for eluding uglify
+        _log(...args);
+    }
     constructor(params) {
         this.version = __version;
-        this._log = console.log; // to elude uglify
-        this._log(`Threelet ${__version}`);
+        Threelet._log(`Threelet ${__version}`);
 
         const defaults = {
             canvas: null,
