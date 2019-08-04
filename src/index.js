@@ -530,7 +530,7 @@ class Threelet {
         canvas.addEventListener("pointerdown", e => {
             isDragging = false;
             const coords = Threelet.getInputCoords(e, canvas);
-            console.log('@@ pointer down:', ...coords);
+            // console.log('@@ pointer down:', ...coords);
             this._callIfDefined('pointer-down', coords);
         }, false);
         canvas.addEventListener("pointermove", e => {

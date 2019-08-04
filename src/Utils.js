@@ -1,5 +1,46 @@
 // TODO to be more categorically organized in future
 
+class Logger {
+    constructor(opts={}) {
+        const defaults = {
+            mute: true,
+        };
+        const actual = Object.assign({}, defaults, opts);
+        this._mute = actual.mute;
+
+        this.times = [];
+        this.splits = [];
+        this.arg0s = [];
+
+        this._last = performance.now()/1000;
+        this._log = console.log; // for eluding uglify
+    }
+    log(...args) {
+        const now = performance.now()/1000;
+        const splits = now - this._last;
+        this.times.push(now);
+        this.splits.push(splits);
+        this.arg0s.push(args[0]);
+
+        this._last = now;
+        if (! this._mute) {
+            this._log(`==== ${now.toFixed(3)} +${splits.toFixed(3)} ====`, ...args);
+        }
+    }
+    grep(query) {
+        const idxs = this.arg0s.reduce((acc, val, idx) => {
+            if (val.includes(query)) acc.push(idx);
+            return acc;
+        }, []);
+        // console.log('idxs:', idxs);
+        return {
+            times: idxs.map(i => this.times[i]),
+            splits: idxs.map(i => this.splits[i]),
+            arg0s: idxs.map(i => this.arg0s[i]),
+        }
+    }
+}
+
 class Utils {
     //======== begin test obj utils ========
     static createLineBox(dim, color=0xcccccc) {
@@ -391,35 +432,12 @@ class Utils {
         });
     }
 
+    static createLogger(opts) {
+        return new Logger(opts);
+    }
     //======== end misc utils ========
 }
 
-class Logger {
-    constructor(opts={}) {
-        const defaults = {
-            mute: false,
-        };
-        const actual = Object.assign({}, defaults, opts);
-        this._mute = actual.mute;
-
-        this.time = [];
-        this.delta = [];
-        this.arg0 = [];
-        this._last = performance.now()/1000;
-        this._log = console.log; // for eluding uglify
-    }
-    log(...args) {
-        const now = performance.now()/1000;
-        const delta = now - this._last;
-        this.time.push(now);
-        this.delta.push(delta);
-        this.arg0.push(args[0]);
-        this._last = now;
-        if (! this._mute) {
-            this._log(`==== ${now.toFixed(3)} +${delta.toFixed(3)} ====`, ...args);
-        }
-    }
-}
 Utils.Logger = Logger;
 
 export default Utils;
