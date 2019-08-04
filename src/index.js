@@ -12,6 +12,9 @@ import Utils from './Utils.js';
 class Threelet {
     constructor(params) {
         this.version = __version;
+        this._log = console.log; // to elude uglify
+        this._log(`Threelet ${__version}`);
+
         const defaults = {
             canvas: null,
             width: 480,
