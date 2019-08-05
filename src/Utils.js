@@ -14,6 +14,12 @@ class Logger {
 
         this._last = performance.now()/1000;
     }
+
+    static _consoleLog(...args) {
+        const _log = console.log; // for eluding uglify
+        _log(...args);
+    }
+
     log(...args) {
         const now = performance.now()/1000;
         const splits = now - this._last;
@@ -22,9 +28,8 @@ class Logger {
         this.arg0s.push(args[0]);
 
         this._last = now;
-        const _log = console.log; // for eluding uglify
         if (! this._mute) {
-            _log(`==== ${now.toFixed(3)} +${splits.toFixed(3)} ====`, ...args);
+            Logger._consoleLog(`==== ${now.toFixed(3)} +${splits.toFixed(3)} ====`, ...args);
         }
     }
     grep(query) {
