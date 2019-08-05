@@ -1,7 +1,7 @@
 
-class TemplateUtils {
+class ExampleUtils {
 
-    // some math stuff...
+    // some math stuff
     static sum(arr) { return arr.reduce((acc, val) => acc + val, 0); }
     static ave(arr) { return this.sum(arr) / arr.length; }
     static std(arr, unbiased=true) {
@@ -19,7 +19,7 @@ class TemplateUtils {
         //----
         const ave = this.ave(samples);
         const std = this.std(samples);
-        console.log('ave, std:', ave, std);
+        console.log('ave, std:', ave.toFixed(3), std.toFixed(3));
 
         // sprite
         const can = Threelet.Utils.createCanvasFromText(
@@ -66,4 +66,4 @@ class TemplateUtils {
     }
 
 }
-Threelet.TemplateUtils = TemplateUtils;
+Threelet.ExampleUtils = ExampleUtils;

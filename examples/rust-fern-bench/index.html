@@ -15,7 +15,7 @@
 
     <script src="../../dist/threelet.min.js"></script>
     <script src="../templates/plane-app.js"></script>
-    <script src="../templates/utils.js"></script>
+    <script src="../templates/example-utils.js"></script>
 
     <script type="module">
     import { default as UtilsDev } from "../../src/Utils.js";
@@ -75,8 +75,8 @@
 
                 const resultGroup = new THREE.Group();
                 resultGroup.add(fern,
-                    Threelet.TemplateUtils.createStatsFromSamples(samples),
-                    Threelet.TemplateUtils.createSamplesObject(samples));
+                    Threelet.ExampleUtils.createStatsFromSamples(samples),
+                    Threelet.ExampleUtils.createSamplesObject(samples));
                 this.scene.add(resultGroup);
             }
             return;//!!!!!!!! !!!!!!!!
