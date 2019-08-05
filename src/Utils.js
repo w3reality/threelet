@@ -34,11 +34,16 @@ class Logger {
     }
     grep(query) {
         const idxs = this.arg0s.reduce((acc, val, idx) => {
-            // TODO check type of val is 'string' !!!!!
-            if (val.includes(query)) acc.push(idx);
+            if (typeof val !== 'string') {
+                Logger._consoleLog('grep(): warning: not a string');
+                return acc;
+            } else if (val.includes(query)) {
+                acc.push(idx);
+            }
             return acc;
         }, []);
         // console.log('idxs:', idxs);
+
         return {
             times: idxs.map(i => this.times[i]),
             splits: idxs.map(i => this.splits[i]),
