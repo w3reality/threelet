@@ -25,11 +25,11 @@ impl VertsBuffer {
             panic!();
         }
 
-        let positions: Vec<f32> = Vec::with_capacity((num_verts * 3) as usize);
-        let colors: Vec<u8> = Vec::with_capacity((num_verts * 4) as usize);
-        //---- debug; slow due to filling 0's; for test measuring mem size only
-        // let positions: Vec<f32> = vec![0.0; (num_verts * 3) as usize];
-        // let colors: Vec<u8> = vec![0; (num_verts * 4) as usize];
+        // let positions: Vec<f32> = Vec::with_capacity((num_verts * 3) as usize);
+        // let colors: Vec<u8> = Vec::with_capacity((num_verts * 4) as usize);
+        //---- slower due to filling 0's
+        let positions: Vec<f32> = vec![0.0; (num_verts * 3) as usize];
+        let colors: Vec<u8> = vec![0; (num_verts * 4) as usize];
 
         Self {
             num_verts,
@@ -60,7 +60,7 @@ impl VertsBuffer {
 
         let tri_width = 0.02;
         let z_variation = 0.01;
-        let base_color = [255, 0, 0, 100];
+        let base_colors = [255,0,0,100,  255,0,0,100,  255,0,0,100];
 
         let f1 = [0.0, 0.0, 0.0, 0.16, 0.0, 0.0, 0.01]; // Stem
         let f2 = [0.85, 0.04, -0.04, 0.85, 0.0, 1.60, 0.85]; // Successively smaller leaflets
@@ -73,15 +73,39 @@ impl VertsBuffer {
         let mut x = 0.0;
         let mut y = 0.0;
         let max_iter = num_verts / 3; // triangles assumed
-        (0..max_iter).for_each(|i| {
-            let z = z_variation * (i as f32) / (max_iter as f32);
+        (0..max_iter).for_each(|idx| {
+            // let prob = 0.5;
+            let prob = rand::thread_rng().gen_range(0.0, 1.0);
+            let z = z_variation * prob;
 
-            positions.extend_from_slice(&[x,y,z,  x+tri_width,y,z,  x,y+tri_width,z]);
-            colors.extend_from_slice(&base_color);
-            colors.extend_from_slice(&base_color);
-            colors.extend_from_slice(&base_color);
+            let offset = (9 * idx) as usize;
+            //-- this seems slow due to clone()
+            // https://stackoverflow.com/questions/28678615/efficiently-insert-or-replace-multiple-elements-in-the-middle-or-at-the-beginnin
+            // let slice = &[x,y,z,  x+tri_width,y,z,  x,y+tri_width,z];
+            // positions.splice(offset..offset+9, slice.iter().cloned());
+            //-- be straightforward
+            positions[offset] = x;
+            positions[offset+1] = y;
+            positions[offset+2] = z;
+            positions[offset+3] = x + tri_width;
+            positions[offset+4] = y;
+            positions[offset+5] = z;
+            positions[offset+6] = x;
+            positions[offset+7] = y + tri_width;
+            positions[offset+8] = z;
 
-            let prob = (rand::thread_rng().gen_range(0, 100) as f32) / 100.0;
+            let offset = (12 * idx) as usize;
+            //-- this seems slow due to clone()
+            // colors.splice(offset..offset+12, (&base_colors).iter().cloned());
+            //-- be straightforward
+            (0..12).for_each(|i| colors[offset+i] = base_colors[i]);
+
+            //==== in case positions/colors allocated by Vec::with_capacity()
+            // positions.extend_from_slice(&[x,y,z,  x+tri_width,y,z,  x,y+tri_width,z]);
+            // colors.extend_from_slice(&base_color);
+            // colors.extend_from_slice(&base_color);
+            // colors.extend_from_slice(&base_color);
+
             let cs = match prob {
                 prob if prob < prob_acc_1 => f1,
                 prob if prob < prob_acc_2 => f2,
