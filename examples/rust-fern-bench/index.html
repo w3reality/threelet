@@ -32,19 +32,22 @@
             // 0: fps, 1: ms, 2: mb, 3+: custom
             this.setup('mod-stats', window.Stats, {panelType: 2});
 
-            // this.reIni = -0.15;
-            // this.imIni = 0.65;
-            // this.jsetData = {
-            //     mod: null,
-            //     re: this.reIni,
-            //     im: this.imIni,
-            // };
+            this.reIni = -0.15;
+            this.imIni = 0.65;
+            this.jsetData = {
+                mod: null,
+                re: this.reIni,
+                im: this.imIni,
+            };
 
             (async () => {
                 const mod = await Threelet.Utils.loadWasmBindgen(
                     './fern', await import(`./fern.export.js`));
                 // console.log('fern - mod, wasm:', mod, mod.wasm);
-                this.onWasmReady(mod);
+                // this.onWasmReady(mod);
+
+                this.jsetData.mod = mod;
+                this.updateJset();
             })();
         }
 
@@ -107,7 +110,7 @@
             positions = null; // just in case
             colors = null; // just in case
 
-            vertsBuf.free(); // TODO check mem profile !!!!!!!!
+            vertsBuf.free();
 
             return stats;
         }
@@ -241,7 +244,7 @@
 
             if (ctx && mod) {
                 Demo.drawC(ctx, re, im);
-                mod.draw(ctx, 256, 256, 0.005*2.4, re, im);
+                // mod.draw(ctx, 256, 256, 0.005*2.4, re, im);
                 this.setPlaneNeedsUpdate(true);
             }
         }
@@ -255,26 +258,30 @@
             ctx.fillRect(1*64, 3*32, 64, 32);
             ctx.fillStyle = '#444444';
             ctx.fillRect(2*64, 3*32, 64, 32);
+            ctx.fillStyle = '#222';
             ctx.fillRect(3*64, 3*32, 64, 32);
             ctx.fillStyle = '#cccccc'; //---- fg
             ctx.font = '13px monospace';
-            ctx.fillText(`Re(C): ${re.toFixed(2)}`, 0*64+8, 3*32+20);
+            // ctx.fillText(`Re(C): ${re.toFixed(2)}`, 0*64+8, 3*32+20);
+            ctx.fillText(`benchFernRust()`, 0*64+8, 3*32+20);
             // ctx.fillText('', 1*64+8, 3*32+20);
-            ctx.fillText('  -', 2*64+8, 3*32+20);
-            ctx.fillText('  +', 3*64+8, 3*32+20);
+            ctx.fillText('Start', 2*64+8, 3*32+20);
+            ctx.fillText(`ave: 0.000 (s)  std: 0.000 (s)`, 3*64+8, 3*32+20);
             //-------- 4th row
             ctx.fillStyle = '#222';
             ctx.fillRect(0*64, 4*32, 64, 32);
             ctx.fillRect(1*64, 4*32, 64, 32);
             ctx.fillStyle = '#444444';
             ctx.fillRect(2*64, 4*32, 64, 32);
+            ctx.fillStyle = '#222';
             ctx.fillRect(3*64, 4*32, 64, 32);
             ctx.fillStyle = '#cccccc'; //---- fg
             ctx.font = '13px monospace';
-            ctx.fillText(`Im(C): ${im.toFixed(2)}`, 0*64+8, 4*32+20);
+            // ctx.fillText(`Im(C): ${im.toFixed(2)}`, 0*64+8, 4*32+20);
+            ctx.fillText(`benchFernJs()`, 0*64+8, 4*32+20);
             // ctx.fillText('', 1*64+8, 4*32+20);
-            ctx.fillText('  -', 2*64+8, 4*32+20);
-            ctx.fillText('  +', 3*64+8, 4*32+20);
+            ctx.fillText('Start', 2*64+8, 4*32+20);
+            ctx.fillText(`ave: 0.000 (s)  std: 0.000 (s)`, 3*64+8, 4*32+20);
         }
 
         // impl
@@ -287,39 +294,39 @@
         // impl
         drawCommands(ctx) {
             // TODO fancy refactored method to skip this brute hardcoding...
-            //
-            // //-------- 2nd row
-            // ctx.fillStyle = '#444444';
-            // // ctx.fillRect(0*64, 2*32, 64, 32);
-            // // ctx.fillRect(1*64, 2*32, 64, 32);
-            // // ctx.fillRect(2*64, 2*32, 64, 32);
-            // // ctx.fillRect(3*64, 2*32, 64, 32);
-            // ctx.fillStyle = '#cccccc'; //---- fg
-            // ctx.font = '13px monospace';
-            // ctx.fillText('Draw Julia set with', 0*64+8, 2*32+20);
-            // // ctx.fillText('', 1*64+8, 2*32+20);
-            // // ctx.fillText('', 2*64+8, 2*32+20);
-            // // ctx.fillText('', 3*64+8, 2*32+20);
-            //
-            // //-------- 5th row
-            // ctx.fillStyle = '#444444';
-            // // ctx.fillRect(0*64, 5*32, 64, 32);
-            // ctx.fillRect(1*64, 5*32, 64, 32);
-            // // ctx.fillRect(2*64, 5*32, 64, 32);
-            // // ctx.fillRect(3*64, 5*32, 64, 32);
-            // ctx.fillStyle = '#cccccc'; //---- fg
-            // ctx.font = '13px monospace';
-            // // ctx.fillText('', 0*64+8, 5*32+20);
-            // ctx.fillText('Reset', 1*64+8, 5*32+20);
-            // // ctx.fillText('', 2*64+8, 5*32+20);
-            // // ctx.fillText('', 3*64+8, 5*32+20);
-            //
-            // //-------- 7th row
-            // ctx.fillStyle = '#444444';
-            // ctx.fillRect(0*64, 7*32, 64, 32);
-            // ctx.fillRect(1*64, 7*32, 64, 32);
-            // ctx.fillStyle = '#cccccc'; //---- fg
-            // ctx.fillText('source code', 0*64+8, 7*32+20);
+
+            //-------- 2nd row
+            ctx.fillStyle = '#444444';
+            // ctx.fillRect(0*64, 2*32, 64, 32);
+            // ctx.fillRect(1*64, 2*32, 64, 32);
+            // ctx.fillRect(2*64, 2*32, 64, 32);
+            // ctx.fillRect(3*64, 2*32, 64, 32);
+            ctx.fillStyle = '#cccccc'; //---- fg
+            ctx.font = '13px monospace';
+            ctx.fillText('Compute fractal with 1,000,000 triangles; 10 times per bench', 0*64+8, 2*32+20);
+            // ctx.fillText('', 1*64+8, 2*32+20);
+            // ctx.fillText('', 2*64+8, 2*32+20);
+            // ctx.fillText('', 3*64+8, 2*32+20);
+
+            //-------- 5th row
+            ctx.fillStyle = '#444444';
+            // ctx.fillRect(0*64, 5*32, 64, 32);
+            ctx.fillRect(1*64, 5*32, 64, 32);
+            // ctx.fillRect(2*64, 5*32, 64, 32);
+            // ctx.fillRect(3*64, 5*32, 64, 32);
+            ctx.fillStyle = '#cccccc'; //---- fg
+            ctx.font = '13px monospace';
+            // ctx.fillText('', 0*64+8, 5*32+20);
+            ctx.fillText('Reset????', 1*64+8, 5*32+20);
+            // ctx.fillText('', 2*64+8, 5*32+20);
+            // ctx.fillText('', 3*64+8, 5*32+20);
+
+            //-------- 7th row
+            ctx.fillStyle = '#444444';
+            ctx.fillRect(0*64, 7*32, 64, 32);
+            ctx.fillRect(1*64, 7*32, 64, 32);
+            ctx.fillStyle = '#cccccc'; //---- fg
+            ctx.fillText('source code', 0*64+8, 7*32+20);
         }
 
         updateMarker(what, row, col, width=1) {
@@ -341,52 +348,38 @@
         // impl
         onLeftPlaneClicked(faceIndex) {
             console.log('faceIndex:', faceIndex);
-            // const _fn = (what, row, col, width) => {
-            //     this.onSelect(what);
-            //     this.updateMarker(what, row, col, width);
-            // };
-            // switch (faceIndex) {
-            //     case 52: case 53: _fn('cmd-resub', 3, 5, 1); break;
-            //     case 54: case 55: _fn('cmd-readd', 3, 7, 1); break;
-            //     case 68: case 69: _fn('cmd-imsub', 4, 5, 1); break;
-            //     case 70: case 71: _fn('cmd-imadd', 4, 7, 1); break;
-            //     case 82: case 83: _fn('cmd-reset', 5, 3, 1); break;
-            //     case 112: case 113: case 114: case 115: _fn('cmd-src', 7, 2, 2); break;
-            //     default: console.log('@@ nop');
-            // }
+            const _fn = (what, row, col, width) => {
+                this.onSelect(what);
+                this.updateMarker(what, row, col, width);
+            };
+            switch (faceIndex) {
+                case 52: case 53: _fn('cmd-bench-rust', 3, 5, 1); break;
+                case 68: case 69: _fn('cmd-bench-js', 4, 5, 1); break;
+                case 82: case 83: _fn('cmd-reset', 5, 3, 1); break;
+                case 112: case 113: case 114: case 115: _fn('cmd-src', 7, 2, 2); break;
+                default: console.log('@@ nop');
+            }
         }
 
         onSelect(what) {
             if (what.startsWith('cmd-')) {
                 const command = what.replace('cmd-', '');
                 switch (command) {
-                    case 'resub': {
+                    case 'bench-rust': {
                         // console.log('re-');
                         this.jsetData.re -= 0.01;
                         this.updateJset();
                         break;
                     }
-                    case 'readd': {
-                        // console.log('re+');
-                        this.jsetData.re += 0.01;
-                        this.updateJset();
-                        break;
-                    }
-                    case 'imsub': {
+                    case 'bench-js': {
                         // console.log('im-');
                         this.jsetData.im -= 0.01;
                         this.updateJset();
                         break;
                     }
-                    case 'imadd': {
-                        // console.log('im+');
-                        this.jsetData.im += 0.01;
-                        this.updateJset();
-                        break;
-                    }
                     case 'reset': {
                         // console.log('reset');
-                        // this.clearPaintArea();
+                        // this.clearPaintArea('#0ff');
                         this.jsetData.re = this.reIni;
                         this.jsetData.im = this.imIni;
                         this.updateJset();
@@ -394,7 +387,7 @@
                     }
                     case 'src': {
                         // console.log('src');
-                        document.location.href = 'https://github.com/w3reality/threelet/tree/master/examples/rust-canvas-juliaset';
+                        document.location.href = 'https://github.com/w3reality/threelet/tree/master/examples/rust-fern-bench';
                         break;
                     }
                     default: console.log('@@ unknown command:', command);
@@ -409,6 +402,7 @@
         canvas: document.getElementById("demo"),
         // optAxes: false,
         debugCube: true,
+        paintAreaColor: '#222',
     });
     demo.updateLoop(1);
 

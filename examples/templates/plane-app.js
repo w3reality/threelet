@@ -1,7 +1,7 @@
 
 class PlaneApp extends Threelet {
     // override
-    onCreate(params) {
+    onCreate(params={}) {
         const controls = this.setup('mod-controls', THREE.OrbitControls);
         controls.enableRotate = false;
         // controls.enablePan = false;
@@ -11,7 +11,7 @@ class PlaneApp extends Threelet {
         this.setup('mod-webvr', window.WEBVR);
         this.setup('mod-sky', THREE.Sky);
 
-        const _planeCanvas = PlaneApp.createPlaneCanvas();
+        const _planeCanvas = PlaneApp.createPlaneCanvas(params.paintAreaColor);
         this.planeCtx = _planeCanvas.getContext('2d');
         this.selector = PlaneApp.createSelector(_planeCanvas);
         this.plane = this.selector.getObjectByName('plane');
@@ -177,23 +177,26 @@ class PlaneApp extends Threelet {
             ctx.fillText(line, 8, (offset++)*32+20);
         }
     }
-    clearPaintArea(ctx) {
-        PlaneApp._clearPaintArea(this.planeCtx);
+    clearPaintArea(color='#fff') {
+        PlaneApp._clearPaintArea(this.planeCtx, color);
     }
-    static _clearPaintArea(ctx) {
+    static _clearPaintArea(ctx, color='#fff') {
         // ctx.fillStyle = '#000';
         // ctx.fillRect(256, 0, 256, 256);
         // ctx.fillStyle = '#fff';
         // ctx.fillRect(256+16, 16, 224, 224);
         //----
         // const clearColor = '#fff';
-        const clearColor = `#${Math.floor(Math.random()*9)}${Math.floor(Math.random()*9)}${Math.floor(Math.random()*9)}`;
-        console.log('clearColor:', clearColor);
-        ctx.fillStyle = clearColor;
+        // const clearColor = `#${Math.floor(Math.random()*9)}${Math.floor(Math.random()*9)}${Math.floor(Math.random()*9)}`;
+        // console.log('clearColor:', clearColor);
+        // ctx.fillStyle = clearColor;
+        // ctx.fillRect(256, 0, 256, 256);
+        //----
+        ctx.fillStyle = color;
         ctx.fillRect(256, 0, 256, 256);
     }
 
-    static createPlaneCanvas(id='plane') {
+    static createPlaneCanvas(paintAreaColor='#fff') {
         const planeCanvas = document.createElement('canvas');
         planeCanvas.width = 512;
         planeCanvas.height = 256;
@@ -201,7 +204,7 @@ class PlaneApp extends Threelet {
         const planeCtx = planeCanvas.getContext('2d');
         planeCtx.fillStyle = '#222';
         planeCtx.fillRect(0, 0, 256, 256);
-        PlaneApp._clearPaintArea(planeCtx);
+        PlaneApp._clearPaintArea(planeCtx, paintAreaColor);
 
         return planeCanvas;
     }
