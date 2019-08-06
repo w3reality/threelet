@@ -34,7 +34,7 @@
 
             this.reIni = -0.15;
             this.imIni = 0.65;
-            this.jsetData = {
+            this.appData = {
                 mod: null,
                 re: this.reIni,
                 im: this.imIni,
@@ -46,8 +46,8 @@
                 // console.log('fern - mod, wasm:', mod, mod.wasm);
                 // this.onWasmReady(mod);
 
-                this.jsetData.mod = mod;
-                this.updateJset();
+                this.appData.mod = mod;
+                this.updateView();
             })();
         }
 
@@ -237,19 +237,19 @@
 
         //===================================================================
 
-        updateJset() {
-            console.log('@@ this.jsetData:', this.jsetData);
-            const {mod, re, im} = this.jsetData;
+        updateView() {
+            console.log('@@ this.appData:', this.appData);
+            const {mod, re, im} = this.appData;
             const ctx = this.planeCtx;
 
             if (ctx && mod) {
-                Demo.drawC(ctx, re, im);
+                Demo.drawCommandsDynamic(ctx, re, im);
                 // mod.draw(ctx, 256, 256, 0.005*2.4, re, im);
                 this.setPlaneNeedsUpdate(true);
             }
         }
 
-        static drawC(ctx, re, im) {
+        static drawCommandsDynamic(ctx, re, im) {
             // TODO fancy refactored method to skip this brute hardcoding...
 
             //-------- 3rd row
@@ -367,22 +367,22 @@
                 switch (command) {
                     case 'bench-rust': {
                         // console.log('re-');
-                        this.jsetData.re -= 0.01;
-                        this.updateJset();
+                        this.appData.re -= 0.01;
+                        this.updateView();
                         break;
                     }
                     case 'bench-js': {
                         // console.log('im-');
-                        this.jsetData.im -= 0.01;
-                        this.updateJset();
+                        this.appData.im -= 0.01;
+                        this.updateView();
                         break;
                     }
                     case 'reset': {
                         // console.log('reset');
                         // this.clearPaintArea('#0ff');
-                        this.jsetData.re = this.reIni;
-                        this.jsetData.im = this.imIni;
-                        this.updateJset();
+                        this.appData.re = this.reIni;
+                        this.appData.im = this.imIni;
+                        this.updateView();
                         break;
                     }
                     case 'src': {
