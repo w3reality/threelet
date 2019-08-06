@@ -249,8 +249,10 @@ class Utils {
             bg: "#fff",
             tbg: "#fff",
             tfg: "#000",
+            fontSize: "13px",
             // fontFamily: "Times",
             fontFamily: "monospace", // https://stackoverflow.com/questions/4686754/making-every-character-on-a-web-page-the-same-width
+            offset: [25, 35],
         };
         const actual = Object.assign({}, defaults, opts);
 
@@ -269,7 +271,7 @@ class Utils {
 
         // ctx.font = `48px ${actual.fontFamily}`;
         // ctx.font = `36px ${actual.fontFamily}`;
-        ctx.font = `13px ${actual.fontFamily}`;
+        ctx.font = `${actual.fontSize} ${actual.fontFamily}`;
 
         ctx.fillStyle = actual.bg;
         ctx.fillRect(0, 0, can.width, can.height);
@@ -279,7 +281,8 @@ class Utils {
 
         ctx.fillStyle = actual.tfg;
         // ctx.fillText(text, 25, 35+25); // ok for 256, 128
-        ctx.fillText(text, 25, 35); // ok for 256, 64
+        // ctx.fillText(text, 25, 35); // ok for 256, 64
+        ctx.fillText(text, ...actual.offset);
 
         return can;
     }

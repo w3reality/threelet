@@ -22,8 +22,20 @@ class ExampleUtils {
         console.log('ave, std:', ave.toFixed(3), std.toFixed(3));
 
         // sprite
-        const can = Threelet.Utils.createCanvasFromText(
-            `ave: ${ave.toFixed(3)} std: ${std.toFixed(3)}`, 256, 64, {tfg: '#0cc'});
+        // const can = Threelet.Utils.createCanvasFromText(
+        //     `ave: ${ave.toFixed(3)} std: ${std.toFixed(3)}`, 256, 64, {
+        //         tfg: '#0cc',
+        //         fontSize: '18px',
+        //         offset: [12, 32],
+        //     });
+        const can = Threelet.Utils.createCanvasFromText('', 256, 64, {
+                tfg: '#0cc',
+                fontSize: '18px',
+            });
+        const ctx = can.getContext("2d");
+        ctx.fillText(`ave: ${ave.toFixed(3)} (s)`, 32, 18);
+        ctx.fillText(`std: ${std.toFixed(3)} (s)`, 32, 42);
+
         const sp = Threelet.Utils.createCanvasSprite(can, 1024*3.0);
         sp.position.x = -0.1;
         sp.position.y = ave + 0.02;
@@ -47,7 +59,11 @@ class ExampleUtils {
 
             // sprite
             const can = Threelet.Utils.createCanvasFromText(
-                `${height.toFixed(3)}`, 256, 64, {tfg: '#000'});
+                `${height.toFixed(3)} (s)`, 256, 64, {
+                    tfg: '#000',
+                    fontSize: '18px',
+                    offset: [32, 32],
+                });
             const sp = Threelet.Utils.createCanvasSprite(can, 1024*3.0);
             sp.position.x = offset[0];
             sp.position.y = offset[1] + height + 0.02;
