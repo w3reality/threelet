@@ -73,7 +73,7 @@ impl VertsBuffer {
         let mut x = 0.0;
         let mut y = 0.0;
         let max_iter = num_verts / 3; // triangles assumed
-        (0..max_iter).for_each(|idx| {
+        for idx in 0..max_iter {
             // let prob = 0.5;
             let prob = rand::thread_rng().gen_range(0.0, 1.0);
             let z = z_variation * prob;
@@ -116,7 +116,7 @@ impl VertsBuffer {
             let _y = cs[2] * x + cs[3] * y + cs[5];
             x = _x;
             y = _y;
-        });
+        }
     }
     pub fn get_positions(&self) -> wasm_bindgen::JsValue {
         unsafe {
