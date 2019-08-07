@@ -60,7 +60,7 @@ impl VertsBuffer {
 
         let tri_width = 0.02;
         let z_variation = 0.01;
-        let base_colors = [255,0,0,100,  255,0,0,100,  255,0,0,100];
+        let base_colors = [255,127,0,100,  255,127,0,100,  255,127,0,100];
 
         let f1 = [0.0, 0.0, 0.0, 0.16, 0.0, 0.0, 0.01]; // Stem
         let f2 = [0.85, 0.04, -0.04, 0.85, 0.0, 1.60, 0.85]; // Successively smaller leaflets

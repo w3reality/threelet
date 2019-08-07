@@ -32,21 +32,23 @@
             // 0: fps, 1: ms, 2: mb, 3+: custom
             this.setup('mod-stats', window.Stats, {panelType: 2});
 
-            this.reIni = -0.15;
-            this.imIni = 0.65;
             this.appData = {
                 mod: null,
-                re: this.reIni,
-                im: this.imIni,
+                fnBench: {
+                    rust: undefined,
+                    js: undefined,
+                },
+                statBench: {
+                    rust: 'noready',
+                    js: 'noready',
+                },
             };
 
             (async () => {
                 const mod = await Threelet.Utils.loadWasmBindgen(
                     './fern', await import(`./fern.export.js`));
                 // console.log('fern - mod, wasm:', mod, mod.wasm);
-                // this.onWasmReady(mod);
-
-                this.appData.mod = mod;
+                this.onWasmReady(mod);
                 this.updateView();
             })();
         }
@@ -61,14 +63,19 @@
 
             const numFerns = 4;
 
-            const statsRust = Demo.benchFernRust(maxIter, numFerns, mod);
-            // this.scene.add(statsRust);
+            this.appData.mod = mod;
 
-            const statsJs = Demo.benchFernJs(maxIter, numFerns);
-            statsJs.position.z -= 0.25;
-            this.scene.add(statsJs);
+            this.appData.fnBench.rust = () => {
+                this.scene.add(Demo.benchFernRust(maxIter, numFerns, mod));
+            };
+            this.appData.statBench.rust = 'ready';
 
-            this.scene.add(statsRust);
+            this.appData.fnBench.js = () => {
+                const stats = Demo.benchFernJs(maxIter, numFerns);
+                stats.position.z -= 0.25;
+                this.scene.add(stats);
+            };
+            this.appData.statBench.js = 'ready';
         }
 
         static benchFernRust(maxIter, numFerns, mod) {
@@ -100,7 +107,7 @@
                 vertsBuf.test_hash();
             }
 
-            const stats = this.createStats(positions, colors, samples);
+            const stats = this.createStats(positions, colors, samples, 'rust');
             // *** vertsToMesh() has already created buffer attributes
             // using the positions/colors array.
             // so we're done with these arrays.
@@ -135,16 +142,16 @@
             const samples = logger.grep('end:').splits;
             // console.log('samples:', samples);
 
-            return this.createStats(positions, colors, samples);
+            return this.createStats(positions, colors, samples, 'js');
         }
 
-        static createStats(positions, colors, samples) {
+        static createStats(positions, colors, samples, label) {
             const fern = UtilsDev.createBufferGeometryMesh(positions, colors, 0.2);
             fern.position.set(1, 0, 0); // show only the last one computed
 
             const resultGroup = new THREE.Group();
             resultGroup.add(fern,
-                Threelet.ExampleUtils.createStatsFromSamples(samples),
+                Threelet.ExampleUtils.createStatsFromSamples(samples, label),
                 Threelet.ExampleUtils.createSamplesObject(samples));
             return resultGroup;
         }
@@ -239,18 +246,60 @@
 
         updateView() {
             console.log('@@ this.appData:', this.appData);
-            const {mod, re, im} = this.appData;
             const ctx = this.planeCtx;
-
-            if (ctx && mod) {
-                Demo.drawCommandsDynamic(ctx, re, im);
-                // mod.draw(ctx, 256, 256, 0.005*2.4, re, im);
+            if (ctx) {
+                this.drawCommandsDynamic(ctx, this.appData.statBench);
                 this.setPlaneNeedsUpdate(true);
             }
         }
 
+        static getIndicator(stat) {
+            let indicator = '?';
+            switch (stat) {
+                case 'noready': indicator = '-'; break;
+                case 'ready': indicator = 'Start'; break;
+                case 'running': indicator = '  ⌛'; break;
+                case 'done': indicator = '  ✅'; break;
+                default: console.warn('unknown stat:', stat);;
+            }
+            return indicator;
+        }
+
         // TODO fancy refactored method to skip this brute hardcoding...
         //      or, just going json-doc style declarative in future
+        drawCommandsDynamic(ctx, sb) {
+            //-------- 3rd row
+            ctx.fillStyle = '#222';
+            ctx.fillRect(0*64, 3*32, 64, 32);
+            ctx.fillRect(1*64, 3*32, 64, 32);
+            ctx.fillStyle = '#444444';
+            ctx.fillRect(2*64, 3*32, 64, 32);
+            ctx.fillStyle = '#222';
+            ctx.fillRect(3*64, 3*32, 64, 32);
+            ctx.font = '13px monospace';
+            ctx.fillStyle = '#cc6600'; //---- fg
+            ctx.fillText('benchFernRust()', 0*64+8, 3*32+20);
+            ctx.fillStyle = '#cccccc'; //---- fg
+            // ctx.fillText('', 1*64+8, 3*32+20);
+            ctx.fillText(`${Demo.getIndicator(sb.rust)}`, 2*64+8, 3*32+20);
+            // TODO !!!!
+            ctx.fillText(`ave: 0.000 (s)  std: 0.000 (s)`, 3*64+8, 3*32+20);
+            //-------- 4th row
+            ctx.fillStyle = '#222';
+            ctx.fillRect(0*64, 4*32, 64, 32);
+            ctx.fillRect(1*64, 4*32, 64, 32);
+            ctx.fillStyle = '#444444';
+            ctx.fillRect(2*64, 4*32, 64, 32);
+            ctx.fillStyle = '#222';
+            ctx.fillRect(3*64, 4*32, 64, 32);
+            ctx.font = '13px monospace';
+            ctx.fillStyle = '#cccc00'; //---- fg
+            ctx.fillText('benchFernJs()', 0*64+8, 4*32+20);
+            ctx.fillStyle = '#cccccc'; //---- fg
+            // ctx.fillText('', 1*64+8, 4*32+20);
+            ctx.fillText(`${Demo.getIndicator(sb.js)}`, 2*64+8, 4*32+20);
+            ctx.fillText(`ave: 0.000 (s)  std: 0.000 (s)`, 3*64+8, 4*32+20);
+        }
         static drawCommandsStatic(ctx) {
             //-------- 2nd row
             ctx.fillStyle = '#444444';
@@ -274,7 +323,7 @@
             ctx.fillStyle = '#cccccc'; //---- fg
             ctx.font = '13px monospace';
             // ctx.fillText('', 0*64+8, 5*32+20);
-            ctx.fillText('Reset????', 1*64+8, 5*32+20);
+            ctx.fillText('Reset', 1*64+8, 5*32+20);
             // ctx.fillText('', 2*64+8, 5*32+20);
             // ctx.fillText('', 3*64+8, 5*32+20);
 
@@ -284,38 +333,6 @@
             ctx.fillRect(1*64, 7*32, 64, 32);
             ctx.fillStyle = '#cccccc'; //---- fg
             ctx.fillText('source code', 0*64+8, 7*32+20);
-        }
-        static drawCommandsDynamic(ctx, re, im) {
-            //-------- 3rd row
-            ctx.fillStyle = '#222';
-            ctx.fillRect(0*64, 3*32, 64, 32);
-            ctx.fillRect(1*64, 3*32, 64, 32);
-            ctx.fillStyle = '#444444';
-            ctx.fillRect(2*64, 3*32, 64, 32);
-            ctx.fillStyle = '#222';
-            ctx.fillRect(3*64, 3*32, 64, 32);
-            ctx.fillStyle = '#cccccc'; //---- fg
-            ctx.font = '13px monospace';
-            // ctx.fillText(`Re(C): ${re.toFixed(2)}`, 0*64+8, 3*32+20);
-            ctx.fillText(`benchFernRust()`, 0*64+8, 3*32+20);
-            // ctx.fillText('', 1*64+8, 3*32+20);
-            ctx.fillText('Start', 2*64+8, 3*32+20);
-            ctx.fillText(`ave: 0.000 (s)  std: 0.000 (s)`, 3*64+8, 3*32+20);
-            //-------- 4th row
-            ctx.fillStyle = '#222';
-            ctx.fillRect(0*64, 4*32, 64, 32);
-            ctx.fillRect(1*64, 4*32, 64, 32);
-            ctx.fillStyle = '#444444';
-            ctx.fillRect(2*64, 4*32, 64, 32);
-            ctx.fillStyle = '#222';
-            ctx.fillRect(3*64, 4*32, 64, 32);
-            ctx.fillStyle = '#cccccc'; //---- fg
-            ctx.font = '13px monospace';
-            // ctx.fillText(`Im(C): ${im.toFixed(2)}`, 0*64+8, 4*32+20);
-            ctx.fillText(`benchFernJs()`, 0*64+8, 4*32+20);
-            // ctx.fillText('', 1*64+8, 4*32+20);
-            ctx.fillText('Start', 2*64+8, 4*32+20);
-            ctx.fillText(`ave: 0.000 (s)  std: 0.000 (s)`, 3*64+8, 4*32+20);
         }
 
         // impl
@@ -362,28 +379,50 @@
             }
         }
 
+        onBench(mode) {
+            if (mode !== 'rust' && mode !== 'js') {
+                console.warn('onBench(): invalid mode:', mode);
+                return;
+            }
+            const modeAnother = mode === 'rust' ? 'js' : 'rust';
+
+            const sb = this.appData.statBench;
+            if (sb[modeAnother] === 'running') {
+                console.log('another bench is running; nop');
+                return;
+            }
+
+            if (sb[mode] === 'ready') {
+                sb[mode] = 'running';
+                this.updateView();
+                setTimeout(() => {
+                    this.appData.fnBench[mode]();
+                    sb[mode] = 'done';
+                    this.updateView();
+                }, 100);
+            }
+        }
+        onReset() {
+            // TODO stub !!!!
+        }
+
         onSelect(what) {
             if (what.startsWith('cmd-')) {
                 const command = what.replace('cmd-', '');
                 switch (command) {
                     case 'bench-rust': {
-                        // console.log('re-');
-                        this.appData.re -= 0.01;
-                        this.updateView();
+                        console.log('bench-rust');
+                        this.onBench('rust');
                         break;
                     }
                     case 'bench-js': {
-                        // console.log('im-');
-                        this.appData.im -= 0.01;
-                        this.updateView();
+                        console.log('bench-js');
+                        this.onBench('js');
                         break;
                     }
                     case 'reset': {
-                        // console.log('reset');
-                        // this.clearPaintArea('#0ff');
-                        this.appData.re = this.reIni;
-                        this.appData.im = this.imIni;
-                        this.updateView();
+                        console.log('reset');
+                        this.onReset();
                         break;
                     }
                     case 'src': {

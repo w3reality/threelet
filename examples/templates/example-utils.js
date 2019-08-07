@@ -12,7 +12,7 @@ class ExampleUtils {
             / (unbiased ? arr.length - 1 : arr.length));
     }
 
-    static createStatsFromSamples(samples) {
+    static createStatsFromSamples(samples, label) {
         // tests agrees with the results in https://mathjs.org/docs/reference/functions/std.html
         // const y = [2, 4, 6, 8];
         // console.log(this.ave(y), this.std(y), this.std(y, false));
@@ -29,12 +29,15 @@ class ExampleUtils {
         //         offset: [12, 32],
         //     });
         const can = Threelet.Utils.createCanvasFromText('', 256, 64, {
-                tfg: '#0cc',
                 fontSize: '18px',
             });
         const ctx = can.getContext("2d");
-        ctx.fillText(`ave: ${ave.toFixed(3)} (s)`, 32, 18);
-        ctx.fillText(`std: ${std.toFixed(3)} (s)`, 32, 42);
+        ctx.fillStyle = '#000000';
+        ctx.fillText(`${label}`, 20, 30);
+        ctx.fillStyle = '#00cccc';
+        ctx.fillText(`ave: ${ave.toFixed(3)} (s)`, 80, 18);
+        ctx.fillStyle = '#cc00cc';
+        ctx.fillText(`std: ${std.toFixed(3)} (s)`, 80, 42);
 
         const sp = Threelet.Utils.createCanvasSprite(can, 1024*3.0);
         sp.position.x = -0.1;
@@ -45,7 +48,7 @@ class ExampleUtils {
         ls.position.y = ave / 2;
 
         // std bar
-        const sq = Threelet.Utils.createLineBox([0.025, 2*std, 0.025], 0x00cccc);
+        const sq = Threelet.Utils.createLineBox([0.025, 2*std, 0.025], 0xcc00cc);
         sq.position.y = ave;
 
         return (new THREE.Group()).add(sp, ls, sq);
