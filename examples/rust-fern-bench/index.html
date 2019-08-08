@@ -305,13 +305,17 @@
             ctx.fillRect(2*64, 3*32, 64, 32);
             ctx.fillStyle = '#222';
             ctx.fillRect(3*64, 3*32, 64, 32);
+            ctx.fillRect(4*64, 3*32, 64*4, 32); // clear 1x4 paint area
+
             ctx.font = '13px monospace';
             ctx.fillStyle = '#cc6600'; //---- fg
             ctx.fillText('benchFernRust()', 0*64+8, 3*32+20);
+
             ctx.fillStyle = '#cccccc'; //---- fg
-            // ctx.fillText('', 1*64+8, 3*32+20);
             ctx.fillText(`${Demo.getIndicator(sb.rust)}`, 2*64+8, 3*32+20);
+
             if (sb.resultRust) {
+                ctx.fillStyle = '#cccccc'; //---- fg
                 ctx.fillText(`ave: ${sb.resultRust.ave.toFixed(3)} (s)  std: ${sb.resultRust.std.toFixed(3)} (s)`, 3*64+8, 3*32+20);
             }
             //-------- 4th row
@@ -322,13 +326,17 @@
             ctx.fillRect(2*64, 4*32, 64, 32);
             ctx.fillStyle = '#222';
             ctx.fillRect(3*64, 4*32, 64, 32);
+            ctx.fillRect(4*64, 4*32, 64*4, 32); // clear 1x4 paint area
+
             ctx.font = '13px monospace';
             ctx.fillStyle = '#cccc00'; //---- fg
             ctx.fillText('benchFernJs()', 0*64+8, 4*32+20);
+
             ctx.fillStyle = '#cccccc'; //---- fg
-            // ctx.fillText('', 1*64+8, 4*32+20);
             ctx.fillText(`${Demo.getIndicator(sb.js)}`, 2*64+8, 4*32+20);
+
             if (sb.resultJs) {
+                ctx.fillStyle = '#cccccc'; //---- fg
                 ctx.fillText(`ave: ${sb.resultJs.ave.toFixed(3)} (s)  std: ${sb.resultJs.std.toFixed(3)} (s)`, 3*64+8, 4*32+20);
             }
         }
@@ -444,7 +452,6 @@
             sb.js = 'ready';
             sb.resultRust = undefined;
             sb.resultJs = undefined;
-            this.clearPaintArea('#222');
             this.updateView();
 
             // clear 3d viz stuff
