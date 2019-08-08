@@ -51,7 +51,10 @@ class ExampleUtils {
         const sq = Threelet.Utils.createLineBox([0.025, 2*std, 0.025], 0xcc00cc);
         sq.position.y = ave;
 
-        return (new THREE.Group()).add(sp, ls, sq);
+        const group = new THREE.Group();
+        group.userData = { ave, std };
+        group.name = 'stats';
+        return group.add(sp, ls, sq);
     }
     static createSamplesObject(samples) {
         const group = new THREE.Group();

@@ -41,16 +41,38 @@
                 statBench: {
                     rust: 'noready',
                     js: 'noready',
+                    resultRust: undefined,
+                    resultJs: undefined,
                 },
             };
 
             (async () => {
+                // TODO in future - this wasm stuff will get refactored into WebWorker
                 const mod = await Threelet.Utils.loadWasmBindgen(
-                    './fern', await import(`./fern.export.js`));
+                    './fern', await import('./fern.export.js'));
                 // console.log('fern - mod, wasm:', mod, mod.wasm);
                 this.onWasmReady(mod);
+
                 this.updateView();
             })();
+
+            // TODO in future - get wbg module working inside worker !!!!
+            this.benchWorker = null;
+            if (0) {/* !!!! */(async () => {
+                const worker = new Worker("./bench-worker.js");
+                this.benchWorker = worker;
+                worker.onmessage = (e) => {
+                    console.log('msg from worker', e.data);
+                }
+                worker.postMessage({aa: 42});
+            })();/* !!!! */}
+        }
+
+        // override
+        onDestroy() {
+            if (this.benchWorker) {
+                this.benchWorker.terminate();
+            }
         }
 
         onWasmReady(mod) {
@@ -65,17 +87,24 @@
 
             this.appData.mod = mod;
 
+            const sb = this.appData.statBench;
+
             this.appData.fnBench.rust = () => {
-                this.scene.add(Demo.benchFernRust(maxIter, numFerns, mod));
+                const viz = Demo.benchFernRust(maxIter, numFerns, mod);
+                viz.name = 'viz-rust';
+                sb.resultRust = viz.getObjectByName('stats').userData;
+                this.scene.add(viz);
             };
-            this.appData.statBench.rust = 'ready';
+            sb.rust = 'ready';
 
             this.appData.fnBench.js = () => {
-                const stats = Demo.benchFernJs(maxIter, numFerns);
-                stats.position.z -= 0.25;
-                this.scene.add(stats);
+                const viz = Demo.benchFernJs(maxIter, numFerns);
+                viz.name = 'viz-js';
+                sb.resultJs = viz.getObjectByName('stats').userData;
+                this.scene.add(viz);
+                viz.position.z -= 0.25;
             };
-            this.appData.statBench.js = 'ready';
+            sb.js = 'ready';
         }
 
         static benchFernRust(maxIter, numFerns, mod) {
@@ -107,7 +136,7 @@
                 vertsBuf.test_hash();
             }
 
-            const stats = this.createStats(positions, colors, samples, 'rust');
+            const viz = this.createStatsViz(positions, colors, samples, 'rust');
             // *** vertsToMesh() has already created buffer attributes
             // using the positions/colors array.
             // so we're done with these arrays.
@@ -119,7 +148,7 @@
 
             vertsBuf.free();
 
-            return stats;
+            return viz;
         }
 
         static benchFernJs(maxIter, numFerns) {
@@ -142,10 +171,10 @@
             const samples = logger.grep('end:').splits;
             // console.log('samples:', samples);
 
-            return this.createStats(positions, colors, samples, 'js');
+            return this.createStatsViz(positions, colors, samples, 'js');
         }
 
-        static createStats(positions, colors, samples, label) {
+        static createStatsViz(positions, colors, samples, label) {
             const fern = UtilsDev.createBufferGeometryMesh(positions, colors, 0.2);
             fern.position.set(1, 0, 0); // show only the last one computed
 
@@ -248,7 +277,7 @@
             console.log('@@ this.appData:', this.appData);
             const ctx = this.planeCtx;
             if (ctx) {
-                this.drawCommandsDynamic(ctx, this.appData.statBench);
+                Demo.drawCommandsDynamic(ctx, this.appData.statBench);
                 this.setPlaneNeedsUpdate(true);
             }
         }
@@ -267,7 +296,7 @@
 
         // TODO fancy refactored method to skip this brute hardcoding...
         //      or, just going json-doc style declarative in future
-        drawCommandsDynamic(ctx, sb) {
+        static drawCommandsDynamic(ctx, sb) {
             //-------- 3rd row
             ctx.fillStyle = '#222';
             ctx.fillRect(0*64, 3*32, 64, 32);
@@ -282,8 +311,9 @@
             ctx.fillStyle = '#cccccc'; //---- fg
             // ctx.fillText('', 1*64+8, 3*32+20);
             ctx.fillText(`${Demo.getIndicator(sb.rust)}`, 2*64+8, 3*32+20);
-            // TODO !!!!
-            ctx.fillText(`ave: 0.000 (s)  std: 0.000 (s)`, 3*64+8, 3*32+20);
+            if (sb.resultRust) {
+                ctx.fillText(`ave: ${sb.resultRust.ave.toFixed(3)} (s)  std: ${sb.resultRust.std.toFixed(3)} (s)`, 3*64+8, 3*32+20);
+            }
             //-------- 4th row
             ctx.fillStyle = '#222';
             ctx.fillRect(0*64, 4*32, 64, 32);
@@ -298,7 +328,9 @@
             ctx.fillStyle = '#cccccc'; //---- fg
             // ctx.fillText('', 1*64+8, 4*32+20);
             ctx.fillText(`${Demo.getIndicator(sb.js)}`, 2*64+8, 4*32+20);
-            ctx.fillText(`ave: 0.000 (s)  std: 0.000 (s)`, 3*64+8, 4*32+20);
+            if (sb.resultJs) {
+                ctx.fillText(`ave: ${sb.resultJs.ave.toFixed(3)} (s)  std: ${sb.resultJs.std.toFixed(3)} (s)`, 3*64+8, 4*32+20);
+            }
         }
         static drawCommandsStatic(ctx) {
             //-------- 2nd row
@@ -384,9 +416,10 @@
                 console.warn('onBench(): invalid mode:', mode);
                 return;
             }
-            const modeAnother = mode === 'rust' ? 'js' : 'rust';
 
             const sb = this.appData.statBench;
+
+            const modeAnother = mode === 'rust' ? 'js' : 'rust';
             if (sb[modeAnother] === 'running') {
                 console.log('another bench is running; nop');
                 return;
@@ -395,6 +428,8 @@
             if (sb[mode] === 'ready') {
                 sb[mode] = 'running';
                 this.updateView();
+
+                // TODO use WebWorker instead
                 setTimeout(() => {
                     this.appData.fnBench[mode]();
                     sb[mode] = 'done';
@@ -403,7 +438,34 @@
             }
         }
         onReset() {
-            // TODO stub !!!!
+            // clear data and panel
+            const sb = this.appData.statBench;
+            sb.rust = 'ready';
+            sb.js = 'ready';
+            sb.resultRust = undefined;
+            sb.resultJs = undefined;
+            this.clearPaintArea('#222');
+            this.updateView();
+
+            // clear 3d viz stuff
+
+            let vizRust = this.scene.getObjectByName('viz-rust');
+            let vizJs = this.scene.getObjectByName('viz-js');
+            // console.log('(before) this.scene:', this.scene);
+            // console.log('vizRust:', vizRust);
+            // console.log('vizJs:', vizJs);
+
+            this.renderer.dispose();
+            if (vizRust) {
+                Threelet.freeScene(vizRust);
+                this.scene.remove(vizRust);
+                vizRust = null;
+            }
+            if (vizJs) {
+                Threelet.freeScene(vizJs);
+                this.scene.remove(vizJs);
+                vizJs = null;
+            }
         }
 
         onSelect(what) {
