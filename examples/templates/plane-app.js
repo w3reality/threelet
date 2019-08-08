@@ -3,8 +3,11 @@ class PlaneApp extends Threelet {
     // override
     onCreate(params={}) {
         const controls = this.setup('mod-controls', THREE.OrbitControls);
-        controls.enableRotate = false;
         // controls.enablePan = false;
+
+        // assume no stroking by default; so enable rotate by mouse
+        // controls.enableRotate = false;
+
         this.controls = controls;
 
         // this.setup('mod-stats', window.Stats, {panelType: 0}); // 0: fps, 1: ms, 2: mb, 3+: custom

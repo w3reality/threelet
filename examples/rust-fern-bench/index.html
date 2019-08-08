@@ -26,9 +26,6 @@
         onCreate(params) {
             super.onCreate(params);
 
-            // no stroking in this app; so enable rotate by mouse
-            this.controls.enableRotate = true;
-
             // 0: fps, 1: ms, 2: mb, 3+: custom
             this.setup('mod-stats', window.Stats, {panelType: 2});
 
@@ -349,6 +346,7 @@
             // ctx.fillRect(3*64, 2*32, 64, 32);
             ctx.fillStyle = '#cccccc'; //---- fg
             ctx.font = '13px monospace';
+            // TODO !!!! dynamic with maxIter
             ctx.fillText('Compute fractal with 1,000,000 triangles; 10 times per bench', 0*64+8, 2*32+20);
             // ctx.fillText('', 1*64+8, 2*32+20);
             // ctx.fillText('', 2*64+8, 2*32+20);
@@ -366,6 +364,8 @@
             ctx.fillText('Reset', 1*64+8, 5*32+20);
             // ctx.fillText('', 2*64+8, 5*32+20);
             // ctx.fillText('', 3*64+8, 5*32+20);
+
+            // TODO !!!! show msg: 'only the last iter viz shown'
 
             //-------- 7th row
             ctx.fillStyle = '#444444';
