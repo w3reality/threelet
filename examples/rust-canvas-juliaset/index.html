@@ -22,12 +22,6 @@
         onCreate(params) {
             super.onCreate(params);
 
-            // Threelet.Utils.createCanvasFromImage('./control.png', can => {
-            //     // console.log('@@ can:', can);
-            //     // document.body.appendChild(can); // debug
-            //     this.illustrationCanvas = can;
-            // });
-
             this.reIni = -0.15;
             this.imIni = 0.65;
             this.jsetData = {
@@ -57,46 +51,28 @@
         }
 
         static drawC(ctx, re, im) {
-            // TODO fancy refactored method to skip this brute hardcoding...
+            let row = 3; //========
+            ctx.fillStyle = '#222';
+            this.boxRect(ctx, row, 0, 2);
+            ctx.fillStyle = '#444444';
+            this.boxRect(ctx, row, 2, 2);
+            ctx.fillStyle = '#cccccc'; //---- fg
+            ctx.font = '13px monospace';
+            this.boxText(ctx, row, 0, `Re(C): ${re.toFixed(2)}`);
+            this.boxText(ctx, row, 2, '  -');
+            this.boxText(ctx, row, 3, '  +');
 
-            //-------- 3rd row
+            row = 4; //========
             ctx.fillStyle = '#222';
-            ctx.fillRect(0*64, 3*32, 64, 32);
-            ctx.fillRect(1*64, 3*32, 64, 32);
+            this.boxRect(ctx, row, 0, 2);
             ctx.fillStyle = '#444444';
-            ctx.fillRect(2*64, 3*32, 64, 32);
-            ctx.fillRect(3*64, 3*32, 64, 32);
+            this.boxRect(ctx, row, 2, 2);
             ctx.fillStyle = '#cccccc'; //---- fg
             ctx.font = '13px monospace';
-            ctx.fillText(`Re(C): ${re.toFixed(2)}`, 0*64+8, 3*32+20);
-            // ctx.fillText('', 1*64+8, 3*32+20);
-            ctx.fillText('  -', 2*64+8, 3*32+20);
-            ctx.fillText('  +', 3*64+8, 3*32+20);
-            //-------- 4th row
-            ctx.fillStyle = '#222';
-            ctx.fillRect(0*64, 4*32, 64, 32);
-            ctx.fillRect(1*64, 4*32, 64, 32);
-            ctx.fillStyle = '#444444';
-            ctx.fillRect(2*64, 4*32, 64, 32);
-            ctx.fillRect(3*64, 4*32, 64, 32);
-            ctx.fillStyle = '#cccccc'; //---- fg
-            ctx.font = '13px monospace';
-            ctx.fillText(`Im(C): ${im.toFixed(2)}`, 0*64+8, 4*32+20);
-            // ctx.fillText('', 1*64+8, 4*32+20);
-            ctx.fillText('  -', 2*64+8, 4*32+20);
-            ctx.fillText('  +', 3*64+8, 4*32+20);
+            this.boxText(ctx, row, 0, `Im(C): ${im.toFixed(2)}`);
+            this.boxText(ctx, row, 2, '  -');
+            this.boxText(ctx, row, 3, '  +');
         }
-
-        // updateIllustration(tf) {
-        //     const ctx = this.planeCtx;
-        //     if (tf && this.illustrationCanvas) {
-        //         // draw a 128 x 256 image
-        //         ctx.drawImage(this.illustrationCanvas, 0, 128);
-        //     } else { // 'hide' the illustration
-        //         ctx.fillStyle = '#000000';
-        //         ctx.fillRect(0, 128, 256, 128);
-        //     }
-        // }
 
         // impl
         drawTitle(ctx) {
@@ -107,40 +83,23 @@
 
         // impl
         drawCommands(ctx) {
-            // TODO fancy refactored method to skip this brute hardcoding...
-
-            //-------- 2nd row
-            ctx.fillStyle = '#444444';
-            // ctx.fillRect(0*64, 2*32, 64, 32);
-            // ctx.fillRect(1*64, 2*32, 64, 32);
-            // ctx.fillRect(2*64, 2*32, 64, 32);
-            // ctx.fillRect(3*64, 2*32, 64, 32);
+            let row = 2; //========
             ctx.fillStyle = '#cccccc'; //---- fg
             ctx.font = '13px monospace';
-            ctx.fillText('Draw Julia set with', 0*64+8, 2*32+20);
-            // ctx.fillText('', 1*64+8, 2*32+20);
-            // ctx.fillText('', 2*64+8, 2*32+20);
-            // ctx.fillText('', 3*64+8, 2*32+20);
+            Demo.boxText(ctx, row, 0, 'Draw Julia set with');
 
-            //-------- 5th row
+            row = 5; //========
             ctx.fillStyle = '#444444';
-            // ctx.fillRect(0*64, 5*32, 64, 32);
-            ctx.fillRect(1*64, 5*32, 64, 32);
-            // ctx.fillRect(2*64, 5*32, 64, 32);
-            // ctx.fillRect(3*64, 5*32, 64, 32);
+            Demo.boxRect(ctx, row, 1, 1);
             ctx.fillStyle = '#cccccc'; //---- fg
             ctx.font = '13px monospace';
-            // ctx.fillText('', 0*64+8, 5*32+20);
-            ctx.fillText('Reset', 1*64+8, 5*32+20);
-            // ctx.fillText('', 2*64+8, 5*32+20);
-            // ctx.fillText('', 3*64+8, 5*32+20);
+            Demo.boxText(ctx, row, 1, 'Reset');
 
-            //-------- 7th row
+            row = 7; //========
             ctx.fillStyle = '#444444';
-            ctx.fillRect(0*64, 7*32, 64, 32);
-            ctx.fillRect(1*64, 7*32, 64, 32);
+            Demo.boxRect(ctx, row, 0, 2);
             ctx.fillStyle = '#cccccc'; //---- fg
-            ctx.fillText('source code', 0*64+8, 7*32+20);
+            Demo.boxText(ctx, row, 0, 'source code');
         }
 
         updateMarker(what, row, col, width=1) {
