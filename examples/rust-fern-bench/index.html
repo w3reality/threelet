@@ -6,6 +6,11 @@
 </head>
 <body>
     <canvas id="demo" style="width: 100%; height: 100%;"></canvas>
+    <pre>
+- todo: adjust stats objs for desktop/vr (and remove unit box)
+- maxIter=1000*1000
+- write up README.md
+    </pre>
 
     <script src="../deps/three.min.js"></script>
     <script src="../deps/OrbitControls.js"></script>
@@ -18,8 +23,7 @@
     <script src="../templates/example-utils.js"></script>
 
     <script type="module">
-    import { default as UtilsDev } from "../../src/Utils.js";
-    // console.log('UtilsDev:', UtilsDev);
+    // import { default as UtilsDev } from "../../src/Utils.js"; // dev
 
     class Demo extends Threelet.PlaneApp {
         // override
@@ -27,7 +31,7 @@
             super.onCreate(params);
 
             // 0: fps, 1: ms, 2: mb, 3+: custom
-            this.setup('mod-stats', window.Stats, {panelType: 2});
+            // this.setup('mod-stats', window.Stats, {panelType: 2});
 
             this.appData = {
                 mod: null,
@@ -36,6 +40,7 @@
                     js: undefined,
                 },
                 statBench: {
+                    maxIter: -1,
                     rust: 'noready',
                     js: 'noready',
                     resultRust: undefined,
@@ -44,7 +49,6 @@
             };
 
             (async () => {
-                // TODO in future - this wasm stuff will get refactored into WebWorker
                 const mod = await Threelet.Utils.loadWasmBindgen(
                     './fern', await import('./fern.export.js'));
                 // console.log('fern - mod, wasm:', mod, mod.wasm);
@@ -55,14 +59,14 @@
 
             // TODO in future - get wbg module working inside worker !!!!
             this.benchWorker = null;
-            if (0) {/* !!!! */(async () => {
-                const worker = new Worker("./bench-worker.js");
-                this.benchWorker = worker;
-                worker.onmessage = (e) => {
-                    console.log('msg from worker', e.data);
-                }
-                worker.postMessage({aa: 42});
-            })();/* !!!! */}
+            // (async () => {
+            //     const worker = new Worker("./bench-worker.js");
+            //     this.benchWorker = worker;
+            //     worker.onmessage = (e) => {
+            //         console.log('msg from worker', e.data);
+            //     }
+            //     worker.postMessage({aa: 42});
+            // })();
         }
 
         // override
@@ -80,11 +84,14 @@
             const maxIter = 1000*100; // ~ 4.8 mb !!!! dev
             // const maxIter = 1024*10; // -> 480 kb
 
-            const numFerns = 4;
+            // const numFerns = 0; // dev
+            const numFerns = 4; // dev
+            // const numFerns = 10;
 
             this.appData.mod = mod;
 
             const sb = this.appData.statBench;
+            sb.maxIter = maxIter;
 
             this.appData.fnBench.rust = () => {
                 const viz = Demo.benchFernRust(maxIter, numFerns, mod);
@@ -107,12 +114,12 @@
         static benchFernRust(maxIter, numFerns, mod) {
             const numVerts = maxIter * 3; // 1 iter <-> 1 triangle
 
-            const loggerAlloc = UtilsDev.createLogger({mute: false});
+            const loggerAlloc = Threelet.Utils.createLogger({mute: false});
             loggerAlloc.log('begin: rust verts alloc');
             const vertsBuf = new mod.VertsBuffer(numVerts);
             loggerAlloc.log('end: rust verts alloc <<<<');
 
-            const logger = UtilsDev.createLogger();
+            const logger = Threelet.Utils.createLogger();
             for (let i = 0; i < numFerns; i++) {
                 logger.log('begin: rust verts compute');
                 // vertsBuf.compute_one_triangle(); // debug
@@ -149,14 +156,14 @@
         }
 
         static benchFernJs(maxIter, numFerns) {
-            const loggerAlloc = UtilsDev.createLogger({mute: false});
+            const loggerAlloc = Threelet.Utils.createLogger({mute: false});
             loggerAlloc.log('begin: js verts alloc');
             const positions = new Float32Array(maxIter * 9);
             const colors = new Uint8Array(maxIter * 12);
             loggerAlloc.log('end: js verts alloc <<<<');
             console.log('positions/colors len:', positions.length, colors.length);
 
-            const logger = UtilsDev.createLogger();
+            const logger = Threelet.Utils.createLogger();
             for (let i = 0; i < numFerns; i++) {
                 logger.log('begin: js verts compute');
                 this.computeFern(positions, colors, maxIter);
@@ -172,7 +179,7 @@
         }
 
         static createStatsViz(positions, colors, samples, label) {
-            const fern = UtilsDev.createBufferGeometryMesh(positions, colors, 0.2);
+            const fern = Threelet.Utils.createBufferGeometryMesh(positions, colors, 0.2);
             fern.position.set(1, 0, 0); // show only the last one computed
 
             const resultGroup = new THREE.Group();
@@ -271,7 +278,7 @@
         //===================================================================
 
         updateView() {
-            console.log('@@ this.appData:', this.appData);
+            // console.log('@@ this.appData:', this.appData);
             const ctx = this.planeCtx;
             if (ctx) {
                 Demo.drawCommandsDynamic(ctx, this.appData.statBench);
@@ -291,95 +298,85 @@
             return indicator;
         }
 
-        // TODO fancy refactored method to skip this brute hardcoding...
-        //      or, just going json-doc style declarative in future
         static drawCommandsDynamic(ctx, sb) {
-            //-------- 3rd row
+            // https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
+            const numberWithCommas = x => x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+            let row = 2; //========
             ctx.fillStyle = '#222';
-            ctx.fillRect(0*64, 3*32, 64, 32);
-            ctx.fillRect(1*64, 3*32, 64, 32);
+            this.boxRect(ctx, row, 0, 8); // clear 1x8
+            ctx.fillStyle = '#cccccc'; //---- fg
+            ctx.font = '13px monospace';
+            this.boxText(ctx, row, 0, `Compute fractal with ${numberWithCommas(sb.maxIter)} triangles; 10 times per bench`);
+
+            row = 3; //========
+            ctx.fillStyle = '#222';
+            this.boxRect(ctx, row, 0, 2);
             ctx.fillStyle = '#444444';
-            ctx.fillRect(2*64, 3*32, 64, 32);
+            this.boxRect(ctx, row, 2, 1);
             ctx.fillStyle = '#222';
-            ctx.fillRect(3*64, 3*32, 64, 32);
-            ctx.fillRect(4*64, 3*32, 64*4, 32); // clear 1x4 paint area
+            this.boxRect(ctx, row, 3, 1+4); // clear 1x4 (paint area) also
 
             ctx.font = '13px monospace';
             ctx.fillStyle = '#cc6600'; //---- fg
-            ctx.fillText('benchFernRust()', 0*64+8, 3*32+20);
+            this.boxText(ctx, row, 0, 'benchFernRust()');
 
             ctx.fillStyle = '#cccccc'; //---- fg
-            ctx.fillText(`${Demo.getIndicator(sb.rust)}`, 2*64+8, 3*32+20);
+            this.boxText(ctx, row, 2, `${Demo.getIndicator(sb.rust)}`);
 
             if (sb.resultRust) {
                 ctx.fillStyle = '#cccccc'; //---- fg
-                ctx.fillText(`ave: ${sb.resultRust.ave.toFixed(3)} (s)  std: ${sb.resultRust.std.toFixed(3)} (s)`, 3*64+8, 3*32+20);
+                this.boxText(ctx, row, 3, `ave: ${sb.resultRust.ave.toFixed(3)} (s)  std: ${sb.resultRust.std.toFixed(3)} (s)`);
             }
-            //-------- 4th row
+
+            row = 4; //========
             ctx.fillStyle = '#222';
-            ctx.fillRect(0*64, 4*32, 64, 32);
-            ctx.fillRect(1*64, 4*32, 64, 32);
+            this.boxRect(ctx, row, 0, 2);
             ctx.fillStyle = '#444444';
-            ctx.fillRect(2*64, 4*32, 64, 32);
+            this.boxRect(ctx, row, 2, 1);
             ctx.fillStyle = '#222';
-            ctx.fillRect(3*64, 4*32, 64, 32);
-            ctx.fillRect(4*64, 4*32, 64*4, 32); // clear 1x4 paint area
+            this.boxRect(ctx, row, 3, 1+4); // clear 1x4 (paint area) also
 
             ctx.font = '13px monospace';
             ctx.fillStyle = '#cccc00'; //---- fg
-            ctx.fillText('benchFernJs()', 0*64+8, 4*32+20);
+            this.boxText(ctx, row, 0, 'benchFernJs()');
 
             ctx.fillStyle = '#cccccc'; //---- fg
-            ctx.fillText(`${Demo.getIndicator(sb.js)}`, 2*64+8, 4*32+20);
+            this.boxText(ctx, row, 2, `${Demo.getIndicator(sb.js)}`);
 
             if (sb.resultJs) {
                 ctx.fillStyle = '#cccccc'; //---- fg
-                ctx.fillText(`ave: ${sb.resultJs.ave.toFixed(3)} (s)  std: ${sb.resultJs.std.toFixed(3)} (s)`, 3*64+8, 4*32+20);
+                this.boxText(ctx, row, 3, `ave: ${sb.resultJs.ave.toFixed(3)} (s)  std: ${sb.resultJs.std.toFixed(3)} (s)`);
+            }
+
+            row = 6; //========
+            ctx.fillStyle = '#222';
+            this.boxRect(ctx, row, 0, 8); // clear 1x8
+            if (sb.resultRust || sb.resultJs) {
+                ctx.fillStyle = '#cccccc';
+                this.boxText(ctx, row, 2, 'ℹ️ Only the last computed fractal is shown');
             }
         }
         static drawCommandsStatic(ctx) {
-            //-------- 2nd row
+            let row = 5; //========
             ctx.fillStyle = '#444444';
-            // ctx.fillRect(0*64, 2*32, 64, 32);
-            // ctx.fillRect(1*64, 2*32, 64, 32);
-            // ctx.fillRect(2*64, 2*32, 64, 32);
-            // ctx.fillRect(3*64, 2*32, 64, 32);
+            this.boxRect(ctx, row, 2, 1);
             ctx.fillStyle = '#cccccc'; //---- fg
             ctx.font = '13px monospace';
-            // TODO !!!! dynamic with maxIter
-            ctx.fillText('Compute fractal with 1,000,000 triangles; 10 times per bench', 0*64+8, 2*32+20);
-            // ctx.fillText('', 1*64+8, 2*32+20);
-            // ctx.fillText('', 2*64+8, 2*32+20);
-            // ctx.fillText('', 3*64+8, 2*32+20);
+            this.boxText(ctx, row, 2, 'Reset');
 
-            //-------- 5th row
+            row = 7; //========
             ctx.fillStyle = '#444444';
-            // ctx.fillRect(0*64, 5*32, 64, 32);
-            ctx.fillRect(1*64, 5*32, 64, 32);
-            // ctx.fillRect(2*64, 5*32, 64, 32);
-            // ctx.fillRect(3*64, 5*32, 64, 32);
+            this.boxRect(ctx, row, 0, 2);
             ctx.fillStyle = '#cccccc'; //---- fg
-            ctx.font = '13px monospace';
-            // ctx.fillText('', 0*64+8, 5*32+20);
-            ctx.fillText('Reset', 1*64+8, 5*32+20);
-            // ctx.fillText('', 2*64+8, 5*32+20);
-            // ctx.fillText('', 3*64+8, 5*32+20);
-
-            // TODO !!!! show msg: 'only the last iter viz shown'
-
-            //-------- 7th row
-            ctx.fillStyle = '#444444';
-            ctx.fillRect(0*64, 7*32, 64, 32);
-            ctx.fillRect(1*64, 7*32, 64, 32);
-            ctx.fillStyle = '#cccccc'; //---- fg
-            ctx.fillText('source code', 0*64+8, 7*32+20);
+            this.boxText(ctx, row, 0, 'source code');
         }
 
         // impl
         drawTitle(ctx) {
             ctx.fillStyle = '#cccccc';
             ctx.font = '18px monospace';
-            ctx.fillText('WIP: 🦀rust-fern-bench', 16, 32+8);
+            ctx.fillText('🦀rust-fern-bench', 16, 32+8);
         }
 
         // impl
@@ -413,7 +410,7 @@
             switch (faceIndex) {
                 case 52: case 53: _fn('cmd-bench-rust', 3, 5, 1); break;
                 case 68: case 69: _fn('cmd-bench-js', 4, 5, 1); break;
-                case 82: case 83: _fn('cmd-reset', 5, 3, 1); break;
+                case 84: case 85: _fn('cmd-reset', 5, 5, 1); break;
                 case 112: case 113: case 114: case 115: _fn('cmd-src', 7, 2, 2); break;
                 default: console.log('@@ nop');
             }
@@ -510,7 +507,7 @@
     const demo = new Demo({
         canvas: document.getElementById("demo"),
         // optAxes: false,
-        debugCube: true,
+        // debugCube: true,
         paintAreaColor: '#222',
     });
     demo.updateLoop(1);

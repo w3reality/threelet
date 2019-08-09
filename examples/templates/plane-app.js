@@ -98,7 +98,25 @@ class PlaneApp extends Threelet {
             this.cube = Threelet.Utils.createTestCube([0.4, 0.1, 0.4], 0xff00ff);
             this.scene.add(this.cube);
         }
+
+        // Threelet.Utils.createCanvasFromImage('./control.png', can => {
+        //     // console.log('@@ can:', can);
+        //     // document.body.appendChild(can); // debug
+        //     this.illustrationCanvas = can;
+        // });
+
     } // end onCreate()
+
+    // updateIllustration(tf) {
+    //     const ctx = this.planeCtx;
+    //     if (tf && this.illustrationCanvas) {
+    //         // draw a 128 x 256 image
+    //         ctx.drawImage(this.illustrationCanvas, 0, 128);
+    //     } else { // 'hide' the illustration
+    //         ctx.fillStyle = '#000000';
+    //         ctx.fillRect(0, 128, 256, 128);
+    //     }
+    // }
 
     setPlaneNeedsUpdate(tf) {
         this.plane.material.map.needsUpdate = tf;
@@ -170,14 +188,21 @@ class PlaneApp extends Threelet {
         return selector;
     }
 
-    drawInfo(lines) {
-        const ctx = this.planeCtx;
+    static boxRect(ctx, row, col, width) {
+        ctx.fillRect(col*64, row*32, 64*width, 32);
+    }
+    static boxText(ctx, row, col, str) {
+        ctx.fillText(str, col*64+8, row*32+20);
+    }
+
+    static drawInfo(ctx, lines) {
+        // const ctx = this.planeCtx;
         ctx.fillStyle = '#cccccc';
         ctx.font = '13px monospace';
 
         let offset = 3;
         for (let line of lines) {
-            ctx.fillText(line, 8, (offset++)*32+20);
+            this.boxText(ctx, offset++, 0, line);
         }
     }
     clearPaintArea(color='#fff') {
