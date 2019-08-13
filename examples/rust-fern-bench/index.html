@@ -6,11 +6,6 @@
 </head>
 <body>
     <canvas id="demo" style="width: 100%; height: 100%;"></canvas>
-    <pre>
-- todo: adjust stats objs for desktop/vr (and remove unit box)
-- maxIter=1000*1000
-- write up README.md
-    </pre>
 
     <script src="../deps/three.min.js"></script>
     <script src="../deps/OrbitControls.js"></script>
@@ -80,13 +75,14 @@
             // const maxIter = 1; // -> 1*3*16 byte
             // const maxIter = 1024*1024*10; // -> 480 mb
             // const maxIter = 1024*1024; // -> 48 mb
-            // const maxIter = 1000*1000; // ~ 48 mb !!!! use for bench
-            const maxIter = 1000*100; // ~ 4.8 mb !!!! dev
+            // const maxIter = 1000*1000; // ~ 48 mb; dev test
+            const maxIter = 1000*200; // prod
+            // const maxIter = 1000*100; // ~ 4.8 mb; dev test
             // const maxIter = 1024*10; // -> 480 kb
 
-            // const numFerns = 0; // dev
-            const numFerns = 4; // dev
-            // const numFerns = 10;
+            // const numFerns = 0; // dev test
+            // const numFerns = 4; // dev test
+            const numFerns = 10; // prod
 
             this.appData.mod = mod;
 
@@ -95,18 +91,25 @@
 
             this.appData.fnBench.rust = () => {
                 const viz = Demo.benchFernRust(maxIter, numFerns, mod);
-                viz.name = 'viz-rust';
                 sb.resultRust = viz.getObjectByName('stats').userData;
-                this.scene.add(viz);
+                viz.name = 'viz-rust';
+                Threelet.hasVrDisplay(tf => {
+                    viz.position.y = tf ? 1 : 0.25;
+                    viz.position.z = tf ? -0.75 : 0.25;
+                    this.scene.add(viz);
+                });
             };
             sb.rust = 'ready';
 
             this.appData.fnBench.js = () => {
                 const viz = Demo.benchFernJs(maxIter, numFerns);
-                viz.name = 'viz-js';
                 sb.resultJs = viz.getObjectByName('stats').userData;
-                this.scene.add(viz);
-                viz.position.z -= 0.25;
+                viz.name = 'viz-js';
+                Threelet.hasVrDisplay(tf => {
+                    viz.position.y = tf ? 1 : 0.25;
+                    viz.position.z = tf ? -1 : 0;
+                    this.scene.add(viz);
+                });
             };
             sb.js = 'ready';
         }
@@ -506,7 +509,7 @@
 
     const demo = new Demo({
         canvas: document.getElementById("demo"),
-        // optAxes: false,
+        optAxes: false,
         // debugCube: true,
         paintAreaColor: '#222',
     });
