@@ -48,6 +48,8 @@ Some notable features include:
 
 - 🦀 rust-canvas-juliaset: Interactive 3D app that can visualize Julia sets. [ `live <https://w3reality.github.io/threelet/examples/rust-canvas-juliaset/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/rust-canvas-juliaset>`__ ]
 
+- 🦀 rust-fern-bench: WebVR app for benchmarking Rust+wasm vs Js. [ `live <https://w3reality.github.io/threelet/examples/rust-fern-bench/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/rust-fern-bench>`__ ]
+
 **Screenshots**
 
 - `App with a dynamic scene <https://w3reality.github.io/threelet/examples/simple-dynamic/index.html>`__
