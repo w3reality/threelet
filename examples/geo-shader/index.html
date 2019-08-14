@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>geo-shader</title>
+</head>
+<body>
+    <div>WIP</div>
+    <canvas id="canvas" style="width: 100%; height: 100%;"></canvas>
+
+    <script src="../deps/three.min.js"></script>
+    <script src="../deps/OrbitControls.js"></script>
+    <script src="../deps/WebVR.js"></script>
+    <script src="../../dist/threelet.min.js"></script>
+
+    <script src="../deps/three-geo.min.js"></script>
+
+    <script>
+    class Demo extends Threelet {
+        // override
+        onCreate(params) {
+            this.setup('mod-controls', THREE.OrbitControls);
+            this.setup('mod-webvr', window.WEBVR);
+
+            this.scene.add(new THREE.GridHelper(10, 20));
+
+            this.cube = Threelet.Utils.createTestCube([0.4, 0.1, 0.4], 0xff00ff);
+            this.scene.add(this.cube);
+            this.updateLoop(1);
+
+            const vizGeo = Demo.initGeo();
+            vizGeo.position.y = 0.25;
+            this.scene.add(vizGeo);
+        }
+
+        static initGeo() {
+            const ioToken = 'pk.eyJ1IjoiamRldmVsIiwiYSI6ImNqemFwaGJoZjAyc3MzbXA1OGNuODBxa2EifQ.7M__SgfWZGJuEiSqbBXdoQ';
+            const tgeo = new ThreeGeo({
+                // tokenMapbox: '********', // <---- set your Mapbox API token here
+                tokenMapbox: ioToken,
+            });
+
+            const isDebug = 1;
+            if (isDebug) {
+                tgeo.tokenMapbox = 'zzzz';
+                tgeo.setApiVector(`./cache/eiger/mapbox-terrain-vector`);
+                tgeo.setApiRgb(`./cache/eiger/mapbox-terrain-rgb`);
+                tgeo.setApiSatellite(`./cache/eiger/mapbox-satellite`);
+                // console.log('tgeo:', tgeo);
+            } else if (tgeo.tokenMapbox === ioToken &&
+                window.location.origin !== 'https://w3reality.github.io') {
+                const warning = 'Please set your own Mapbox API token in ThreeGeo constructor.';
+                alert(warning);
+                return;
+            }
+
+            const terrainGroup = new THREE.Group();
+            terrainGroup.rotation.x = - Math.PI/2;
+
+            const origin = [46.5763, 7.9904];
+            const radius = 5.0;
+            tgeo.getTerrain(origin, radius, 12, {
+                onRgbDem: (meshes) => {},
+                onSatelliteMat: (mesh) => {
+                    const position = mesh.geometry.attributes.position;
+                    const arr = position.array;
+
+                    if (0) { // flatten the terrain
+                        for (let i = 0; i < arr.length; i += 3) {
+                            arr[i+2] = 0; // set z value (height) to zero
+                        }
+                        position.needsUpdate = true;
+                    }
+
+                    console.log('mesh:', mesh);
+                    // mesh.material.map.image
+                    terrainGroup.add(mesh);
+
+                    {
+                        const positions = [];
+                        for (let i = 0; i < arr.length; i += 3) {
+                            positions.push(arr[i], arr[i+1], arr[i+2]);
+                            positions.push(arr[i]+0.005, arr[i+1], arr[i+2]);
+                            positions.push(arr[i], arr[i+1]+0.005, arr[i+2]);
+                        }
+                        const colors = new Uint8Array(positions.length / 3 * 4);
+                        for (let i = 0; i < colors.length; i++) {
+                            colors[i] = 255;
+                        }
+
+                        const { mesh, uniforms } = Threelet.Utils.vertsToMesh(positions, colors);
+                        terrainGroup.add(mesh);
+                        // TODO resolve colors
+                        // TODO introduce uniform u (0<u<1) for shading heights
+                        //      2D <--> 3D map transform
+                    }
+                },
+            });
+            return terrainGroup;
+        }
+
+        // override
+        onUpdate(t, dt) {
+            this.cube.position.set(Math.cos(t), 0.5, Math.sin(t)-1.5);
+            this.cube.rotation.z += dt;
+        }
+
+        // override
+        onDestroy() {
+        }
+    }
+
+    const demo = new Demo({
+        canvas: document.getElementById("canvas"),
+    });
+    </script>
+</body>
+</html>
