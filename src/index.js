@@ -3,7 +3,7 @@
 
 const __version = "0.9.19dev";
 
-import '../node_modules/regenerator-runtime/runtime.js';
+import 'regenerator-runtime/runtime.js';
 
 import VRControlHelper from './VRControlHelper.js';
 import SkyHelper from './SkyHelper.js';
