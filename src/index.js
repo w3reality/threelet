@@ -430,16 +430,20 @@ class Threelet {
         const scene = opts.optScene ? opts.optScene : new THREE.Scene();
 
         if (opts.optAxes) {
-            const walls = Threelet.Utils.createLineBox([1, 1, 1], 0xcccccc);
-            walls.position.set(0, 0, 0);
-            walls.name = 'walls';
-            scene.add(walls);
-            const axes = new THREE.AxesHelper(1);
-            axes.name = 'axes';
-            scene.add(axes);
+            const { walls, axes } = this.createAxes();
+            scene.add(walls, axes);
         }
 
         return [scene, camera, renderer];
+    }
+
+    static createAxes() {
+        const walls = Threelet.Utils.createLineBox([1, 1, 1], 0xcccccc);
+        walls.position.set(0, 0, 0);
+        walls.name = 'walls';
+        const axes = new THREE.AxesHelper(1);
+        axes.name = 'axes';
+        return { walls, axes };
     }
 
     resizeCanvas(canvas, force=false) {
@@ -710,22 +714,22 @@ class Threelet {
         this.camera = null;
     }
     static freeScene(scene) {
-        Threelet.freeChildObjects(scene, scene.children);
+        this.freeChildObjects(scene, scene.children);
     }
     static freeChildObjects(_parent, _children) {
         while (_children.length > 0) {
             let ch = _children[0];
-            Threelet.freeChildObjects(ch, ch.children);
+            this.freeChildObjects(ch, ch.children);
             console.log('@@ freeing: one obj:', ch.name);
             console.log(`@@ freeing obj ${ch.uuid} of ${_parent.uuid}`);
             _parent.remove(ch);
-            Threelet.disposeObject(ch);
+            this.disposeObject(ch);
             ch = null
         }
     }
     static disposeObject(obj) { // https://gist.github.com/j-devel/6d0323264b6a1e47e2ee38bc8647c726
         if (obj.geometry) obj.geometry.dispose();
-        if (obj.material) Threelet.disposeMaterial(obj.material);
+        if (obj.material) this.disposeMaterial(obj.material);
         if (obj.texture) obj.texture.dispose();
     }
     static disposeMaterial(mat) {
