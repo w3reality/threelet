@@ -713,13 +713,19 @@ class Threelet {
 
         this.camera = null;
     }
-    clearScene(needAxes=false) {
+    clearScene(opts={}) {
+        const defaults = {
+            needAxes: false,
+        };
+        const actual = Object.assign({}, defaults, opts);
+
         if (! this.scene) return;
 
-        // clear objs in the scene and restore only axes objs if needed
+        // clear objs in the scene
         this.renderer.dispose();
         Threelet.freeScene(this.scene);
-        if (needAxes) {
+
+        if (actual.needAxes) {
             const { walls, axes } = Threelet.createAxes();
             this.scene.add(walls, axes);
         }
