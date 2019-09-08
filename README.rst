@@ -13,6 +13,9 @@ Some notable features include:
 - function interface ``.update = (t, dt) => {}`` for programming temporal 3D scenes, and
 - easy-to-use mouse/vr-controller event listeners.
 
+Demos
+-----
+
 **Basic demos**
 
 - Hello world (with the default axes and a unit lattice) [ `live <https://w3reality.github.io/threelet/examples/simple/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple/index.html>`__ | `Observable <https://observablehq.com/@j-devel/hello-world-with-threelet>`__ ]
@@ -44,7 +47,7 @@ Some notable features include:
 
 - vr-paint app [ `live <https://w3reality.github.io/threelet/examples/vr-paint/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/vr-paint>`__ ]
 
-- 🔥 ML app (MNIST with LeNet) [ `live <https://w3reality.github.io/spacial-ml/examples/lenet/index.html>`__ | `source <https://github.com/w3reality/spacial-ml/tree/master/examples/lenet/index.html>`__ ] 🔗
+- ML app (MNIST with LeNet) [ `live <https://w3reality.github.io/spacial-ml/examples/lenet/index.html>`__ | `source <https://github.com/w3reality/spacial-ml/tree/master/examples/lenet/index.html>`__ ] 🔗
 
 - 🦀 rust-canvas-juliaset: Interactive 3D app that can visualize Julia sets. [ `live <https://w3reality.github.io/threelet/examples/rust-canvas-juliaset/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/rust-canvas-juliaset>`__ ]
 
