@@ -16,8 +16,9 @@ class Logger {
     }
 
     static _consoleLog(...args) {
-        const _log = console.log; // for eluding uglify
-        _log(...args);
+        // for eluding uglify
+        const _console = console;
+        _console.log.apply(_console, args);
     }
 
     log(...args) {
