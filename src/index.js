@@ -63,13 +63,13 @@ class Threelet {
         [this.scene, this.camera, this.renderer] =
             Threelet._initBasics(canvas, actual);
 
-        this.resizeCanvas(canvas, true); // first time
+        this.resizeCanvas(true); // first time
 
         // render function
         this.render = (isPresenting=false) => {
             // console.log('@@ render(): isPresenting:', isPresenting);
             if (this._stats) { this._stats.update(); }
-            if (! isPresenting) { this.resizeCanvas(canvas); }
+            if (! isPresenting) { this.resizeCanvas(); }
             this.renderer.render(this.scene, this.camera);
         };
 
@@ -219,6 +219,7 @@ class Threelet {
             stats.dom.style.position = 'absolute';
         }
         actual.appendTo.appendChild(stats.dom);
+        return this._stats;
     }
 
     getSkyHelper() { return this.skyHelper; }
@@ -446,9 +447,9 @@ class Threelet {
         return { walls, axes };
     }
 
-    resizeCanvas(canvas, force=false) {
+    resizeCanvas(force=false) {
         Threelet._resizeCanvasToDisplaySize(
-            canvas, this.renderer, this.camera, force);
+            this.canvas, this.renderer, this.camera, force);
     }
 
     // https://stackoverflow.com/questions/29884485/threejs-canvas-size-based-on-container
