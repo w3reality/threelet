@@ -244,12 +244,12 @@ class Threelet {
     }
 
     setupVRControlHelperTest() {
-        this.scene.add(Threelet.Utils.createTestHemisphereLight());
-        this.scene.add(Threelet.Utils.createTestDirectionalLight());
+        this.scene.add(Utils.createTestHemisphereLight());
+        this.scene.add(Utils.createTestDirectionalLight());
 
         this.enableInteractiveGroup('drag');
         const group = this.getInteractiveGroup();
-        Threelet.Utils.createTestObjects([0,0,0]).forEach(obj => group.add(obj));
+        Utils.createTestObjects([0,0,0]).forEach(obj => group.add(obj));
         this.scene.add(group);
     }
     getVRControlHelper() { // deprecated
@@ -439,7 +439,7 @@ class Threelet {
     }
 
     static createAxes() {
-        const walls = Threelet.Utils.createLineBox([1, 1, 1], 0xcccccc);
+        const walls = Utils.createLineBox([1, 1, 1], 0xcccccc);
         walls.position.set(0, 0, 0);
         walls.name = 'walls';
         const axes = new THREE.AxesHelper(1);
@@ -683,6 +683,15 @@ class Threelet {
         const [mx, my] = [x - rect.left, y - rect.top];
         // console.log('getInputCoords():', mx, my, canvas.width, canvas.height);
         return [mx, my];
+    }
+
+    capture() {
+        // Without this pre-rendering, on the Silk browser,
+        // the result is blacked out second time in successive captures.
+        // Also relevant to this -- https://stackoverflow.com/questions/30628064/how-to-toggle-preservedrawingbuffer-in-three-js
+        this.render();
+
+        Utils.capture(this.renderer.domElement);
     }
 
     dispose() {
