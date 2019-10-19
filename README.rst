@@ -27,7 +27,7 @@ Demos
 - App extending the ``Threelet`` class (Object-Oriented Programming) [ `live <https://w3reality.github.io/threelet/examples/simple-oop/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple-oop/index.html>`__ ]
 
 - Embedding a 3D viewer into a web page. [ `live <https://w3reality.github.io/threelet/examples/embed-inline-block/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/embed-inline-block/index.html>`__ ]
-- Embedding multiple independent viewers into a web page. [ `live <https://w3reality.github.io/threelet/examples/embed-multiple/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/embed-multiple/index.html>`__ ]
+- 💡 Embedding multiple independent viewers into a web page. [ `live <https://w3reality.github.io/threelet/examples/embed-multiple/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/embed-multiple/index.html>`__ ]
 
 - Hello glTF animation. [ `live <https://w3reality.github.io/threelet/examples/animation-hello/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/animation-hello/index.html>`__ ]
 
@@ -37,21 +37,23 @@ Demos
 
 - VR app with interactive objects [ `live <https://w3reality.github.io/threelet/examples/webvr-interactive/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-interactive/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-an-interactive-vr-app>`__ ]
 
-- WebVR controller state visualizer [ `live <https://w3reality.github.io/threelet/examples/webvr-controllers/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-controllers>`__ ]
+- 🎮 WebVR controller state visualizer [ `live <https://w3reality.github.io/threelet/examples/webvr-controllers/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-controllers>`__ ]
 
-- Animation player (with glTF, FBX and Collada models). [ `live <https://w3reality.github.io/threelet/examples/animation-player/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/animation-player/index.html>`__ ]
+- 🎬 Animation player (with glTF, FBX and Collada models). [ `live <https://w3reality.github.io/threelet/examples/animation-player/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/animation-player/index.html>`__ ]
 
 - glTF model selection panel. [ `live <https://w3reality.github.io/threelet/examples/model-selection/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/model-selection/index.html>`__ ]
 
 - In-window VR casting. [ `live <https://w3reality.github.io/threelet/examples/vr-casting-in-window/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/vr-casting-in-window/index.html>`__ ]
 
-- vr-paint app [ `live <https://w3reality.github.io/threelet/examples/vr-paint/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/vr-paint>`__ ]
+- 🎨 vr-paint app [ `live <https://w3reality.github.io/threelet/examples/vr-paint/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/vr-paint>`__ ]
 
-- ML app (MNIST with LeNet) [ `live <https://w3reality.github.io/spacial-ml/examples/lenet/index.html>`__ | `source <https://github.com/w3reality/spacial-ml/tree/master/examples/lenet/index.html>`__ ] 🔗
+- 🤖 ML app (MNIST with LeNet) [ `live <https://w3reality.github.io/spacial-ml/examples/lenet/index.html>`__ | `source <https://github.com/w3reality/spacial-ml/tree/master/examples/lenet/index.html>`__ ] 🔗
 
 - 🦀 rust-canvas-juliaset: Interactive 3D app that can visualize Julia sets. [ `live <https://w3reality.github.io/threelet/examples/rust-canvas-juliaset/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/rust-canvas-juliaset>`__ ]
 
 - 🦀 rust-fern-bench: WebVR app for benchmarking Rust+wasm vs Js. [ `live <https://w3reality.github.io/threelet/examples/rust-fern-bench/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/rust-fern-bench>`__ ]
+
+- 🗺️ geo-viewer [ `live <https://w3reality.github.io/three-geo/examples/geo-viewer/io/index.html?lat=46.5763&lng=7.9904&title=Eiger>`__ | `source <https://github.com/w3reality/three-geo/tree/master/examples/geo-viewer>`__ ] 🔗
 
 **Screenshots**
 
