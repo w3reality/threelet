@@ -12,7 +12,7 @@ import Utils from './Utils.js';
 class Threelet {
     constructor(params) {
         this.version = __version;
-        Utils.Logger._consoleLog(`Threelet ${__version}`);
+        Utils.Logger._consoleLog(`Threelet ${__version} with THREE r${THREE.REVISION}`);
 
         const defaults = {
             canvas: null,
