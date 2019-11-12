@@ -54,7 +54,7 @@
             (async () => {
                 // load wasm module
                 const mod = await Threelet.Utils.loadWasmBindgen(
-                    './canvas', await import(`./canvas.export.js`));
+                    './canvas', await import(`./canvas.exports.js`));
                 console.log('canvas mod:', mod);
 
                 // draw via Rust

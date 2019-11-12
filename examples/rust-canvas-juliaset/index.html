@@ -31,7 +31,7 @@
             };
             (async () => {
                 const mod = await Threelet.Utils.loadWasmBindgen(
-                    './julia_set', await import(`./julia_set.export.js`));
+                    './julia_set', await import(`./julia_set.exports.js`));
                 console.log('juliaset mod:', mod);
                 this.jsetData.mod = mod;
                 this.updateJset();
