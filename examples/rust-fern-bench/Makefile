@@ -1,9 +1,11 @@
-all: wasm
+all: wasm-compat
 
 export CRATE_DIR=./fern
 export CRATE_NAME=fern
-MAKE_TARGET=make -f ../wasm/bindgen.mk $@
-wasm:
+export OUT_DIR=.
+export WASM_TOOLS_DIR=../wasm
+MAKE_TARGET=make -f $(WASM_TOOLS_DIR)/bindgen.mk $@
+wasm-compat:
 	$(MAKE_TARGET) 
 
 clean:

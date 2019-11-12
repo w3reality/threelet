@@ -1,0 +1,93 @@
+#!/usr/bin/env node
+
+// gen-bindgen-exports - generate a wasm-bindgen's js module with max compatibility
+//                       (for NodeJS, Web Workers, etc.)
+// j-devel <j@w3reality.com> (MIT license)
+
+const path = require('path');
+const fs = require('fs-extra');
+const babel = require('@babel/core');
+
+const __catFile = (src, dest) => {
+    return new Promise((res, rej) => {
+        try {
+            const rs = fs.createReadStream(src);
+            const ws = fs.createWriteStream(dest, {flags: 'a'});
+            ws.on('close', () => {
+                // console.log('catFile(): done:', src, dest);
+                res();
+            });
+            rs.pipe(ws);
+        } catch (err) {
+            rej(err);
+        }
+    });
+};
+
+const genExportsJs = async (config, throwOnError) => {
+    const { crateDir, crateNameUnderscored, outDir } = config;
+
+    const fixNodeStr = `
+const isNodejs = typeof window === 'undefined' &&
+typeof __non_webpack_require__ !== 'undefined'; // 'require' is not defined in case of WebWorker
+if (isNodejs) {
+// console.log('global:', global);
+const util = __non_webpack_require__('util');
+global.TextEncoder = util.TextEncoder;
+global.TextDecoder = util.TextDecoder;
+}
+`;
+    // __log('fixNodeStr:', fixNodeStr);
+
+    const src = `${crateDir}/pkg/${crateNameUnderscored}.js`;
+    const destEs6 = path.resolve(`${outDir}/__exports.es6.js`);
+
+    // maybe use concat-stream in future - https://github.com/maxogden/concat-stream
+
+    fs.writeFileSync(destEs6, '//-------- begin es6 block\n'); // create a new file
+    fs.appendFileSync(destEs6, fixNodeStr);
+    // __log('before: await catFile()');
+    await __catFile(src, destEs6);
+    // __log('after: await catFile()');
+    fs.appendFileSync(destEs6, '//-------- end es6 block');
+
+    const srcStr = fs.readFileSync(destEs6, 'utf8')
+        .replace(/import \* as wasm.*/g, 'export const wasm = {};')
+        .replace(/ from \'\.\/snippets\//g, ' from \'\.\/__snippets\/');
+    // __log('srcStr:', srcStr);
+
+    const fnameOut = `${crateNameUnderscored}.exports.js`;
+    const pathOut = path.resolve(`${outDir}/${fnameOut}`);
+    fs.writeFileSync(pathOut, ''); // create a new file
+    fs.appendFileSync(pathOut, `
+const crateName = "${crateNameUnderscored}";
+const createBgExports = () => (() => {
+const exports = {};
+`);
+    fs.appendFileSync(pathOut,
+        babel.transformSync(srcStr, {presets: ['@babel/preset-env']}).code);
+    fs.appendFileSync(pathOut, `
+return exports; })();
+// export { crateName, createBgExports };
+`);
+
+    console.log(`transformed pkg/${crateNameUnderscored}.js -> ${fnameOut}`)
+
+    // clean up
+    // nop when the file/dir does not exist - https://github.com/jprichardson/node-fs-extra/blob/master/docs/remove-sync.md
+    fs.removeSync(destEs6);
+};
+
+const yargs = require('yargs');
+const argv = yargs
+    .usage('usage: $0 <crate-dir> <crate-name> <out-dir>')
+    .example('$0 ./fern fern .')
+    .demandCommand(3)
+    .argv;
+// console.log(argv);
+
+genExportsJs({
+    crateDir: argv._[0],
+    crateNameUnderscored: argv._[1],
+    outDir: argv._[2],
+});
