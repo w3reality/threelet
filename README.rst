@@ -51,7 +51,7 @@ Demos
 
 - 🦀 rust-canvas-juliaset: Interactive 3D app that can visualize Julia sets. [ `live <https://w3reality.github.io/threelet/examples/rust-canvas-juliaset/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/rust-canvas-juliaset>`__ ]
 
-- 🦀 rust-fern-bench: WebVR app for benchmarking Rust+wasm vs Js. [ `live <https://w3reality.github.io/threelet/examples/rust-fern-bench/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/rust-fern-bench>`__ ]
+- 🦀 rust-fern-bench: WebVR app for benchmarking fractal computation with Rust+wasm vs JavaScript. [ `live <https://w3reality.github.io/threelet/examples/rust-fern-bench/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/rust-fern-bench>`__ ]
 
 - 🗺️ geo-viewer [ `live <https://w3reality.github.io/three-geo/examples/geo-viewer/io/index.html?lat=46.5763&lng=7.9904&title=Eiger>`__ | `source <https://github.com/w3reality/three-geo/tree/master/examples/geo-viewer>`__ ] 🔗
 
