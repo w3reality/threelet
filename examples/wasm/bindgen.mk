@@ -1,3 +1,5 @@
+CRATE_NAME:=$(subst -,_,$(CRATE_NAME))
+
 wasm:
 	cd $(CRATE_DIR) && wasm-pack build
 	cp $(CRATE_DIR)/pkg/$(CRATE_NAME)_bg.wasm .
