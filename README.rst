@@ -37,7 +37,7 @@ Demos
 
 - VR app with interactive objects [ `live <https://w3reality.github.io/threelet/examples/webvr-interactive/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-interactive/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-an-interactive-vr-app>`__ ]
 
-- 🎮 WebVR controller state visualizer [ `live <https://w3reality.github.io/threelet/examples/webvr-controllers/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-controllers>`__ ]
+- 🎮 WebVR controller state visualizer [ `live <https://w3reality.github.io/threelet/examples/webvr-controllers/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-controllers>`__ | `video <https://w3reality.github.io/threelet/examples/webvr-controllers/media/webvr-controllers.mp4>`__ ]
 
 - 🎬 Animation player (with glTF, FBX and Collada models). [ `live <https://w3reality.github.io/threelet/examples/animation-player/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/animation-player/index.html>`__ ]
 
@@ -51,7 +51,7 @@ Demos
 
 - 🦀 rust-canvas-juliaset: Interactive 3D app that can visualize Julia sets. [ `live <https://w3reality.github.io/threelet/examples/rust-canvas-juliaset/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/rust-canvas-juliaset>`__ ]
 
-- 🦀 rust-fern-bench: WebVR app for benchmarking fractal computation with Rust+wasm vs JavaScript. [ `live <https://w3reality.github.io/threelet/examples/rust-fern-bench/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/rust-fern-bench>`__ ]
+- 🦀 rust-fern-bench: WebVR app for benchmarking fractal computation with Rust+wasm vs JavaScript. [ `live <https://w3reality.github.io/threelet/examples/rust-fern-bench/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/rust-fern-bench>`__ | `video <https://w3reality.github.io/threelet/examples/rust-fern-bench/rust-fern-bench.mp4>`__ ]
 
 - 🗺️ geo-viewer [ `live <https://w3reality.github.io/three-geo/examples/geo-viewer/io/index.html?lat=46.5763&lng=7.9904&title=Eiger>`__ | `source <https://github.com/w3reality/three-geo/tree/master/examples/geo-viewer>`__ ] 🔗
 
