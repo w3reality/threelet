@@ -7,3 +7,7 @@ installed in the system.  Then, build `<name>_bg.wasm` and `<name>.exports.js` (
 $ cd ../.. && npm install && cd -  # for the `wasm-compat` target in Makefile
 $ make
 ```
+
+### Demo
+
+[![screenshot](./rust-fern-bench.png)](https://w3reality.github.io/threelet/examples/rust-fern-bench/index.html)
