@@ -102,9 +102,12 @@ const crateName = "${crateNameUnderscored}";
     fs.removeSync(destEs6);
 
     // experimental: snippet file processing
-    console.log('optSnippetFile:', optSnippetFile);
+    // console.log('optSnippetFile:', optSnippetFile);
     if (optSnippetFile) {
-        genSnippetExportsJs(optSnippetFile, '.', 'snippet-test1.exports.js');
+        const outfile = 'snippet-test1.exports.js';
+        console.log('begin: process a snippet:', optSnippetFile);
+        await genSnippetExportsJs(optSnippetFile, '.', outfile);
+        console.log('done, outfile:', outfile);
     }
 };
 
