@@ -24,9 +24,8 @@ const __catFile = (src, dest) => {
     });
 };
 
-const genExportsJs = async (config, throwOnError) => {
-    const { crateDir, crateNameUnderscored, outDir } = config;
 
+const createEs6InputFile = async (src, dest) => {
     const fixNodeStr = `
 const isNodejs = typeof window === 'undefined' &&
 typeof __non_webpack_require__ !== 'undefined'; // 'require' is not defined in case of WebWorker
@@ -39,17 +38,44 @@ global.TextDecoder = util.TextDecoder;
 `;
     // __log('fixNodeStr:', fixNodeStr);
 
+    // maybe use concat-stream in future - https://github.com/maxogden/concat-stream
+
+    fs.writeFileSync(dest, '//-------- begin es6 block\n'); // create a new file
+    fs.appendFileSync(dest, fixNodeStr);
+    // __log('before: await catFile()');
+    await __catFile(src, dest);
+    // __log('after: await catFile()');
+    fs.appendFileSync(dest, '//-------- end es6 block');
+};
+
+const createExportsFnString = (fnName, srcStr) => {
+    return `
+const ${fnName} = () => (() => {
+const exports = {};
+` + babel.transformSync(srcStr, {presets: ['@babel/preset-env']}).code + `
+return exports; })();
+`;
+};
+
+const genSnippetExportsJs = async (srcFile, outDir, outFile) => {
+    const destEs6 = path.resolve(`${outDir}/__snippet.exports.es6.js`);
+    await createEs6InputFile(srcFile, destEs6);
+    const srcStr = fs.readFileSync(destEs6, 'utf8')
+    fs.removeSync(destEs6);
+
+    const pathOut = path.resolve(`${outDir}/${outFile}`);
+    fs.writeFileSync(pathOut, ''); // create a new file
+    fs.appendFileSync(pathOut,
+        createExportsFnString('createSnippetExports', srcStr));
+};
+
+const genExportsJs = async (config, throwOnError) => {
+    const { crateDir, crateNameUnderscored, outDir, optSnippetFile } = config;
+
     const src = `${crateDir}/pkg/${crateNameUnderscored}.js`;
     const destEs6 = path.resolve(`${outDir}/__exports.es6.js`);
 
-    // maybe use concat-stream in future - https://github.com/maxogden/concat-stream
-
-    fs.writeFileSync(destEs6, '//-------- begin es6 block\n'); // create a new file
-    fs.appendFileSync(destEs6, fixNodeStr);
-    // __log('before: await catFile()');
-    await __catFile(src, destEs6);
-    // __log('after: await catFile()');
-    fs.appendFileSync(destEs6, '//-------- end es6 block');
+    await createEs6InputFile(src, destEs6);
 
     const srcStr = fs.readFileSync(destEs6, 'utf8')
         .replace(/import \* as wasm.*/g, 'export const wasm = {};')
@@ -58,17 +84,15 @@ global.TextDecoder = util.TextDecoder;
 
     const fnameOut = `${crateNameUnderscored}.exports.js`;
     const pathOut = path.resolve(`${outDir}/${fnameOut}`);
+    const fnName = 'createBgExports';
+
     fs.writeFileSync(pathOut, ''); // create a new file
     fs.appendFileSync(pathOut, `
 const crateName = "${crateNameUnderscored}";
-const createBgExports = () => (() => {
-const exports = {};
 `);
-    fs.appendFileSync(pathOut,
-        babel.transformSync(srcStr, {presets: ['@babel/preset-env']}).code);
+    fs.appendFileSync(pathOut, createExportsFnString(fnName, srcStr));
     fs.appendFileSync(pathOut, `
-return exports; })();
-// export { crateName, createBgExports };
+// export { crateName, ${fnName} };
 `);
 
     console.log(`transformed pkg/${crateNameUnderscored}.js -> ${fnameOut}`)
@@ -76,11 +100,19 @@ return exports; })();
     // clean up
     // nop when the file/dir does not exist - https://github.com/jprichardson/node-fs-extra/blob/master/docs/remove-sync.md
     fs.removeSync(destEs6);
+
+    // experimental: snippet file processing
+    console.log('optSnippetFile:', optSnippetFile);
+    if (optSnippetFile) {
+        genSnippetExportsJs(optSnippetFile, '.', 'snippet-test1.exports.js');
+    }
 };
+
+
 
 const yargs = require('yargs');
 const argv = yargs
-    .usage('usage: $0 <crate-dir> <crate-name> <out-dir>')
+    .usage('usage: $0 <crate-dir> <crate-name> <out-dir> [<snippet-file>]')
     .example('$0 ./fern fern .')
     .demandCommand(3)
     .argv;
@@ -90,4 +122,5 @@ genExportsJs({
     crateDir: argv._[0],
     crateNameUnderscored: argv._[1],
     outDir: argv._[2],
+    optSnippetFile: argv._[3], // TODO - only one file supported so far!!!!
 });

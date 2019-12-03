@@ -9,7 +9,7 @@ wasm:
 wasm-compat:
 	cd $(CRATE_DIR) && wasm-pack build
 	cp $(CRATE_DIR)/pkg/$(CRATE_NAME)_bg.wasm .
-	$(WASM_TOOLS_DIR)/gen-bindgen-exports $(CRATE_DIR) $(CRATE_NAME) $(OUT_DIR)
+	$(WASM_TOOLS_DIR)/gen-bindgen-exports $(CRATE_DIR) $(CRATE_NAME) $(OUT_DIR) $(OPT_SNIPPET_FILE)
 
 clean:
 	rm -f $(CRATE_NAME)_bg.wasm $(CRATE_NAME).exports.js
