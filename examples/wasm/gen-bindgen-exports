@@ -52,7 +52,23 @@ const createExportsFnString = (fnName, srcStr) => {
     return `
 const ${fnName} = () => (() => {
 const exports = {};
-` + babel.transformSync(srcStr, {presets: ['@babel/preset-env']}).code + `
+` + babel.transformSync(srcStr, {
+    //==== `async/await` -> _regeneratorRuntime.xx() calls
+    // presets: ['@babel/preset-env'],
+    //==== keep `async/await` etc.(!!) based on `targets`
+    // presets: [['@babel/preset-env', {targets: "last 1 chrome versions"}]],
+    //==== **OK** use `fast-async` for compile-time transformation of async/await
+    // https://stackoverflow.com/questions/52704820/disable-promise-transpilation-using-babel-preset-env
+    // https://github.com/MatAtBread/fast-async#usage
+    presets: [['@babel/preset-env', {exclude: ["babel-plugin-transform-async-to-generator", "babel-plugin-transform-regenerator"]}]],
+    plugins: ['module:fast-async'],
+    //==== this adds `require("...")` for regenerator stuff; needs post-processing with Webpack...
+    // plugins: [
+    //     // https://stackoverflow.com/questions/33527653/babel-6-regeneratorruntime-is-not-defined
+    //     // ["transform-runtime", {"regenerator": true}], // babel-6's loader -- https://stackoverflow.com/a/36821986
+    //     ["@babel/transform-runtime"], // babel-7's loader -- https://stackoverflow.com/a/53736090
+    // ],
+}).code + `
 return exports; })();
 `;
 };
