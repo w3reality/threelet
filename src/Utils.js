@@ -352,9 +352,9 @@ class Utils {
         const colorAttribute = new THREE.Uint8BufferAttribute(colors, 4); // note: "dupe" the colors array
         colorAttribute.normalized = true; // map to 0.0f - +1.0f in the shader
         const geometry = new THREE.BufferGeometry();
-        geometry.addAttribute('position',
+        geometry.setAttribute('position',
             new THREE.Float32BufferAttribute(positions, 3)); // note: "dupe" the positions array
-        geometry.addAttribute('color', colorAttribute);
+        geometry.setAttribute('color', colorAttribute);
         const vs = `
             precision mediump float;
             precision mediump int;
