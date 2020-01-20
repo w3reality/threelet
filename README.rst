@@ -182,6 +182,8 @@ Calling the constructor with the default parameters looks as:
         height: 320,
         // ---- viewer options ----
         optScene: null,
+        optXR: false, // enable WebXR
+        optXRAppendButtonTo: null, // specify the HTML element where the VR button is appended
         optAxes: true, // axes and a unit lattice
         optCameraPosition: [0, 1, 2], // initial camera position in desktop mode
     });
@@ -327,22 +329,19 @@ creating test THREE objects (used in the examples for shortcuts):
     const obj = Threelet.Utils.createTestCube(size=[0.4, 0.1, 0.4], color=0xff00ff, wireframe=false);
     const objs = Threelet.Utils.createTestObjects(offset=[0, 1, -2]);
 
-**Plugin features**
+**External modules**
 
-OrbitControls, stats, and WebVR:
+OrbitControls, stats, and more to be added in future:
 
 .. code:: html
 
     <script src="OrbitControls.js"></script>
     <script src="stats.min.js"></script>
-    <script src="WebVR.js"></script>
 
 .. code:: js
 
     threelet.setup('mod-controls', THREE.OrbitControls); // enable controls
     threelet.setup('mod-stats', window.Stats); // show the stats meter
-    threelet.setup('mod-webvr', window.WEBVR); // show the desktop/VR switch button
-
 
 Sky based on the `shaders/sky example <https://threejs.org/examples/?q=sky#webgl_shaders_sky>`__ in three.js:
 
