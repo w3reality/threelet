@@ -9,7 +9,6 @@
 
     <script src="../deps/three.min.js"></script>
     <script src="../deps/OrbitControls.js"></script>
-    <script src="../deps/WebVR.js"></script>
 
     <script src="../../dist/threelet.min.js"></script>
 
@@ -17,10 +16,10 @@
     const threelet = new Threelet({
         canvas: document.getElementById("canvas"),
         optAxes: false,
+        optXR: true,
     });
 
     threelet.setup('mod-controls', THREE.OrbitControls);
-    threelet.setup('mod-webvr', window.WEBVR);
 
     threelet.scene.add(new THREE.GridHelper(10, 20));
 

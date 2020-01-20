@@ -11,7 +11,6 @@ class PlaneApp extends Threelet {
         this.controls = controls;
 
         // this.setup('mod-stats', window.Stats, {panelType: 0}); // 0: fps, 1: ms, 2: mb, 3+: custom
-        this.setup('mod-webvr', window.WEBVR);
         this.setup('mod-sky', THREE.Sky);
 
         const _planeCanvas = PlaneApp.createPlaneCanvas(params.paintAreaColor);
@@ -170,7 +169,8 @@ class PlaneApp extends Threelet {
     }
     static createSelector(planeCanvas) {
         const selector = new THREE.Group();
-        Threelet.hasVrDisplay(tf => selector.position.set(0, 1, tf ? -3.5 : -0.5));
+        const tf = Threelet.isVrSupported();
+        selector.position.set(0, 1, tf ? -3.5 : -0.5);
 
         const plane = Threelet.Utils.createCanvasPlane(planeCanvas, 4, 2, 8, 8);
         if (0) { // control tex opacity

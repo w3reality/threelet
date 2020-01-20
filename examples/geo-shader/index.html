@@ -10,7 +10,6 @@
 
     <script src="../deps/three.min.js"></script>
     <script src="../deps/OrbitControls.js"></script>
-    <script src="../deps/WebVR.js"></script>
     <script src="../../dist/threelet.min.js"></script>
 
     <script src="../deps/three-geo.min.js"></script>
@@ -20,7 +19,6 @@
         // override
         onCreate(params) {
             this.setup('mod-controls', THREE.OrbitControls);
-            this.setup('mod-webvr', window.WEBVR);
 
             this.scene.add(new THREE.GridHelper(10, 20));
 
@@ -112,6 +110,7 @@
 
     const demo = new Demo({
         canvas: document.getElementById("canvas"),
+        optXR: true,
     });
     </script>
 </body>

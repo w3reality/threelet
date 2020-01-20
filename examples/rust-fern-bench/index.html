@@ -9,7 +9,6 @@
 
     <script src="../deps/three.min.js"></script>
     <script src="../deps/OrbitControls.js"></script>
-    <script src="../deps/WebVR.js"></script>
     <script src="../deps/Sky.js"></script>
     <script src="../deps/stats.min.js"></script>
     <script src='../deps/async-thread-worker.min.js'></script>
@@ -85,11 +84,10 @@
                 const viz = await Demo.benchFern(maxIter, numFerns, thread, 'rust');
                 sb.resultRust = viz.getObjectByName('stats').userData;
                 viz.name = 'viz-rust';
-                Threelet.hasVrDisplay(tf => {
-                    viz.position.y = tf ? 1 : 0.25;
-                    viz.position.z = tf ? -0.75 : 0.25;
-                    this.scene.add(viz);
-                });
+                const tf = Threelet.isVrSupported();
+                viz.position.y = tf ? 1 : 0.25;
+                viz.position.z = tf ? -0.75 : 0.25;
+                this.scene.add(viz);
             };
             sb.rust = 'ready';
 
@@ -97,11 +95,10 @@
                 const viz = await Demo.benchFern(maxIter, numFerns, thread, 'js');
                 sb.resultJs = viz.getObjectByName('stats').userData;
                 viz.name = 'viz-js';
-                Threelet.hasVrDisplay(tf => {
-                    viz.position.y = tf ? 1 : 0.25;
-                    viz.position.z = tf ? -1 : 0;
-                    this.scene.add(viz);
-                });
+                const tf = Threelet.isVrSupported();
+                viz.position.y = tf ? 1 : 0.25;
+                viz.position.z = tf ? -1 : 0;
+                this.scene.add(viz);
             };
             sb.js = 'ready';
         }
@@ -363,6 +360,7 @@
     const demo = new Demo({
         canvas: document.getElementById("demo"),
         optAxes: false,
+        optXR: true,
         // debugCube: true,
         paintAreaColor: '#222',
     });

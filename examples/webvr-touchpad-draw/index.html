@@ -33,32 +33,32 @@
     <script src="../deps/three.min.js"></script>
     <script src="../deps/OrbitControls.js"></script>
     <script src="../deps/Sky.js"></script>
-    <script src="../deps/WebVR.js"></script>
 
 
-    <!-- <script src="../../dist/threelet.min.js"></script> -->
+    <script src="../../dist/threelet.min.js"></script>
     <!-- ==== prod/dev ==== -->
     <script type="module">
-    import Threelet from '../../src/index.js';
+    //import Threelet from '../../src/index.js';
 
+    const overlayDiv = document.getElementById('overlay');
 
     const scene = new THREE.Scene();
     const threelet = new Threelet({
         canvas: document.getElementById("canvas"),
         optScene: scene,
         optAxes: false,
+        optXR: true,
+        optXRAppendButtonTo: overlayDiv,
         optCameraPosition: [0, 1, 1.2],
     });
 
     threelet.setup('mod-controls', THREE.OrbitControls);
     threelet.setup('mod-sky', THREE.Sky);
 
-    const overlayDiv = document.getElementById('overlay');
     threelet.setup('mod-stats', window.Stats, {
         panelType: 1, // 0: fps, 1: ms, 2: mb, 3+: custom
         appendTo: overlayDiv,
     });
-    threelet.setup('mod-webvr', window.WEBVR, {appendTo: overlayDiv});
 
     const vrTouchpadTouching = [false, false];
     const vrTouchpadPressing = [false, false];

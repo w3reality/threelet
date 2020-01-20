@@ -9,7 +9,6 @@
 
     <script src="../deps/three.min.js"></script>
     <script src="../deps/OrbitControls.js"></script>
-    <script src="../deps/WebVR.js"></script>
     <script src="../deps/Sky.js"></script>
 
     <script src="../../dist/threelet.min.js"></script>
@@ -188,6 +187,7 @@
     const demo = new Demo({
         canvas: document.getElementById("demo"),
         optAxes: false,
+        optXR: true,
         // debugCube: true,
     });
     demo.updateLoop(2);

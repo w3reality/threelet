@@ -20,7 +20,6 @@
     <script src="../deps/three.min.js"></script>
     <script src="../deps/OrbitControls.js"></script>
     <script src="../deps/stats.min.js"></script>
-    <script src="../deps/WebVR.js"></script>
     <script src="../deps/GLTFLoader.js"></script>
 
     <script src="../../dist/threelet.min.js"></script>
@@ -28,9 +27,8 @@
     <script type="module">
     // import Threelet from '../../src/index.js';
 
-    const threelet = new Threelet({width: 800, height: 480});
+    const threelet = new Threelet({width: 800, height: 480, optXR: true});
     threelet.setup('mod-controls', THREE.OrbitControls);
-    threelet.setup('mod-webvr', window.WEBVR);
     threelet.setup('mod-stats', window.Stats, {panelType: 0});
     document.getElementById('viewer').appendChild(threelet.domElement);
 

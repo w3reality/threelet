@@ -18,7 +18,6 @@
 
     <script src="../deps/three.min.js"></script>
     <script src="../deps/OrbitControls.js"></script>
-    <script src="../deps/WebVR.js"></script>
     <script src="../../dist/threelet.min.js"></script>
 
     <script type="module">
@@ -29,7 +28,6 @@
         // override
         onCreate(params) {
             this.setup('mod-controls', THREE.OrbitControls);
-            this.setup('mod-webvr', window.WEBVR);
 
             this.scene.add(new THREE.GridHelper(10, 20));
 

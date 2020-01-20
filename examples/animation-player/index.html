@@ -48,7 +48,6 @@
     <script src="../deps/OrbitControls.js"></script>
     <script src="../deps/stats.min.js"></script>
     <script src="../deps/Sky.js"></script>
-    <script src="../deps/WebVR.js"></script>
 
     <script src="../../dist/threelet.min.js"></script>
     <!-- ==== prod/dev ==== -->
@@ -60,10 +59,10 @@
         width: hasVR ? 480 : 800,
         height: hasVR ? 320 : 480,
         optAxes: false,
+        optXR: true,
     });
     threelet.setup('mod-controls', THREE.OrbitControls);
     threelet.setup('mod-sky', THREE.Sky);
-    threelet.setup('mod-webvr', window.WEBVR);
     threelet.setup('mod-stats', window.Stats, {panelType: 0});
     document.getElementById('viewer').appendChild(threelet.domElement);
 
