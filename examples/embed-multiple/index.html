@@ -18,7 +18,7 @@
         </div>
         <div class="ib">
             <span id="viewer1"></span><br />
-            <span>1) static scene + WebVR enabled</span>
+            <span>1) static scene + WebXR enabled</span>
         </div>
     </div>
     <hr />
@@ -29,14 +29,13 @@
         </div>
         <div class="ib">
             <span id="viewer3"></span><br />
-            <span>3) dynamic scene + WebVR enabled</span>
+            <span>3) dynamic scene + WebXR enabled</span>
         </div>
     </div>
 
     <script src="../deps/stats.min.js"></script>
     <script src="../deps/three.min.js"></script>
     <script src="../deps/OrbitControls.js"></script>
-    <script src="../deps/WebVR.js"></script>
 
     <script src="../../dist/threelet.min.js"></script>
     <!-- ==== prod/dev ==== -->
@@ -44,14 +43,11 @@
     // import Threelet from '../../src/index.js';
 
     for (let i of [0, 1, 2, 3]) {
-        const threelet = new Threelet({width: 380, height: 260});
+        const optXR = i % 2 === 1;
+        const threelet = new Threelet({width: 380, height: 260, optXR});
         document.getElementById(`viewer${i}`).appendChild(threelet.domElement);
 
         threelet.setup('mod-controls', THREE.OrbitControls);
-
-        if (i % 2) {
-            threelet.setup('mod-webvr', window.WEBVR);
-        }
 
         const cube = Threelet.Utils.createTestCube([0.4, 0.1, 0.4], 0xff00ff);
         threelet.scene.add(cube);

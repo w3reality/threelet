@@ -10,7 +10,6 @@
     <script src="../deps/stats.min.js"></script>
     <script src="../deps/three.min.js"></script>
     <script src="../deps/OrbitControls.js"></script>
-    <script src="../deps/WebVR.js"></script>
     <script src="../deps/Sky.js"></script>
     <script src="../deps/signature_pad.min.js"></script>
 
@@ -32,7 +31,6 @@
             // controls.enablePan = false;
 
             this.setup('mod-stats', window.Stats, {panelType: 0}); // 0: fps, 1: ms, 2: mb, 3+: custom
-            this.setup('mod-webvr', window.WEBVR);
             this.setup('mod-sky', THREE.Sky);
 
             const _planeCanvas = Viewer.createPlaneCanvas();
@@ -444,6 +442,7 @@
     const viewer = new Viewer({
         canvas: document.getElementById("viewer"),
         optAxes: false,
+        optXR: true,
     });
     if (! Threelet.isVrSupported()) { viewer.camera.position.z = 2; }
 

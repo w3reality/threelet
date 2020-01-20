@@ -309,6 +309,7 @@ class Threelet {
         }
     }
 
+    static isVrSupported() { return this._isXrSupported(); }
     static _isXrSupported() { return 'xr' in navigator; }
     static _createVRButton(renderer, onEnter) {
         const btn = VRButton.createButton(renderer);
