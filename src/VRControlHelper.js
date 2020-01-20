@@ -1,8 +1,8 @@
 
 // credits: VRControlHelper is based on the dragging example -
-// https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
+// r104 - https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
 class VRControlHelper {
-    constructor(renderer) {
+    constructor(rendererXr) {
         // this.controllerArmLength = 0;
         this.controllerArmLength = 0.25;
         this.controllerLineLength = 5;
@@ -13,7 +13,7 @@ class VRControlHelper {
 
         this.group = new THREE.Group();
 
-        this.controllers = this._createControllers(renderer);
+        this.controllers = this._createControllers(rendererXr);
         this.controllersState = {
             touchpads: [],
             triggers: [],
@@ -43,7 +43,7 @@ class VRControlHelper {
         obj.position.set(touchpad.axes0 * 0.025, 0.0125,
             touchpad.axes1 * 0.025 - this.controllerArmLength - 0.025);
     }
-    _createControllers(renderer) {
+    _createControllers(rendererXr) {
         // maybe load a 3D model instead of the box
         // https://github.com/mrdoob/three.js/blob/master/examples/webvr_paint.html
         const walls = new THREE.LineSegments(
@@ -100,7 +100,7 @@ class VRControlHelper {
         padCircleTouch.name = 'touchpad-press';
 
         // https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
-        const controllers = [0, 1].map(i => renderer.vr.getController(i)
+        const controllers = [0, 1].map(i => rendererXr.getController(i)
             .add(walls.clone())
             .add(line.clone())
             .add(triggerLoop.clone())

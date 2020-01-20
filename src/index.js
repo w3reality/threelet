@@ -8,6 +8,7 @@ import 'regenerator-runtime/runtime.js';
 import VRControlHelper from './VRControlHelper.js';
 import SkyHelper from './SkyHelper.js';
 import Utils from './Utils.js';
+import { VRButton } from './deps/VRButton.js';
 
 class Threelet {
     constructor(params) {
@@ -22,6 +23,8 @@ class Threelet {
             optScene: null,
             optAxes: true, // axes and a unit lattice
             optCameraPosition: [0, 1, 2], // initial camera position in desktop mode
+            optXR: false,
+            optXRAppendButtonTo: null,
         };
         const actual = Object.assign({}, defaults, params);
 
@@ -145,7 +148,6 @@ class Threelet {
         this.modTable = {
             'mod-controls': this._setupControls,
             'mod-stats': this._setupStats,
-            'mod-webvr': this._setupWebVR,
             'mod-sky': this._setupSky,
         };
 
@@ -158,13 +160,24 @@ class Threelet {
         // for sky module
         this.skyHelper = null;
 
-        // for WebVR module
-        this.fpsDesktopLast = 0;
-        this._vrcHelper = new VRControlHelper(this.renderer);
-        this.vrButton = null;
-            // https://stackoverflow.com/questions/49471653/in-three-js-while-using-webvr-how-do-i-move-the-camera-position
-            // this.dolly = new THREE.Group();
-            // this.dolly.add(this.camera);
+        // for WebXR
+        this._fpsDesktopLast = 0;
+        this._vrcHelper = new VRControlHelper(this.renderer.xr);
+        this._vrButton = null;
+        if (actual.optXR) {
+            this._vrButton = this.setupVRButton(actual.optXRAppendButtonTo);
+
+            if (Threelet._isXrSupported()) {
+                this.renderer.xr.enabled = true;
+
+                this._vrcHelper.getControllers()
+                    .forEach(cont => this.scene.add(cont));
+            }
+        }
+
+        // https://stackoverflow.com/questions/49471653/in-three-js-while-using-webvr-how-do-i-move-the-camera-position
+        // this.dolly = new THREE.Group();
+        // this.dolly.add(this.camera);
 
         // api
         this.onCreate(params);
@@ -195,13 +208,20 @@ class Threelet {
         this._controls = new Module(this.camera, this.renderer.domElement);
         this._controls.addEventListener('change', this.render.bind(null, false));
 
-        Threelet.hasVrDisplay(tf => {
-            if (tf) {
-                // KLUDGE - OrbitControl breaks _initMouseListeners() on Oculus Go
-                console.warn('not enabling OrbitControls (although requested) on this browser with VR display.');
-                this._controls.enabled = false; // https://stackoverflow.com/questions/20058579/threejs-disable-orbit-camera-while-using-transform-control
-            }
-        });
+        // Threelet.hasVrDisplay(tf => {
+        //     if (tf) {
+        //         // KLUDGE - OrbitControl breaks _initMouseListeners() on Oculus Go
+        //         console.warn('not enabling OrbitControls (although requested) on this browser with VR display.');
+        //         this._controls.enabled = false; // https://stackoverflow.com/questions/20058579/threejs-disable-orbit-camera-while-using-transform-control
+        //     }
+        // });
+        //====
+        // !!!!!!!! TODO check after `xr` support added
+        // if (Threelet._isXrSupported()) {
+        //     // KLUDGE - OrbitControl breaks _initMouseListeners() on Oculus Go
+        //     console.warn('not enabling OrbitControls (although requested) on this browser with VR display.');
+        //     this._controls.enabled = false; // https://stackoverflow.com/questions/20058579/threejs-disable-orbit-camera-while-using-transform-control
+        // }
 
         return this._controls;
     }
@@ -289,64 +309,38 @@ class Threelet {
         }
     }
 
-    _setupWebVR(Module, opts={}) {
-        const defaults = {
-            appendTo: this.domElement ? this.domElement : document.body,
-        };
-        const actual = Object.assign({}, defaults, opts);
-
-        Threelet.hasVrDisplay(tf => {
-            console.log('hasVrDisplay():', tf);
-            // https://threejs.org/docs/manual/en/introduction/How-to-create-VR-content.html
-            // note: do make sure vr.enabled === false when enabling OrbitControls, or they interfere badly
-            this.renderer.vr.enabled = tf;
-        });
-
-        const btn = this._createVRButton(Module);
-        actual.appendTo.appendChild(btn);
-        this.vrButton = btn;
-
-        if (Threelet.isVrSupported()) {
-            this._vrcHelper.getControllers()
-                .forEach(cont => this.scene.add(cont));
-        }
-    }
-
-    static hasVrDisplay(cb) {
-        if (this.isVrSupported()) {
-            // Oculus Go -> true
-            // desktop-firefox -> false (displays.length === 0)
-            navigator.getVRDisplays()
-                .then(displays => cb(displays.length > 0))
-                .catch(() => cb(false));
-        } else { // desktop-chrome, desktop-safari
-            cb(false);
-        }
-    }
-    static isVrSupported() {
-        // https://github.com/mrdoob/three.js/blob/dev/examples/js/vr/WebVR.js
-        return 'getVRDisplays' in navigator;
-    }
-    _createVRButton(classWebVR) {
-        const btn = classWebVR.createButton(this.renderer);
+    static _isXrSupported() { return 'xr' in navigator; }
+    static _createVRButton(renderer, onEnter) {
+        const btn = VRButton.createButton(renderer);
         btn.style.top = btn.style.bottom;
         btn.style.bottom = '';
-        if (Threelet.isVrSupported()) {
+        if (Threelet._isXrSupported()) {
             btn.addEventListener('click', ev => {
                 console.log('@@ btn.textContent:', btn.textContent);
                 if (btn.textContent.startsWith('ENTER')) {
-                    this.enterVR(() => { // onError
-                        console.log('@@ device:', this.renderer.vr.getDevice());
-                        console.log('@@ controller:', this.renderer.vr.getController(0));
-                        // TODO (how to programmatically exit the VR session????)
-                        // this.updateLoop(this.fpsDesktopLast); // wanna call this after exiting the vr session...
-                    });
+                    onEnter();
                 }
             });
         }
         return btn;
     }
+    setupVRButton(optXRAppendButtonTo) {
+        const btn = Threelet._createVRButton(this.renderer, () => { /* onEnter */
+            this.enterVR(() => { /* onError */
+                console.log('@@ enterVR(): onError() called.');
+                // console.log('@@ controller 0:', this.renderer.xr.getController(0));
+                // TODO (how to programmatically exit the VR session????)
+                // this.updateLoop(this._fpsDesktopLast); // wanna call this after exiting the vr session...
+            });
+        });
 
+        const defaults = this.domElement ? this.domElement : document.body;
+        const appendButtonTo =
+            optXRAppendButtonTo ? optXRAppendButtonTo : defaults;
+        console.log('appendButtonTo:', appendButtonTo);
+        appendButtonTo.appendChild(btn);
+        return btn;
+    }
     enterVR(onError=null) {
         // try entering VR for at most tryCountMax * delay (ms)
         const tryCountMax = 30, delay = 400;
@@ -354,7 +348,7 @@ class Threelet {
         const _enterVR = () => {
             setTimeout(() => {
                 tryCount++;
-                if (this.renderer.vr.isPresenting()) {
+                if (this.renderer.xr.isPresenting) {
                     console.log(`@@ transition to vr loop!! (tryCount: ${tryCount})`);
                     this.updateLoop(-1);
                 } else {
@@ -366,7 +360,7 @@ class Threelet {
                         onError();
                     }
                 }
-            }, delay); // need some delay for this.renderer.vr.isPresenting() to become true
+            }, delay); // need some delay for this.renderer.xr.isPresenting to become true
         };
 
         this.updateLoop(0); // first, make sure desktop loop is stopped
@@ -391,11 +385,11 @@ class Threelet {
             return; // stop the loop
         } else if (fps < 0) { // start the vr loop
             this.renderer.setAnimationLoop(() => {
-                if (! this.renderer.vr.isPresenting()) {
+                if (! this.renderer.xr.isPresenting) {
                     this.renderer.setAnimationLoop(null); // stop the vr loop
                     console.log('@@ transition back to desktop');
-                    // console.log('fps last:', this.fpsDesktopLast);
-                    return this.updateLoop(this.fpsDesktopLast);
+                    // console.log('fps last:', this._fpsDesktopLast);
+                    return this.updateLoop(this._fpsDesktopLast);
                 }
 
                 this.render(true);
@@ -407,7 +401,7 @@ class Threelet {
         }
 
         // FIXME for this naive dev version, not looping with rAF()...
-        this.fpsDesktopLast = fps;
+        this._fpsDesktopLast = fps;
         this.iid = setInterval(() => {
             this.render(); // make sure image dump is available; https://stackoverflow.com/questions/30628064/how-to-toggle-preservedrawingbuffer-in-three-js
             this.updateMechanics();
@@ -709,8 +703,8 @@ class Threelet {
             this._stats.dom.remove();
         }
 
-        if (this.vrButton) {
-            this.vrButton.remove();
+        if (this._vrButton) {
+            this._vrButton.remove();
         }
 
         // this also ensures releasing memory for objects freed by freeScene()
