@@ -162,7 +162,7 @@ class Threelet {
 
         // for WebXR
         this._fpsDesktopLast = 0;
-        this._vrcHelper = new VRControlHelper(this.renderer.xr);
+        this._vrcHelper = new VRControlHelper(this.renderer.xr, this.camera);
         this._vrButton = null;
         if (actual.optXR) {
             this._vrButton = this.setupVRButton(actual.optXRAppendButtonTo);
@@ -641,6 +641,12 @@ class Threelet {
     }
     raycast(origin, direction, meshes, recursive=false, faceExclude=null) {
         this._raycaster.set(origin, direction);
+
+        // Work around the error: "Raycaster.camera" needs to be set in order to raycast against sprites.
+        //   https://threejs.org/docs/#api/en/core/Raycaster.camera
+        //   https://github.com/mrdoob/three.js/pull/16423
+        this._raycaster.camera = this.camera;
+
         return this._raycast(meshes, recursive, faceExclude);
     }
     raycastFromMouse(mx, my, meshes, recursive=false) {

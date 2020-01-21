@@ -2,14 +2,20 @@
 // credits: VRControlHelper is based on the dragging example -
 // r104 - https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
 class VRControlHelper {
-    constructor(rendererXr) {
+    constructor(rendererXr, camera) {
         // this.controllerArmLength = 0;
         this.controllerArmLength = 0.25;
         this.controllerLineLength = 5;
 
         this.tempMatrix = new THREE.Matrix4();
-        this.raycaster = new THREE.Raycaster();
         this.intersected = [];
+
+        this.raycaster = new THREE.Raycaster();
+        // Work around the error: "Raycaster.camera" needs to be set in order to raycast against sprites.
+        //   https://threejs.org/docs/#api/en/core/Raycaster.camera
+        //   https://github.com/mrdoob/three.js/pull/16423
+        this.raycaster.camera = camera;
+
 
         this.group = new THREE.Group();
 
