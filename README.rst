@@ -2,7 +2,7 @@ threelet
 ===================
 
 **threelet** is a `three.js <https://github.com/mrdoob/three.js/>`__ based
-VR app framework for rapidly making 3D browser/WebVR applications.
+VR app framework for rapidly making 3D browser/VR applications.
 
 Using threelet's built-in features, developers who have a minimal
 knowledge of three.js can immediately start writing interactive 3D apps with less code.
@@ -37,7 +37,7 @@ Demos
 
 - VR app with interactive objects [ `live <https://w3reality.github.io/threelet/examples/webvr-interactive/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-interactive/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-an-interactive-vr-app>`__ ]
 
-- 🎮 WebVR controller state visualizer [ `live <https://w3reality.github.io/threelet/examples/webvr-controllers/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-controllers>`__ | `video <https://w3reality.github.io/threelet/examples/webvr-controllers/media/webvr-controllers.mp4>`__ ]
+- 🎮 WebXR controller state visualizer [ `live <https://w3reality.github.io/threelet/examples/webvr-controllers/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/webvr-controllers>`__ | `video <https://w3reality.github.io/threelet/examples/webvr-controllers/media/webvr-controllers.mp4>`__ ]
 
 - 🎬 Animation player (with glTF, FBX and Collada models). [ `live <https://w3reality.github.io/threelet/examples/animation-player/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/animation-player/index.html>`__ ]
 
@@ -51,7 +51,7 @@ Demos
 
 - 🦀 rust-canvas-juliaset: Interactive 3D app that can visualize Julia sets. [ `live <https://w3reality.github.io/threelet/examples/rust-canvas-juliaset/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/rust-canvas-juliaset>`__ ]
 
-- 🦀 rust-fern-bench: WebVR app for benchmarking fractal computation with Rust+wasm vs JavaScript. [ `live <https://w3reality.github.io/threelet/examples/rust-fern-bench/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/rust-fern-bench>`__ | `video <https://w3reality.github.io/threelet/examples/rust-fern-bench/rust-fern-bench.mp4>`__ ]
+- 🦀 rust-fern-bench: WebXR app for benchmarking fractal computation with Rust+wasm vs JavaScript. [ `live <https://w3reality.github.io/threelet/examples/rust-fern-bench/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/rust-fern-bench>`__ | `video <https://w3reality.github.io/threelet/examples/rust-fern-bench/rust-fern-bench.mp4>`__ ]
 
 - 🗺️ geo-viewer [ `live <https://w3reality.github.io/three-geo/examples/geo-viewer/io/index.html?lat=46.5763&lng=7.9904&title=Eiger>`__ | `source <https://github.com/w3reality/three-geo/tree/master/examples/geo-viewer>`__ ] 🔗
 
@@ -152,7 +152,7 @@ specifying render modes (passive, active, and fps-throttled) by the built-in loo
 
 .. code:: js
 
-    threelet.updateLoop(fps); // render at fps using the looper
+    threelet.updateLoop(fps); // render at fps using the built-in looper
 
     threelet.render(); // atomic render manually
 
@@ -182,8 +182,8 @@ Calling the constructor with the default parameters looks as:
         height: 320,
         // ---- viewer options ----
         optScene: null,
-        optXR: false, // enable WebXR
-        optXRAppendButtonTo: null, // specify the HTML element where the VR button is appended
+        optXR: false, // enable WebXR 🔥
+        optXRAppendButtonTo: null, // specify an HTML element where the VR button is appended
         optAxes: true, // axes and a unit lattice
         optCameraPosition: [0, 1, 2], // initial camera position in desktop mode
     });
