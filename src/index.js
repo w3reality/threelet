@@ -3,11 +3,13 @@
 
 const __version = "0.9.19dev";
 
-import 'regenerator-runtime/runtime.js';
+import '../node_modules/regenerator-runtime/runtime.js';
 
 import VRControlHelper from './VRControlHelper.js';
 import SkyHelper from './SkyHelper.js';
 import Utils from './Utils.js';
+
+// TODO integrate `jsm/webxr/VRButton.js` as well
 import { VRButton } from './deps/VRButton.js';
 
 class Threelet {
