@@ -351,7 +351,7 @@ class Threelet {
                 tryCount++;
                 if (this.renderer.xr.isPresenting) {
                     console.log(`@@ transition to vr loop!! (tryCount: ${tryCount})`);
-                    this.updateLoop(-1);
+                    this.updateLoop(-1); // negative fps 'means' vr loop
                 } else {
                     console.log(`@@ vr not ready after: ${tryCount*delay} ms (tryCount: ${tryCount})`);
                     if (tryCount < tryCountMax) {
@@ -389,6 +389,9 @@ class Threelet {
                 if (! this.renderer.xr.isPresenting) {
                     this.renderer.setAnimationLoop(null); // stop the vr loop
                     console.log('@@ transition back to desktop');
+
+                    this.render(); // move one tick to refresh the buffer
+
                     // console.log('fps last:', this._fpsDesktopLast);
                     return this.updateLoop(this._fpsDesktopLast);
                 }
