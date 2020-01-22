@@ -389,8 +389,9 @@ class Threelet {
             } catch (err) {
                 console.log('err:', err);
             }
-
-            overrideStyle(btn);
+            setTimeout(() => {
+                overrideStyle(btn);
+            }, 1);
         }
 
         return btn;
