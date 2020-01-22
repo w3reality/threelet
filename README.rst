@@ -2,7 +2,7 @@ threelet
 ===================
 
 **threelet** is a `three.js <https://github.com/mrdoob/three.js/>`__ based
-VR app framework for rapidly making 3D browser/VR applications.
+WebXR-compatible framework for rapidly developing 3D/VR/AR apps all at once!
 
 Using threelet's built-in features, developers who have a minimal
 knowledge of three.js can immediately start writing interactive 3D apps with less code.
@@ -182,8 +182,11 @@ Calling the constructor with the default parameters looks as:
         height: 320,
         // ---- viewer options ----
         optScene: null,
-        optXR: false, // enable WebXR 🔥
-        optXRAppendButtonTo: null, // specify an HTML element where the VR button is appended
+        optVR: false, // enable VR 🔥
+        optAR: false, // enable AR 🔥
+        optXR: false, // enable both VR/AR
+        optVRAppendButtonTo: null, // specify an HTML element where the VR button is appended
+        optARAppendButtonTo: null, // specify an HTML element where the AR button is appended
         optAxes: true, // axes and a unit lattice
         optCameraPosition: [0, 1, 2], // initial camera position in desktop mode
     });
