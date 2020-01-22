@@ -1,5 +1,5 @@
 // Threelet - https://github.com/w3reality/threelet
-// VR app framework based on three.js (MIT License)
+// 3D/VR/AR app framework based on three.js (MIT License)
 
 const __version = "0.9.19dev";
 
