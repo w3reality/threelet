@@ -43,8 +43,8 @@
     // import Threelet from '../../src/index.js';
 
     for (let i of [0, 1, 2, 3]) {
-        const optXR = i % 2 === 1;
-        const threelet = new Threelet({width: 380, height: 260, optXR});
+        const optVR = i % 2 === 1;
+        const threelet = new Threelet({width: 380, height: 260, optVR});
         document.getElementById(`viewer${i}`).appendChild(threelet.domElement);
 
         threelet.setup('mod-controls', THREE.OrbitControls);
