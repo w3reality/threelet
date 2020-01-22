@@ -20,6 +20,7 @@ Demos
 
 - Hello world (with the default axes and a unit lattice) [ `live <https://w3reality.github.io/threelet/examples/simple/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple/index.html>`__ | `Observable <https://observablehq.com/@j-devel/hello-world-with-threelet>`__ ]
 - Hello VR world [ `live <https://w3reality.github.io/threelet/examples/simple-webvr/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple-webvr/index.html>`__ | `Observable <https://observablehq.com/@j-devel/hello-world-with-threelet/2>`__ ]
+- Hybrid apps with WebXR buttons. [ `live <https://w3reality.github.io/threelet/examples/embed-multiple-buttons/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/embed-multiple-buttons/index.html>`__ ]
 
 - App with a static scene (mouse-event driven passive rendering) [ `live <https://w3reality.github.io/threelet/examples/simple-static/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple-static/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-a-static-3d-app>`__ ]
 - App with a dynamic scene (rendering at 30 fps) [ `live <https://w3reality.github.io/threelet/examples/simple-dynamic/index.html>`__ | `source <https://github.com/w3reality/threelet/tree/master/examples/simple-dynamic/index.html>`__ | `Observable <https://observablehq.com/@j-devel/making-a-dynamic-3d-app>`__ ]
