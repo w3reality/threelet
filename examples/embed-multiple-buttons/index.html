@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>embed-multiple-buttons</title>
+</head>
+<body>
+    <div>
+        Hybrid apps with WebXR buttons.
+        <a href="https://github.com/w3reality/threelet/tree/master/examples/embed-multiple-buttons/index.html">source code</a>
+    </div>
+    <hr />
+    <style>div.ib { display: inline-block; }</style>
+    <div>
+        <div class="ib">
+            <span id="viewer0"></span><br />
+            <span>0) app (Desktop only)</span>
+        </div>
+        <div class="ib">
+            <span id="viewer1"></span><br />
+            <span>1) hybrid app (Desktop + VR)</span>
+        </div>
+    </div>
+    <hr />
+    <div>
+        <div class="ib">
+            <span id="viewer2"></span><br />
+            <span>2) hybrid app (Desktop + AR)</span>
+        </div>
+        <div class="ib">
+            <span id="viewer3"></span><br />
+            <span>3) hybrid app (Desktop + VR + AR)</span>
+        </div>
+    </div>
+
+    <script src="../deps/three.min.js"></script>
+    <script src="../deps/OrbitControls.js"></script>
+
+    <script src="../../dist/threelet.min.js"></script>
+    <!-- ==== prod/dev ==== -->
+    <script type="module">
+    // import Threelet from '../../src/index.js';
+
+    for (let i of [0, 1, 2, 3]) {
+        const threelet = new Threelet({
+            width: 380,
+            height: 260,
+            optVR: i === 1,
+            optAR: i === 2,
+            optXR: i === 3,
+        });
+
+        document.getElementById(`viewer${i}`).appendChild(threelet.domElement);
+        threelet.setup('mod-controls', THREE.OrbitControls);
+
+        const cube = Threelet.Utils.createTestCube([0.6, 0.2, 0.6], 0x00cccc);
+        threelet.scene.add(cube);
+        threelet.update = (t, dt) => {
+            cube.position.set(Math.cos(t), 0.5, Math.sin(t)-1.5);
+            cube.rotation.set(Math.cos(t), Math.sin(t), 0.5);
+        };
+        threelet.updateLoop(4); // loop with the spcified FPS
+    }
+    </script>
+</body>
+</html>

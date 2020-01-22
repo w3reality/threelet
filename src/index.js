@@ -9,8 +9,8 @@ import VRControlHelper from './VRControlHelper.js';
 import SkyHelper from './SkyHelper.js';
 import Utils from './Utils.js';
 
-// TODO integrate `jsm/webxr/VRButton.js` as well
 import { VRButton } from './deps/VRButton.js';
+import { ARButton } from './deps/ARButton.js';
 
 class Threelet {
     constructor(params) {
@@ -25,8 +25,13 @@ class Threelet {
             optScene: null,
             optAxes: true, // axes and a unit lattice
             optCameraPosition: [0, 1, 2], // initial camera position in desktop mode
-            optXR: false,
-            optXRAppendButtonTo: null,
+            //--
+            optVR: false,
+            optAR: false,
+            optVRAppendButtonTo: null,
+            optARAppendButtonTo: null,
+            optXR: false, // shorthand for enabling both VR and AR
+            //--
         };
         const actual = Object.assign({}, defaults, params);
 
@@ -166,16 +171,8 @@ class Threelet {
         this._fpsDesktopLast = 0;
         this._vrcHelper = new VRControlHelper(this.renderer.xr, this.camera);
         this._vrButton = null;
-        if (actual.optXR) {
-            this._vrButton = this.setupVRButton(actual.optXRAppendButtonTo);
-
-            if (Threelet._isXrSupported()) {
-                this.renderer.xr.enabled = true;
-
-                this._vrcHelper.getControllers()
-                    .forEach(cont => this.scene.add(cont));
-            }
-        }
+        this._arButton = null;
+        this.setupWebXR(actual);
 
         // https://stackoverflow.com/questions/49471653/in-three-js-while-using-webvr-how-do-i-move-the-camera-position
         // this.dolly = new THREE.Group();
@@ -311,26 +308,66 @@ class Threelet {
         }
     }
 
-    static isVrSupported() { return this._isXrSupported(); }
+    static isVrSupported() { return this._isXrSupported(); } // exposed
     static _isXrSupported() { return 'xr' in navigator; }
-    static _createVRButton(renderer, onEnter) {
-        const btn = VRButton.createButton(renderer);
-        btn.style.top = btn.style.bottom;
-        btn.style.bottom = '';
+    static _createXRButton(buttonClass, renderer, onEnter) {
+        const btn = buttonClass.createButton(renderer);
+
         if (Threelet._isXrSupported()) {
             btn.addEventListener('click', ev => {
                 console.log('@@ btn.textContent:', btn.textContent);
-                if (btn.textContent.startsWith('ENTER')) {
+                if (btn.textContent === 'ENTER VR' ||
+                    btn.textContent === 'START AR') {
                     onEnter();
                 }
             });
         }
         return btn;
     }
-    setupVRButton(optXRAppendButtonTo) {
-        const btn = Threelet._createVRButton(this.renderer, () => { /* onEnter */
-            this.enterVR(() => { /* onError */
-                console.log('@@ enterVR(): onError() called.');
+    setupWebXR(actual) {
+        const { optVR, optAR, optXR,
+            optVRAppendButtonTo, optARAppendButtonTo } = actual;
+        const styler = Threelet._getXRButtonStyler();
+
+        if (optVR || optXR) {
+            const isDuo = optAR || optXR;
+            this._vrButton = this._setupXRButton(
+                VRButton, optVRAppendButtonTo, styler('vr', isDuo));
+        }
+        if (optAR || optXR) {
+            const isDuo = optVR || optXR;
+            this._arButton = this._setupXRButton(
+                ARButton, optARAppendButtonTo, styler('ar', isDuo));
+        }
+        if (optVR || optAR || optXR) {
+            if (Threelet._isXrSupported()) {
+                this.renderer.xr.enabled = true;
+
+                this._vrcHelper.getControllers()
+                    .forEach(cont => this.scene.add(cont));
+            }
+        }
+    }
+    static _getXRButtonStyler() {
+        return (type, isDuo) => btn => {
+            let shift = 'calc(50% + 0px)'; // https://developer.mozilla.org/en-US/docs/Web/CSS/calc
+            if (isDuo) {
+                const rect = btn.getBoundingClientRect(); // https://developer.mozilla.org/en-US/docs/Web/API/CSS_Object_Model/Determining_the_dimensions_of_elements
+                shift = type === 'vr' ? `- ${rect.width + 5}px` : '+ 4px';
+            }
+            // console.log('shift:', shift);
+
+            Object.assign(btn.style, {
+                top: btn.style.bottom,
+                bottom: '',
+                left: `calc(50% ${shift})`,
+            });
+        };
+    }
+    async _setupXRButton(buttonClass, appendButtonTo, overrideStyle=null) {
+        const btn = Threelet._createXRButton(buttonClass, this.renderer, () => { /* onEnter */
+            this.enterXR(() => { /* onError */
+                console.log('@@ enterXR(): onError() called.');
                 // console.log('@@ controller 0:', this.renderer.xr.getController(0));
                 // TODO (how to programmatically exit the VR session????)
                 // this.updateLoop(this._fpsDesktopLast); // wanna call this after exiting the vr session...
@@ -338,17 +375,32 @@ class Threelet {
         });
 
         const defaults = this.domElement ? this.domElement : document.body;
-        const appendButtonTo =
-            optXRAppendButtonTo ? optXRAppendButtonTo : defaults;
-        console.log('appendButtonTo:', appendButtonTo);
-        appendButtonTo.appendChild(btn);
+        const _appendButtonTo =
+            appendButtonTo ? appendButtonTo : defaults;
+        // console.log('_appendButtonTo:', _appendButtonTo);
+        _appendButtonTo.appendChild(btn);
+
+        if (overrideStyle) {
+            // kludge: ensure style overriding happens *after* VRButton/ARButton
+            try {
+                const token = `immersive-${buttonClass === VRButton ? 'vr' : 'ar'}`;
+                const supported = await navigator.xr.isSessionSupported(token);
+                // console.log('token, supported:', token, supported);
+            } catch (err) {
+                console.log('err:', err);
+            }
+
+            overrideStyle(btn);
+        }
+
         return btn;
     }
-    enterVR(onError=null) {
+
+    enterXR(onError=null) {
         // try entering VR for at most tryCountMax * delay (ms)
         const tryCountMax = 30, delay = 400;
         let tryCount = 0;
-        const _enterVR = () => {
+        const _enterXR = () => {
             setTimeout(() => {
                 tryCount++;
                 if (this.renderer.xr.isPresenting) {
@@ -357,7 +409,7 @@ class Threelet {
                 } else {
                     console.log(`@@ vr not ready after: ${tryCount*delay} ms (tryCount: ${tryCount})`);
                     if (tryCount < tryCountMax) {
-                        _enterVR(tryCountMax, delay); // try harder
+                        _enterXR(tryCountMax, delay); // try harder
                     } else if (onError) {
                         console.error('@@ enter vr failed!!')
                         onError();
@@ -367,7 +419,7 @@ class Threelet {
         };
 
         this.updateLoop(0); // first, make sure desktop loop is stopped
-        _enterVR(tryCountMax, delay);
+        _enterXR(tryCountMax, delay);
     }
 
 
@@ -717,6 +769,9 @@ class Threelet {
 
         if (this._vrButton) {
             this._vrButton.remove();
+        }
+        if (this._arButton) {
+            this._arButton.remove();
         }
 
         // this also ensures releasing memory for objects freed by freeScene()
