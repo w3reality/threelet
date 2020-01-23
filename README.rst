@@ -11,7 +11,7 @@ Some notable features include:
 
 - built-in render loop manager (with auto VR context switching),
 - function interface ``.update = (t, dt) => {}`` for programming temporal 3D scenes, and
-- easy-to-use mouse/vr-controller event listeners.
+- input device abstraction: mouse/xr-controller event listeners.
 
 Demos
 -----
@@ -286,13 +286,15 @@ setting VR controller listeners (`example <https://w3reality.github.io/threelet/
     // i: controller index
     // x, y: controller touchpad coordinates
 
-    threelet.on('vr-touchpad-touch-start', (i, x, y) => { /* ... */ });
-    threelet.on('vr-touchpad-touch-end', (i, x, y) => { /* ... */ });
-    threelet.on('vr-touchpad-press-start', (i, x, y) => { /* ... */ });
-    threelet.on('vr-touchpad-press-end', (i, x, y) => { /* ... */ });
+    threelet.on('xr-trigger-press-start', i => { /* ... */ });
+    threelet.on('xr-trigger-press-end', i => { /* ... */ });
 
-    threelet.on('vr-trigger-press-start', (i) => { /* ... */ });
-    threelet.on('vr-trigger-press-end', (i) => { /* ... */ });
+    // WIP
+    threelet.on('xr-touchpad-touch-start', (i, x, y) => { /* ... */ });
+    threelet.on('xr-touchpad-touch-end', (i, x, y) => { /* ... */ });
+    threelet.on('xr-touchpad-press-start', (i, x, y) => { /* ... */ });
+    threelet.on('xr-touchpad-press-end', (i, x, y) => { /* ... */ });   
+
 
 unsetting listeners:
 
