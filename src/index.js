@@ -1,7 +1,7 @@
 // Threelet - https://github.com/w3reality/threelet
 // 3D/VR/AR app framework based on three.js (MIT License)
 
-const __version = "0.9.19dev";
+const __version = "0.10.0";
 
 import '../node_modules/regenerator-runtime/runtime.js';
 
