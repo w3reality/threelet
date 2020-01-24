@@ -108,12 +108,12 @@ class Threelet {
             'touch-end',
             'touch-click',
             'touch-drag-end',
-            'vr-touchpad-touch-start',
-            'vr-touchpad-touch-end',
-            'vr-touchpad-press-start',
-            'vr-touchpad-press-end',
-            'vr-trigger-press-start',
-            'vr-trigger-press-end',
+            'xr-touchpad-touch-start',
+            'xr-touchpad-touch-end',
+            'xr-touchpad-press-start',
+            'xr-touchpad-press-end',
+            'xr-trigger-press-start',
+            'xr-trigger-press-end',
         ];
 
         this._initTouchListeners(this.renderer.domElement);
@@ -287,11 +287,11 @@ class Threelet {
     getControllersState() { return this._vrcHelper.getControllersState(); }
     displayControllerEvent(i, what, tf) {
         // only for updating visibility
-        if (what === 'vr-trigger-press') {
+        if (what === 'xr-trigger-press') {
             this._vrcHelper.toggleTriggerPressVisibility(i, tf);
-        } else if (what === 'vr-touchpad-touch') {
+        } else if (what === 'xr-touchpad-touch') {
             this._vrcHelper.toggleTouchpadPointVisibility(i, 'touch', tf);
-        } else if (what === 'vr-touchpad-press') {
+        } else if (what === 'xr-touchpad-press') {
             this._vrcHelper.toggleTouchpadPointVisibility(i, 'press', tf);
         } else {
             console.warn('@@ unsupported what:', what);
@@ -299,9 +299,9 @@ class Threelet {
     }
     updateControllerTouchpad(i, what) {
         // only for updating the position based on the current axes values
-        if (what === 'vr-touchpad-touch') {
+        if (what === 'xr-touchpad-touch') {
             this._vrcHelper.updateTouchpadPoint(i, 'touch');
-        } else if (what === 'vr-touchpad-press') {
+        } else if (what === 'xr-touchpad-press') {
             this._vrcHelper.updateTouchpadPoint(i, 'press');
         } else {
             console.warn('@@ unsupported what:', what);
@@ -454,7 +454,9 @@ class Threelet {
                 this.render(true);
                 this.updateMechanics();
                 this._vrcHelper.intersectObjects();
-                this._vrcHelper.updateControllers();
+
+                // DEPRECATED - valid only for WebVR 1.1
+                // this._vrcHelper.updateControllers();
             });
             return;
         }
@@ -529,11 +531,14 @@ class Threelet {
             if (eventName === 'mouse-down') eventName = 'mouse-down-left';
             if (eventName === 'mouse-click') eventName = 'mouse-click-left';
 
-            const listeners = eventName.startsWith('vr-') ?
+            const listeners = eventName.startsWith('xr-') ?
                 this._vrcHelper._eventListeners : this._eventListeners;
             listeners[eventName] = listener;
         } else {
             console.error('@@ on(): unsupported eventName:', eventName);
+            if (eventName.startsWith('vr-')) {
+                Utils.Logger._consoleLog(`${eventName} is deprecated; use 'xr-' instead`);
+            }
         }
     }
     _callIfDefined(name, coords) {

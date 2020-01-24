@@ -72,7 +72,7 @@
             });
 
             this._planeClickStart = [-1, -1]; // faceIndex per controller i
-            this.on('vr-trigger-press-start', (i) => {
+            this.on('xr-trigger-press-start', i => {
                 const plane = this.getPlane();
                 if (! plane) return;
 
@@ -84,7 +84,7 @@
                     this._planeClickStart[i] = -1;
                 }
             });
-            this.on('vr-trigger-press-end', (i) => {
+            this.on('xr-trigger-press-end', i => {
                 const plane = this.getPlane();
                 if (! plane) return;
 

@@ -135,7 +135,7 @@ interactive VR app
         console.log('@@ isec:', isec);
         if (isec && isec.object.name === 'base') updateBase();
     });
-    threelet.on('vr-trigger-press-start', (i) => {
+    threelet.on('xr-trigger-press-start', i => {
         const isects = threelet.raycastFromController(
             i, [base, ...testObjs], false);
 

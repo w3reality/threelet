@@ -101,31 +101,31 @@
 
 
             this._vrPressPlaneStart = [-1, -1]; // faceIndex per controller i
-            this.on('vr-trigger-press-start', (i) => {
+            this.on('xr-trigger-press-start', (i) => {
                 const isec = this.vrcontrollerToPlaneIntersect(i);
                 if (isec) {
-                    console.log('@@ vr-press-start');
+                    console.log('@@ xr-trigger-press-start');
                     this._vrPressPlaneStart[i] = isec.faceIndex;
                     this.invokeSigPadCall('_strokeBegin', isec.point.x, isec.point.y);
                 } else {
                     this._vrPressPlaneStart[i] = -1;
                 }
             });
-            this.on('vr-trigger-press-end', (i) => {
+            this.on('xr-trigger-press-end', (i) => {
                 this.invokeSigPadCall('_strokeEnd', -1, -1);
                 if (this._vrPressPlaneStart[i] < 0) return;
 
                 const lastFaceIndex = this._vrPressPlaneStart[i];
                 this._vrPressPlaneStart[i] = -1;
 
-                // check vr-click
+                // check xr-click
                 const isec = this.vrcontrollerToPlaneIntersect(i);
                 if (isec) {
                     const faceIndex = isec.faceIndex;
-                    console.log('@@ vr-press-end; faceIndex:', faceIndex);
+                    console.log('@@ xr-press-end; faceIndex:', faceIndex);
                     if (Math.floor(faceIndex/2) ===
                         Math.floor(lastFaceIndex/2)) {
-                        console.log('@@ vr-click fulfilled for faceIndex:', faceIndex);
+                        console.log('@@ xr-click fulfilled for faceIndex:', faceIndex);
                         if (isec && Viewer.isPointOnLeftSquare(isec.point)) {
                             this.onLeftPlaneClicked(isec.faceIndex);
                         }

@@ -64,36 +64,36 @@
     const vrTouchpadTouching = [false, false];
     const vrTouchpadPressing = [false, false];
 
-    threelet.on('vr-touchpad-touch-start', (i, x, y) => {
+    threelet.on('xr-touchpad-touch-start', (i, x, y) => {
         console.log('@@ touchpad ts - i, x, y:', i, x, y);
         vrTouchpadTouching[i] = true;
-        threelet.displayControllerEvent(i, 'vr-touchpad-touch', true);
+        threelet.displayControllerEvent(i, 'xr-touchpad-touch', true);
     });
-    threelet.on('vr-touchpad-touch-end', (i, x, y) => {
+    threelet.on('xr-touchpad-touch-end', (i, x, y) => {
         console.log('@@ touchpad te - i, x, y:', i, x, y);
         // always x,y = 0,0 on Oculus Go controller; spec??
         vrTouchpadTouching[i] = false;
-        threelet.displayControllerEvent(i, 'vr-touchpad-touch', false);
+        threelet.displayControllerEvent(i, 'xr-touchpad-touch', false);
     });
-    threelet.on('vr-touchpad-press-start', (i, x, y) => {
+    threelet.on('xr-touchpad-press-start', (i, x, y) => {
         console.log('@@ touchpad ps - i, x, y:', i, x, y);
         vrTouchpadPressing[i] = true;
-        threelet.displayControllerEvent(i, 'vr-touchpad-press', true);
-        threelet.displayControllerEvent(i, 'vr-touchpad-touch', false);
+        threelet.displayControllerEvent(i, 'xr-touchpad-press', true);
+        threelet.displayControllerEvent(i, 'xr-touchpad-touch', false);
     });
-    threelet.on('vr-touchpad-press-end', (i, x, y) => {
+    threelet.on('xr-touchpad-press-end', (i, x, y) => {
         console.log('@@ touchpad pe - i, x, y:', i, x, y);
         vrTouchpadPressing[i] = false;
-        threelet.displayControllerEvent(i, 'vr-touchpad-press', false);
-        threelet.displayControllerEvent(i, 'vr-touchpad-touch', true);
+        threelet.displayControllerEvent(i, 'xr-touchpad-press', false);
+        threelet.displayControllerEvent(i, 'xr-touchpad-touch', true);
     });
-    threelet.on('vr-trigger-press-start', (i) => {
+    threelet.on('xr-trigger-press-start', (i) => {
         console.log('@@ trigger ps - i:', i);
-        threelet.displayControllerEvent(i, 'vr-trigger-press', true);
+        threelet.displayControllerEvent(i, 'xr-trigger-press', true);
     });
-    threelet.on('vr-trigger-press-end', (i) => {
+    threelet.on('xr-trigger-press-end', (i) => {
         console.log('@@ trigger pe - i:', i);
-        threelet.displayControllerEvent(i, 'vr-trigger-press', false);
+        threelet.displayControllerEvent(i, 'xr-trigger-press', false);
     });
 
     //
@@ -209,9 +209,9 @@
         // console.log('@@ vr touchpad touching/pressing:', vrTouchpadTouching, vrTouchpadPressing);
         for (let i of [0, 1]) {
             if (vrTouchpadPressing[i]) {
-                threelet.updateControllerTouchpad(i, 'vr-touchpad-press');
+                threelet.updateControllerTouchpad(i, 'xr-touchpad-press');
             } else if (vrTouchpadTouching[i]) {
-                threelet.updateControllerTouchpad(i, 'vr-touchpad-touch');
+                threelet.updateControllerTouchpad(i, 'xr-touchpad-touch');
             }
         }
     };

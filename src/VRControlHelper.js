@@ -11,11 +11,11 @@ class VRControlHelper {
         this.intersected = [];
 
         this.raycaster = new THREE.Raycaster();
+
         // Work around the error: "Raycaster.camera" needs to be set in order to raycast against sprites.
         //   https://threejs.org/docs/#api/en/core/Raycaster.camera
         //   https://github.com/mrdoob/three.js/pull/16423
         this.raycaster.camera = camera;
-
 
         this.group = new THREE.Group();
 
@@ -28,6 +28,7 @@ class VRControlHelper {
         }
 
         this._eventListeners = {};
+        this._initInputListenersXR();
     }
     getInteractiveGroup() { return this.group; }
     getControllers() { return this.controllers; }
@@ -184,6 +185,7 @@ class VRControlHelper {
         return this.raycaster.intersectObjects( objs, recursive );
     }
 
+    // DEPRECATED - valid only for WebVR 1.1
     // mod of findGamepad() of three.js r104
     static _findGamepad(id) {
         const gamepads = navigator.getGamepads && navigator.getGamepads();
@@ -199,6 +201,8 @@ class VRControlHelper {
             }
         }
     }
+
+    // DEPRECATED - valid only for WebVR 1.1
     // mod of updateControllers() of three.js r104
     updateControllers() {
         const stat = this.controllersState;
@@ -294,13 +298,28 @@ class VRControlHelper {
         }
     }
 
+    // TODO: establish `xr-touchpad-{touch,press}-{start,end}` listeners
+    _initInputListenersXR() {
+        const listenerFor = name => event => {
+            const cb = this._eventListeners[name];
+            if (cb) {
+                const uuid = event.target.uuid;
+                for (let idx of [0, 1]) {
+                    const cont = this.controllers[idx];
+                    if (cont && cont.uuid === uuid) cb(idx);
+                }
+            }
+        };
+        this._addSelectListener(
+            'selectstart', listenerFor('xr-trigger-press-start'));
+        this._addSelectListener(
+            'selectend', listenerFor('xr-trigger-press-end'));
+    }
+
     intersectObjects() {
         this._cleanIntersected();
-        if (this.controllers[0]) {
-            this._intersectObjects(this.controllers[0]);
-        }
-        if (this.controllers[1]) {
-            this._intersectObjects(this.controllers[1]);
+        for (let cont of this.controllers) {
+            if (cont) this._intersectObjects(cont);
         }
     }
     _intersectObjects( controller ) {
