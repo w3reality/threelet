@@ -2,7 +2,7 @@ threelet
 ===================
 
 **threelet** is a `three.js <https://github.com/mrdoob/three.js/>`__ based
-WebXR-compatible framework for rapidly developing 3D/VR/AR apps all at once!
+framework for rapidly developing 3D/WebXR apps all at once!
 
 Using threelet's built-in features, developers who have a minimal
 knowledge of three.js can immediately start writing interactive 3D apps with less code.
