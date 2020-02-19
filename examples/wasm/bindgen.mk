@@ -7,7 +7,7 @@ wasm:
 
 # this variant generates `*.exports.js` that is compatible with NodeJS and Web Workers.
 wasm-compat:
-	cd $(CRATE_DIR) && wasm-pack build
+	cd $(CRATE_DIR) && wasm-pack build $(WASM_PACK_BUILD_FLAGS)
 	cp $(CRATE_DIR)/pkg/$(CRATE_NAME)_bg.wasm .
 	$(WASM_TOOLS_DIR)/gen-bindgen-exports $(CRATE_DIR) $(CRATE_NAME) $(OUT_DIR) $(OPT_SNIPPET_FILE)
 
