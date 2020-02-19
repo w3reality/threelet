@@ -71,28 +71,12 @@ Demos
     .. image:: https://w3reality.github.io/threelet/examples/media/img/casting-2.jpg
         :target: https://w3reality.github.io/threelet/examples/vr-casting-in-window/index.html
 
-Setup
------
-
-**Installation**
+Installation
+------------
 
 .. code:: sh
 
     $ npm install threelet
-
-**Loading**
-
-ES6:
-
-.. code:: js
-
-    import Threelet from 'src/index.js';
-
-Script tag:
-
-.. code:: html
-
-    <script src="dist/threelet.min.js"></script>
 
 Hello world
 -----------
