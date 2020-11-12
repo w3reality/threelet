@@ -1,19 +1,20 @@
 {
     "name": "threelet",
-    "version": "0.10.0",
-    "description": "VR app framework based on three.js",
+    "version": "1.1.0-dev.0",
+    "description": "3D/WebXR app framework based on three.js",
     "main": "dist/threelet.min.js",
     "directories": {
-        "example": "examples",
-        "test": "test"
+        "example": "examples"
     },
     "scripts": {
-        "dist": "npm run build && npm run build:esm && mkdir -p ./dist && cp ./lib/*{min,esm.min}.js ./dist/",
-        "build": "webpack --mode development --env dev && webpack --mode production --env build && npm run test",
-        "build:esm": "webpack --mode production --env esm && npm run test",
-        "dev": "webpack --mode development --progress --colors --watch --env dev",
-        "test": "mocha --require babel-core/register --colors ./test/*.spec.js",
-        "test:watch": "mocha --require babel-core/register --colors -w ./test/*.spec.js"
+        "dist": "es-pack build -d ./dist -m umd esm esm-compat",
+        "build": "es-pack build -m umd",
+        "build:esm": "es-pack build -m esm",
+        "build:esm:compat": "es-pack build -m esm-compat",
+        "test": "npm run test:verify && npm run test:main",
+        "test:verify": "es-pack build -m umd esm esm-compat --verify",
+        "test:main": "es-pack test --node --browser",
+        "dev": "es-pack build --dev"
     },
     "repository": {
         "type": "git",
@@ -21,7 +22,7 @@
     },
     "keywords": [
         "three",
-        "viewer"
+        "webxr"
     ],
     "author": "j-devel",
     "license": "MIT",
@@ -31,26 +32,10 @@
     "homepage": "https://github.com/w3reality/threelet",
     "dependencies": {},
     "devDependencies": {
-        "@babel/preset-env": "^7.7.1",
-        "babel-core": "^6.26.0",
-        "babel-eslint": "^8.0.3",
-        "babel-loader": "^7.1.2",
-        "babel-plugin-add-module-exports": "^0.2.1",
-        "babel-preset-env": "^1.6.1",
-        "chai": "^4.1.2",
-        "eslint": "^6.2.2",
-        "eslint-loader": "^2.1.0",
+        "es-pack-js": "0.4.0-dev.2",
         "fast-async": "^7.0.6",
-        "fs-extra": "^8.1.0",
-        "lodash": "^4.17.14",
-        "mocha": "^6.1.4",
-        "regenerator": "^0.14.1",
-        "terser-webpack-plugin": "^2.2.2",
-        "three": "^0.112.1",
-        "webpack": "^4.41.2",
-        "webpack-bundle-analyzer": "^3.0.2",
-        "webpack-cli": "^3.3.3",
-        "webpack-var2esm-plugin": "^1.2.1",
-        "yargs": "^15.0.2"
+        "fs-extra": "^9.0.1",
+        "regenerator": "^0.14.2",
+        "three": "^0.122.0"
     }
 }
