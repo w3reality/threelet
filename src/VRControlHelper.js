@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 
 // credits: VRControlHelper is based on the dragging example -
 // r104 - https://github.com/mrdoob/three.js/blob/master/examples/webvr_dragging.html
@@ -25,7 +26,7 @@ class VRControlHelper {
             triggers: [],
             poses: [],
             ids: [],
-        }
+        };
 
         this._eventListeners = {};
         this._initInputListenersXR();

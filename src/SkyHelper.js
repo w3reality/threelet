@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 
 // credits: SkyHelper is based on the sky example -
 // https://github.com/mrdoob/three.js/blob/master/examples/webgl_shaders_sky.html
@@ -71,7 +72,7 @@ class SkyHelper {
 
     updateUniforms(params={}) {
         if (! this._updateUniforms) {
-            throw 'updateUniforms(): error; init() must be called first'
+            throw 'updateUniforms(): error; init() must be called first';
         }
         Object.assign(this._effectController, params);
         this._updateUniforms();

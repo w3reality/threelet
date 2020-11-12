@@ -1,5 +1,7 @@
 // TODO to be more categorically organized in future
 
+import * as THREE from 'three';
+
 class Logger {
     constructor(opts={}) {
         const defaults = {
@@ -49,7 +51,7 @@ class Logger {
             times: idxs.map(i => this.times[i]),
             splits: idxs.map(i => this.splits[i]),
             arg0s: idxs.map(i => this.arg0s[i]),
-        }
+        };
     }
 }
 

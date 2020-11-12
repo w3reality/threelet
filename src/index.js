@@ -1,10 +1,12 @@
 // Threelet - https://github.com/w3reality/threelet
 // 3D/WebXR app framework based on three.js (MIT License)
 
-const __version = "0.10.2dev";
+import pkg from '../package.json';
+const __version = pkg.version;
 
-import '../node_modules/regenerator-runtime/runtime.js';
+import 'regenerator-runtime/runtime.js';
 
+import * as THREE from 'three';
 import VRControlHelper from './VRControlHelper.js';
 import SkyHelper from './SkyHelper.js';
 import Utils from './Utils.js';
@@ -412,7 +414,7 @@ class Threelet {
                     if (tryCount < tryCountMax) {
                         _enterXR(tryCountMax, delay); // try harder
                     } else if (onError) {
-                        console.error('@@ enter vr failed!!')
+                        console.error('@@ enter vr failed!!');
                         onError();
                     }
                 }
@@ -818,7 +820,7 @@ class Threelet {
             console.log(`@@ freeing obj ${ch.uuid} of ${_parent.uuid}`);
             _parent.remove(ch);
             this.disposeObject(ch);
-            ch = null
+            ch = null;
         }
     }
     static disposeObject(obj) { // https://gist.github.com/j-devel/6d0323264b6a1e47e2ee38bc8647c726
