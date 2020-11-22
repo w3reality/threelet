@@ -7,27 +7,31 @@
 <body>
     <canvas id="canvas" style="width: 100%; height: 100%;"></canvas>
 
-    <script src="../deps/three.min.js"></script>
-    <script src="../deps/OrbitControls.js"></script>
     <script src="../deps/stats.min.js"></script>
-    <script src="../deps/Sky.js"></script>
 
-    <script src="../../dist/threelet.min.js"></script>
+    <script type="module">
+    import { OrbitControls } from '../deps/three/examples/jsm/controls/OrbitControls.js';
+    import { Sky } from '../deps/three/examples/jsm/objects/Sky.js';
 
-    <script>
-    const threelet = new Threelet({
-        canvas: document.getElementById("canvas"),
-    });
+    (async () => {
+        window.THREE = await import('../deps/three/build/three.module.js');
+        const Threelet = (await import('../../dist/threelet.esm.js')).default;
+        // const Threelet = (await import('../../target/threelet.esm.dev.js')).default;
 
-    threelet.setup('mod-controls', THREE.OrbitControls);
-    threelet.setup('mod-stats', window.Stats);
-    threelet.setup('mod-sky', THREE.Sky);
+        const threelet = new Threelet({
+            canvas: document.getElementById("canvas"),
+        });
 
-    threelet.scene.add(Threelet.Utils.createTestHemisphereLight());
-    threelet.scene.add(Threelet.Utils.createTestDirectionalLight());
-    Threelet.Utils.createTestObjects([0,0,0]).forEach(obj => threelet.scene.add(obj));
+        threelet.setup('mod-stats', window.Stats);
+        threelet.setup('mod-controls', OrbitControls);
+        threelet.setup('mod-sky', Sky);
 
-    threelet.render(); // first time; passive rendering per mouse interaction
+        threelet.scene.add(Threelet.Utils.createTestHemisphereLight());
+        threelet.scene.add(Threelet.Utils.createTestDirectionalLight());
+        Threelet.Utils.createTestObjects([0,0,0]).forEach(obj => threelet.scene.add(obj));
+
+        threelet.render(); // first time; passive rendering per mouse interaction
+    })();
     </script>
 </body>
 </html>
