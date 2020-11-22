@@ -249,19 +249,19 @@ class Threelet {
         this.skyHelper = new SkyHelper(Module);
         // console.log('@@ this.skyHelper:', this.skyHelper);
 
-        const [sky, sunSphere] = this.skyHelper.init();
-        this.scene.add(sky, sunSphere);
+        const sky = this.skyHelper.init();
+        this.scene.add(sky);
         this.skyHelper.updateUniforms({
-            //---- drawn
-            // turbidity: 1,
-            //---- yingyang
-            mieCoefficient: 0.01,
-            luminance: 1.185,
-            inclination: 0.2,
-            azimuth: 0.35,
-            //----
+            //==== yingyang
+            turbidity: 5.2,
+            rayleigh: 0.01,
+            mieCoefficient: 0.002,
+            mieDirectionalG: 0.9,
+            inclination: 0.1,
+            azimuth: 0.3,
+            //====
         });
-        return [sky, sunSphere];
+        return sky;
     }
 
     setupVRControlHelperTest() {
