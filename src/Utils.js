@@ -120,10 +120,24 @@ class Utils {
 
     //======== begin 3D model utils ========
 
-    // <script src="../deps/ColladaLoader.js"></script>
-    static loadCollada(path, cb=null) {
+    static loadGLTF(GLTFLoader, path, file, cb=null) {
+        const loader = new GLTFLoader().setPath(path);
+        const filter = gltf => {
+            console.log('@@ gltf:', gltf);
+            const object = gltf.scene;
+            object.traverse(node => {
+                // if (node.isMesh) {
+                //     node.material.envMap = envMap;
+                // }
+            });
+            return [object, gltf];
+        };
+        return Utils.fetchModelData(loader, file, filter, cb);
+    }
+
+    static loadCollada(ColladaLoader, path, cb=null) {
         // https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_collada_skinning.html
-        const loader = new THREE.ColladaLoader();
+        const loader = new ColladaLoader();
         const filter = collada => {
             const object = collada.scene;
             console.log('@@ object:', object);
@@ -140,11 +154,9 @@ class Utils {
         return Utils.fetchModelData(loader, path, filter, cb);
     }
 
-    // <script src="../deps/inflate.min.js"></script>
-    // <script src="../deps/FBXLoader.js"></script>
-    static loadFBX(path, cb=null) {
+    static loadFBX(FBXLoader, path, cb=null) {
         // https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_fbx.html
-        const loader = new THREE.FBXLoader();
+        const loader = new FBXLoader();
         const filter = object => {
             console.log('@@ object:', object);
             object.traverse(node => {
@@ -156,22 +168,6 @@ class Utils {
             return [object, object];
         };
         return Utils.fetchModelData(loader, path, filter, cb);
-    }
-
-    // <script src="../deps/GLTFLoader.js"></script>
-    static loadGLTF(path, file, cb=null) {
-        const loader = new THREE.GLTFLoader().setPath(path);
-        const filter = gltf => {
-            console.log('@@ gltf:', gltf);
-            const object = gltf.scene;
-            object.traverse(node => {
-                // if (node.isMesh) {
-                //     node.material.envMap = envMap;
-                // }
-            });
-            return [object, gltf];
-        };
-        return Utils.fetchModelData(loader, file, filter, cb);
     }
 
     // filter: raw => [object, raw]
