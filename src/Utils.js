@@ -197,12 +197,7 @@ class Utils {
             }
         }
         console.log('@@ actions:', actions);
-        return { // modelData
-            object: object,
-            mixer: mixer,
-            actions: actions,
-            raw: raw,
-        };
+        return { object, mixer, actions, raw }; // modelData
     }
 
     //======== end 3D model utils ========

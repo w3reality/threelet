@@ -47,8 +47,7 @@
     import { FBXLoader } from '../deps/three/examples/jsm/loaders/FBXLoader.js';
 
     (async () => {
-        // TODO XR button updates !!!!
-        alert('FIXME pause functionality broken !!!!');
+        alert('TODO XR button updates !!!!');
 
         const THREE = await import('../deps/three/build/three.module.js');
         window.THREE = THREE;
@@ -93,19 +92,31 @@
         };
         setBtnText(animPaused);
 
+        let timePaused = 0;
         btnPauseResume.addEventListener('click', (e) => {
             const { mixer, actions } = modelData[keyLast];
+
             if (animPaused) {
                 animPaused = false;
-                // https://threejs.org/docs/#api/en/animation/AnimationAction.startAt
-                // for (let action of actions) action.play().startAt(_timeStop);
-                for (let action of actions) action.play().startAt(0);
+
+                // https://stackoverflow.com/questions/55996807/play-mixer-animation-at-a-specific-time-playat-or-skipto
+                actions.forEach(action => {
+                    action.paused = false;
+                    action.play();
+                    action.time = timePaused;
+                });
             } else {
                 animPaused = true;
+
+                //==== three r122: NG - the paused frame always forced to be the initial one
                 // for (let action of actions) action.stop();
                 // https://threejs.org/docs/#api/en/animation/AnimationMixer.stopAllAction
-                if (mixer) mixer.stopAllAction();
+                // if (mixer) mixer.stopAllAction();
+                //==== workaround
+                timePaused = mixer.time;
+                actions.forEach(action => { action.paused = true; });
             };
+
             setBtnText(animPaused);
         });
 
