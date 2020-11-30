@@ -47,13 +47,11 @@
     import { FBXLoader } from '../deps/three/examples/jsm/loaders/FBXLoader.js';
 
     (async () => {
-        alert('TODO XR button updates !!!!');
-
         const THREE = await import('../deps/three/build/three.module.js');
         window.THREE = THREE;
 
-        // const Threelet = (await import('../../dist/threelet.esm.js')).default;
-        const Threelet = (await import('../../target/threelet.esm.dev.js')).default;
+        const Threelet = (await import('../../dist/threelet.esm.js')).default;
+        // const Threelet = (await import('../../target/threelet.esm.dev.js')).default;
 
         const hasVR = Threelet.isVrSupported();
         const threelet = new Threelet({

@@ -7,12 +7,13 @@ const __version = pkg.version;
 import 'regenerator-runtime/runtime.js';
 
 import * as THREE from 'three';
+import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
+import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
+
 import VRControlHelper from './VRControlHelper.js';
 import SkyHelper from './SkyHelper.js';
 import Utils from './Utils.js';
 
-import { VRButton } from './deps/VRButton.js';
-import { ARButton } from './deps/ARButton.js';
 
 class Threelet {
     constructor(params) {
