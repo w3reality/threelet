@@ -18,7 +18,7 @@ import Utils from './Utils.js';
 class Threelet {
     constructor(params) {
         this.version = __version;
-        Utils.Logger._consoleLog(`Threelet ${__version} with THREE r${THREE.REVISION}`);
+        console.info(`Threelet ${__version} with THREE r${THREE.REVISION}`);
 
         const defaults = {
             canvas: null,
@@ -540,7 +540,7 @@ class Threelet {
         } else {
             console.error('@@ on(): unsupported eventName:', eventName);
             if (eventName.startsWith('vr-')) {
-                Utils.Logger._consoleLog(`${eventName} is deprecated; use 'xr-' instead`);
+                console.info(`${eventName} is deprecated; use 'xr-' instead`);
             }
         }
     }

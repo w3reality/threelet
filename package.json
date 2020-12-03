@@ -32,7 +32,7 @@
     "homepage": "https://github.com/w3reality/threelet",
     "dependencies": {},
     "devDependencies": {
-        "es-pack-js": "0.4.0",
+        "es-pack-js": "0.4.1",
         "fast-async": "^7.0.6",
         "fs-extra": "^9.0.1",
         "regenerator": "^0.14.2",

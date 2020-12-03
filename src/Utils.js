@@ -17,12 +17,6 @@ class Logger {
         this._last = performance.now()/1000;
     }
 
-    static _consoleLog(...args) {
-        // for eluding uglify
-        const _console = console;
-        _console.log.apply(_console, args);
-    }
-
     log(...args) {
         const now = performance.now()/1000;
         const splits = now - this._last;
@@ -32,13 +26,13 @@ class Logger {
 
         this._last = now;
         if (! this._mute) {
-            Logger._consoleLog(`==== ${now.toFixed(3)} +${splits.toFixed(3)} ====`, ...args);
+            console.info(`==== ${now.toFixed(3)} +${splits.toFixed(3)} ====`, ...args);
         }
     }
     grep(query) {
         const idxs = this.arg0s.reduce((acc, val, idx) => {
             if (typeof val !== 'string') {
-                Logger._consoleLog('grep(): warning: not a string');
+                console.info('grep(): warning: not a string');
                 return acc;
             } else if (val.includes(query)) {
                 acc.push(idx);
