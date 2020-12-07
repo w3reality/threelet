@@ -580,7 +580,7 @@ class Threelet {
                 // console.log("mouseup: drag");
                 this._callIfDefined('mouse-drag-end', coords);
             } else {
-                // console.log("mouseup: click");
+                console.log("mouseup: click");
                 if (e.button === 0) {
                     // console.log('@@ mouse click left:', ...coords);
                     this._callIfDefined('mouse-click-left', coords);
