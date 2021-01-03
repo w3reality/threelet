@@ -1,11 +1,9 @@
-all: wasm
+all: dev
 
-WASM_PACK_BUILD := RUSTFLAGS="-Z macro-backtrace" wasm-pack build --dev
-#WASM_PACK_BUILD := wasm-pack build --release
-
-wasm:
-	$(WASM_PACK_BUILD) --target no-modules
-
+dev:
+	RUSTFLAGS="-Z macro-backtrace" wasm-pack build --dev --target no-modules
+release:
+	wasm-pack build --release --target no-modules
 test:
 	wasm-pack test --headless --chrome
 
