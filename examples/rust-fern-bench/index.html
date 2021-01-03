@@ -18,7 +18,7 @@
 
     <script type="module">
     // import { default as UtilsDev } from "../../src/Utils.js"; // dev
-    import loadWbg from './load-wbg.js';
+    import loadWbg from '../deps/load-wbg.js';
 
     class Demo extends Threelet.PlaneApp {
         // override
@@ -44,8 +44,11 @@
 
             this.bench = null;
             (async () => {
-                const wbg = await loadWbg('fern');
-                const bench = await (new wbg.Bench()).init();
+                // const pkgDir = './dist'; // prod
+                const pkgDir = './fern/pkg'; // dev
+
+                const wbg = await loadWbg(pkgDir, 'fern');
+                const bench = await (new wbg.Bench()).init(`${pkgDir}/fern.js`);
                 this.bench = bench;
 
                 this.onBenchReady(bench);

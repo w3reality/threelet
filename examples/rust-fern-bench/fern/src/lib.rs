@@ -47,8 +47,8 @@ impl Bench {
     // }
 
     #[wasm_bindgen]
-    pub async fn init(self) -> Self {
-        let th = WasmMt::new("./pkg/fern.js").and_init().await.unwrap()
+    pub async fn init(self, pkg_js: String) -> Self {
+        let th = WasmMt::new(&pkg_js).and_init().await.unwrap()
             .thread().and_init().await.unwrap();
         self.th.replace(Some(th));
 
