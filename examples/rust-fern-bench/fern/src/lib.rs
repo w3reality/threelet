@@ -3,11 +3,70 @@ extern crate web_sys;
 extern crate js_sys;
 extern crate rand;
 
-//use std::fmt;
+use wasm_mt::prelude::*;
+use wasm_mt::Thread;
+use wasm_mt::utils::console_ln;
+use std::cell::RefCell;
+
 use wasm_bindgen::prelude::*;
-use web_sys::{console};
-//use js_sys::{Function, Object, Reflect, Uint8Array, WebAssembly};
+use wasm_bindgen_futures;
 use rand::Rng;
+
+#[wasm_bindgen]
+pub struct Bench {
+    th: RefCell<Option<Thread>>,
+    ans: RefCell<f64>,
+}
+
+#[wasm_bindgen]
+impl Bench {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Self {
+        Self {
+            th: RefCell::new(None),
+            ans: RefCell::new(-1.0),
+        }
+    }
+
+    #[wasm_bindgen]
+    pub fn get_ans(&self) -> wasm_bindgen::JsValue {
+        JsValue::from(*self.ans.borrow())
+    }
+
+    // @@ FIXME
+    //==== not compile (with `async`) !!!!
+    // #[wasm_bindgen]
+    // pub async fn foo(&self) {
+    //     // ...
+    // }
+    //==== kludge; throughout in the following
+    // #[wasm_bindgen]
+    // pub async fn init(self) -> Self {
+    //     // ...
+    //     self
+    // }
+
+    #[wasm_bindgen]
+    pub async fn init(self) -> Self {
+        let th = WasmMt::new("./pkg/fern.js").and_init().await.unwrap()
+            .thread().and_init().await.unwrap();
+        self.th.replace(Some(th));
+
+        self
+    }
+
+    #[wasm_bindgen]
+    pub async fn run(self, num: i32) -> Self {
+        console_ln!("run(): num: {}", num);
+        let ans = exec!(self.th.borrow().as_ref().unwrap(), move || {
+            Ok(JsValue::from(num * 2))
+        }).await.unwrap();
+        console_ln!("run(): ans: {:?}", ans);
+        self.ans.replace(ans.as_f64().unwrap());
+
+        self
+    }
+}
 
 #[wasm_bindgen]
 pub struct VertsBuffer {
@@ -21,7 +80,7 @@ impl VertsBuffer {
     #[wasm_bindgen(constructor)]
     pub fn new(num_verts: u32) -> Self {
         if num_verts % 3 != 0 {
-            console::log_2(&"will panic:".into(), &"num_verts % 3 != 0 (non-trianglular vertices??)".into());
+            console_ln!("will panic: num_verts % 3 != 0 (non-trianglular vertices??)");
             panic!();
         }
 
@@ -50,13 +109,13 @@ impl VertsBuffer {
         //----
         pp.iter().for_each(|&q| positions.push(q));
         cc.iter().for_each(|&q| colors.push(q));
-        console::log_2(&"positions:".into(), &format!("{:?}", positions).into());
+        console_ln!("positions: {:?}", positions);
     }
     pub fn compute_fern(&mut self) {
         let positions = &mut self.positions;
         let colors = &mut self.colors;
         let num_verts = self.num_verts;
-        // console::log_2(&"num_verts:".into(), &format!("{:?}", num_verts).into());
+        // console_ln!("num_verts: {:?}", num_verts);
 
         let tri_width = 0.02;
         let z_variation = 0.01;
@@ -131,7 +190,7 @@ impl VertsBuffer {
     pub fn test_hash(&self) {
         let sum_positions = self.positions.iter().map(|&q| q as f64).sum::<f64>();
         let sum_colors = self.colors.iter().map(|&q| q as u32).sum::<u32>();
-        console::log_2(&"hash:".into(), &format!("{} {}", sum_positions, sum_colors).into());
+        console_ln!("hash: {} {}", sum_positions, sum_colors);
     }
 }
 
@@ -161,7 +220,7 @@ impl WasmMemBuffer {
 }
 
 fn compute_buffer_hash_impl(data: &[u8]) -> u32 {
-    console::log_2(&"data:".into(), &format!("{:?}", data).into());
+    console_ln!("data: {:?}", data);
     data.iter().map(|&ele| ele as u32).sum::<u32>()
 }
 

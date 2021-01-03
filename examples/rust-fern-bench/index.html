@@ -11,7 +11,6 @@
     <script src="../deps/OrbitControls.js"></script>
     <script src="../deps/Sky.js"></script>
     <script src="../deps/stats.min.js"></script>
-    <script src='../deps/async-thread-worker.min.js'></script>
 
     <script src="../../dist/threelet.min.js"></script>
     <script src="../templates/plane-app.js"></script>
@@ -19,6 +18,7 @@
 
     <script type="module">
     // import { default as UtilsDev } from "../../src/Utils.js"; // dev
+    import loadWbg from './load-wbg.js';
 
     class Demo extends Threelet.PlaneApp {
         // override
@@ -42,27 +42,33 @@
                 },
             };
 
+            this.bench = null;
             (async () => {
-                const thread = new AsyncThreadWorker.Thread('./fern-thread-worker.js');
-                const result = await thread.sendRequest({task: 'init'});
-                console.log('result:', result);
+                const wbg = await loadWbg('fern');
+                const bench = await (new wbg.Bench()).init();
+                this.bench = bench;
 
-                this.onThreadReady(thread);
+                this.onBenchReady(bench);
                 this.updateView();
-
-                // console.log('test ans:', await thread.sendRequest({task: 'terminate'}));
-                // console.log('test ans:', await thread.sendRequest({task: 'add', a: 1, b: 2}));
             })();
+        }
+
+        async runBench(num) {
+            const bench = await this.bench.run(num);
+            this.bench = bench; // kludge; see FIXME in bench/src/lib.rs
+
+            return bench.get_ans();
         }
 
         // override
         onDestroy() {
-            if (this.appData.thread) {
-                this.appData.thread.terminate();
+            if (this.bench) {
+                this.bench.free();
+                this.bench = null;
             }
         }
 
-        onThreadReady(thread) {
+        onBenchReady() {
             // const maxIter = 1; // -> 1*3*16 byte
             // const maxIter = 1024*1024*10; // -> 480 mb
             // const maxIter = 1024*1024; // -> 48 mb
@@ -75,45 +81,49 @@
             // const numFerns = 4; // dev test
             const numFerns = 10; // prod
 
-            this.appData.thread = thread;
-
             const sb = this.appData.statBench;
             sb.maxIter = maxIter;
 
+            const _runBench = this.runBench.bind(this);
+
             this.appData.fnBench.rust = async () => {
-                const viz = await Demo.benchFern(maxIter, numFerns, thread, 'rust');
-                sb.resultRust = viz.getObjectByName('stats').userData;
-                viz.name = 'viz-rust';
-                const tf = Threelet.isVrSupported();
-                viz.position.y = tf ? 1 : 0.25;
-                viz.position.z = tf ? -0.75 : 0.25;
-                this.scene.add(viz);
+                const viz = await Demo.benchFern(maxIter, numFerns, _runBench, 'rust');
+                if (viz) {
+                    sb.resultRust = viz.getObjectByName('stats').userData;
+                    viz.name = 'viz-rust';
+                    const tf = Threelet.isVrSupported();
+                    viz.position.y = tf ? 1 : 0.25;
+                    viz.position.z = tf ? -0.75 : 0.25;
+                    this.scene.add(viz);
+                }
             };
             sb.rust = 'ready';
 
             this.appData.fnBench.js = async () => {
-                const viz = await Demo.benchFern(maxIter, numFerns, thread, 'js');
-                sb.resultJs = viz.getObjectByName('stats').userData;
-                viz.name = 'viz-js';
-                const tf = Threelet.isVrSupported();
-                viz.position.y = tf ? 1 : 0.25;
-                viz.position.z = tf ? -1 : 0;
-                this.scene.add(viz);
+                const viz = await Demo.benchFern(maxIter, numFerns, _runBench, 'js');
+                if (viz) {
+                    sb.resultJs = viz.getObjectByName('stats').userData;
+                    viz.name = 'viz-js';
+                    const tf = Threelet.isVrSupported();
+                    viz.position.y = tf ? 1 : 0.25;
+                    viz.position.z = tf ? -1 : 0;
+                    this.scene.add(viz);
+                }
             };
             sb.js = 'ready';
         }
 
-        static async sendBenchRequest(maxIter, numFerns, thread, task) {
-            const { posBuf, colorBuf, samples } =
-                await thread.sendRequest({ task, maxIter, numFerns });
+        static async benchFern(maxIter, numFerns, _runBench, label) {
+            // const { posBuf, colorBuf, samples } =
+            //     await thread.sendRequest({
+            //         task: `bench-${label}`, maxIter, numFerns });
+            //==== TODO !!!! !!!!
+            const ans = await _runBench(maxIter);
+            console.log('@@ ans:', ans);
+            return null; // !!!! !!!!
 
             const positions = new Float32Array(posBuf); // view
             const colors = new Uint8ClampedArray(colorBuf); // view
-            return { positions, colors, samples };
-        }
-        static async benchFern(maxIter, numFerns, thread, label) {
-            const { positions, colors, samples } = await this.sendBenchRequest(
-                maxIter, numFerns, thread, `bench-${label}`);
             // console.log('positions, colors:', positions, colors);
 
             return this.createStatsViz(positions, colors, samples, label);
@@ -153,6 +163,8 @@
             }
             return indicator;
         }
+
+        // TODO rewrite panel GUI with https://github.com/emilk/egui
 
         static drawCommandsDynamic(ctx, sb) {
             // https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
