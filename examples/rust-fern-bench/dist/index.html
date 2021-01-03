@@ -7,18 +7,17 @@
 <body>
     <canvas id="demo" style="width: 100%; height: 100%;"></canvas>
 
-    <script src="../deps/three.min.js"></script>
-    <script src="../deps/OrbitControls.js"></script>
-    <script src="../deps/Sky.js"></script>
-    <script src="../deps/stats.min.js"></script>
+    <script src="../../deps/three.min.js"></script>
+    <script src="../../deps/OrbitControls.js"></script>
+    <script src="../../deps/Sky.js"></script>
+    <script src="../../deps/stats.min.js"></script>
 
-    <script src="../../dist/threelet.min.js"></script>
-    <script src="../templates/plane-app.js"></script>
-    <script src="../templates/example-utils.js"></script>
+    <script src="../../../dist/threelet.min.js"></script>
+    <script src="../../templates/plane-app.js"></script>
+    <script src="../../templates/example-utils.js"></script>
 
     <script type="module">
-    // import { default as UtilsDev } from "../../src/Utils.js"; // dev
-    import loadWbg from '../deps/load-wbg.js';
+    import loadWbg from '../../deps/load-wbg.js';
 
     class Demo extends Threelet.PlaneApp {
         // override
@@ -45,7 +44,7 @@
             this.bench = null;
             (async () => {
                 // const pkgDir = './dist'; // prod
-                const pkgDir = './fern/pkg'; // dev
+                const pkgDir = '../fern/pkg'; // dev
 
                 const wbg = await loadWbg(pkgDir, 'fern');
                 const bench = await (new wbg.Bench()).init(`${pkgDir}/fern.js`);
