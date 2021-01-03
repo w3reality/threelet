@@ -46,7 +46,7 @@
                 // const pkgDir = './dist'; // prod
                 const pkgDir = '../fern/pkg'; // dev
 
-                const wbg = await loadWbg(pkgDir, 'fern');
+                const { wbg } = await loadWbg(pkgDir, 'fern');
                 const bench = await (new wbg.Bench()).init(`${pkgDir}/fern.js`);
                 this.bench = bench;
 

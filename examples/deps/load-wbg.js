@@ -7,6 +7,6 @@ export default async function (pkgDir, name) {
 
     const wbg = init();
     const wasm = await wbg(`${pkgDir}/${name}_bg.wasm`);
-    //console.log('wasm:', wasm);
-    return wbg;
+    // console.log('wasm:', wasm);
+    return { wbg, wasm };
 }
