@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 
-// gen-bindgen-exports - generate a wasm-bindgen's js module with max compatibility
-//                       (for NodeJS, Web Workers, etc.)
-// j-devel <j@w3reality.com> (MIT license)
+// DEPRECATED: Use the wasm-mt crate instead
 
 const path = require('path');
 const fs = require('fs-extra');
