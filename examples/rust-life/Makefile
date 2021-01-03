@@ -1,10 +1,9 @@
-all: wasm
+all: release
 
-export CRATE_DIR=./wasm_game_of_life
-export CRATE_NAME=wasm_game_of_life
-MAKE_TARGET=make -f ../wasm/bindgen.mk $@
-wasm:
-	$(MAKE_TARGET) 
+release:
+	make -C ./life release
+	mkdir -p dist && cp ./fern/pkg/life{.js,_bg.wasm} ./dist/
+dev:
+	make -C ./life
 
 clean:
-	$(MAKE_TARGET)
