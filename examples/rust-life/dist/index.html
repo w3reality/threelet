@@ -19,22 +19,30 @@
     </div>
 
     <script type="module">
-    import loadWbg from '../../deps/load-wbg.js';
+    //import Life from '../rust/pkg-es-pack/life.esm.js'; // !!!!!!!!
+    import Life from '../rust/pkg-es-pack/life.esm.dev.js'; // !!!!!!!!
 
 (async () => { // main
-    // const pkgDir = './dist'; // prod
-    const pkgDir = '../life/pkg'; // dev
+    //====
+//    const life = await (new Life()).init(); // plain
+//    const life = await Life.new(); // sugar; preferred
+    //==== in case needing the underlying `wasm` object
+    const mod = new Life();
+    const life = await mod.init();
+    const wasm = mod.getWasm();
+    console.log('@@ wasm:', wasm);
+    console.log('@@ typeof wasm:', typeof wasm);
+    console.log('@@ wasm.hasOwnProperty(\'memory\'):', wasm.hasOwnProperty('memory'));
+    //====
 
-    const { wbg, wasm } = await loadWbg(pkgDir, 'life');
-    // console.log('@@ wbg:', wbg);
-    // console.log('@@ wasm:', wasm);
-
-    wbg.greet('9999');
-
-    const { Universe, Cell } = wbg;
-    const memory = wasm.memory;
-
+    life.greet('9999');
+    const { Universe, Cell } = life;
     if (1) { Universe.greet("expect OK"); } // OK; name shown
+
+return; // !!!! plain/sugar
+
+    console.log('@@ wasm:', wasm);
+    const memory = wasm.memory;
 
     return; // !!!! !!!!
     //========

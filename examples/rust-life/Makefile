@@ -1,9 +1,9 @@
 all: release
 
 release:
-	make -C ./life release
-	mkdir -p dist && cp ./life/pkg/life{.js,_bg.wasm} ./dist/
+	make -C ./rust release
+	mkdir -p dist && cp ./rust/pkg/life-mod{.js,_bg.wasm} ./dist/
 dev:
-	make -C ./life
+	make -C ./rust
 
 clean:
