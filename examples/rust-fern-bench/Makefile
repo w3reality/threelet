@@ -1,9 +1,12 @@
-all: release
+all: wasm-compat
 
-release:
-	make -C ./fern release
-	mkdir -p dist && cp ./fern/pkg/fern{.js,_bg.wasm} ./dist/
-dev:
-	make -C ./fern
+export CRATE_DIR=./fern
+export CRATE_NAME=fern
+export OUT_DIR=.
+export WASM_TOOLS_DIR=../wasm
+MAKE_TARGET=make -f $(WASM_TOOLS_DIR)/bindgen.mk $@
+wasm-compat:
+	$(MAKE_TARGET) 
 
 clean:
+	$(MAKE_TARGET)

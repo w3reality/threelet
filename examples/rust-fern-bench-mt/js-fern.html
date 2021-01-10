@@ -1,0 +1,57 @@
+<span>https://en.wikipedia.org/wiki/Barnsley_fern</span>
+<canvas id="canvas" height="512" width="512"></canvas>
+
+<script>
+window.onload = () => {
+    const max = 1000*10; // debug
+    // const max = 1000*100;
+
+    let x = 0;
+    let y = 0;
+    const xs = [];
+    const ys = [];
+    for (let i = 0; i < max; i++) {
+        xs.push(x);
+        ys.push(y);
+
+        let _x, _y;
+        let r = Math.random();
+        if (r < 0.01) {
+            _x =  0;
+            _y =  0.16 * y;
+        } else if (r < 0.86) {
+            _x =  0.85 * x + 0.04 * y;
+            _y = -0.04 * x + 0.85 * y + 1.6;
+        } else if (r < 0.93) {
+            _x =  0.20 * x - 0.26 * y;
+            _y =  0.23 * x + 0.22 * y + 1.6;
+        } else {
+            _x = -0.15 * x + 0.28 * y;
+            _y =  0.26 * x + 0.24 * y + 0.44;
+        }
+        x = _x;
+        y = _y;
+    }
+    // console.log('xs, ys:', xs, ys);
+    console.log('xs, ys:', xs.length, ys.length);
+
+    // init canvas
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // draw points
+    const drawFilledCircle = (centerX, centerY) => {
+        ctx.beginPath();
+        ctx.fillStyle = "green";
+        ctx.arc(centerX, centerY, 1 /* radius */, 0, 2 * Math.PI, true);
+        ctx.fill();
+    };
+    for (let i = 0; i < max; i++) {
+        drawFilledCircle(
+            xs[i] * 50 + 512/2,
+            512 - ys[i] * 50);
+    }
+}; // end of window.onload = ...
+</script>

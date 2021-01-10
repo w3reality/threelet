@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>rust-fern-bench</title>
+</head>
+<body>
+    <canvas id="demo" style="width: 100%; height: 100%;"></canvas>
+
+    <script src="../deps/three.min.js"></script>
+    <script src="../deps/OrbitControls.js"></script>
+    <script src="../deps/Sky.js"></script>
+    <script src="../deps/stats.min.js"></script>
+    <script src='../deps/async-thread-worker.min.js'></script>
+
+    <script src="../../dist/threelet.min.js"></script>
+    <script src="../templates/plane-app.js"></script>
+    <script src="../templates/example-utils.js"></script>
+
+    <script type="module">
+    // import { default as UtilsDev } from "../../src/Utils.js"; // dev
+
+    class Demo extends Threelet.PlaneApp {
+        // override
+        onCreate(params) {
+            super.onCreate(params);
+
+            // 0: fps, 1: ms, 2: mb, 3+: custom
+            // this.setup('mod-stats', window.Stats, {panelType: 2});
+
+            this.appData = {
+                fnBench: {
+                    rust: undefined,
+                    js: undefined,
+                },
+                statBench: {
+                    maxIter: -1,
+                    rust: 'noready',
+                    js: 'noready',
+                    resultRust: undefined,
+                    resultJs: undefined,
+                },
+            };
+
+            (async () => {
+                const thread = new AsyncThreadWorker.Thread('./fern-thread-worker.js');
+                const result = await thread.sendRequest({task: 'init'});
+                console.log('result:', result);
+
+                this.onThreadReady(thread);
+                this.updateView();
+
+                // console.log('test ans:', await thread.sendRequest({task: 'terminate'}));
+                // console.log('test ans:', await thread.sendRequest({task: 'add', a: 1, b: 2}));
+            })();
+        }
+
+        // override
+        onDestroy() {
+            if (this.appData.thread) {
+                this.appData.thread.terminate();
+            }
+        }
+
+        onThreadReady(thread) {
+            // const maxIter = 1; // -> 1*3*16 byte
+            // const maxIter = 1024*1024*10; // -> 480 mb
+            // const maxIter = 1024*1024; // -> 48 mb
+            // const maxIter = 1000*1000; // ~ 48 mb; dev test
+            const maxIter = 1000*200; // prod
+            // const maxIter = 1000*100; // ~ 4.8 mb; dev test
+            // const maxIter = 1024*10; // -> 480 kb
+
+            // const numFerns = 0; // dev test
+            // const numFerns = 4; // dev test
+            const numFerns = 10; // prod
+
+            this.appData.thread = thread;
+
+            const sb = this.appData.statBench;
+            sb.maxIter = maxIter;
+
+            this.appData.fnBench.rust = async () => {
+                const viz = await Demo.benchFern(maxIter, numFerns, thread, 'rust');
+                sb.resultRust = viz.getObjectByName('stats').userData;
+                viz.name = 'viz-rust';
+                const tf = Threelet.isVrSupported();
+                viz.position.y = tf ? 1 : 0.25;
+                viz.position.z = tf ? -0.75 : 0.25;
+                this.scene.add(viz);
+            };
+            sb.rust = 'ready';
+
+            this.appData.fnBench.js = async () => {
+                const viz = await Demo.benchFern(maxIter, numFerns, thread, 'js');
+                sb.resultJs = viz.getObjectByName('stats').userData;
+                viz.name = 'viz-js';
+                const tf = Threelet.isVrSupported();
+                viz.position.y = tf ? 1 : 0.25;
+                viz.position.z = tf ? -1 : 0;
+                this.scene.add(viz);
+            };
+            sb.js = 'ready';
+        }
+
+        static async sendBenchRequest(maxIter, numFerns, thread, task) {
+            const { posBuf, colorBuf, samples } =
+                await thread.sendRequest({ task, maxIter, numFerns });
+
+            const positions = new Float32Array(posBuf); // view
+            const colors = new Uint8ClampedArray(colorBuf); // view
+            return { positions, colors, samples };
+        }
+        static async benchFern(maxIter, numFerns, thread, label) {
+            const { positions, colors, samples } = await this.sendBenchRequest(
+                maxIter, numFerns, thread, `bench-${label}`);
+            // console.log('positions, colors:', positions, colors);
+
+            return this.createStatsViz(positions, colors, samples, label);
+            // *** vertsToMesh() has already created buffer attributes
+            // using the positions/colors array.
+            // so we're done with these arrays.
+            // ***
+        }
+        static createStatsViz(positions, colors, samples, label) {
+            const fern = Threelet.Utils.createBufferGeometryMesh(positions, colors, 0.2);
+            fern.position.set(1, 0, 0); // show only the last one computed
+
+            const resultGroup = new THREE.Group();
+            resultGroup.add(fern,
+                Threelet.ExampleUtils.createStatsFromSamples(samples, label),
+                Threelet.ExampleUtils.createSamplesObject(samples));
+            return resultGroup;
+        }
+
+        updateView() {
+            // console.log('@@ this.appData:', this.appData);
+            const ctx = this.planeCtx;
+            if (ctx) {
+                Demo.drawCommandsDynamic(ctx, this.appData.statBench);
+                this.setPlaneNeedsUpdate(true);
+            }
+        }
+
+        static getIndicator(stat) {
+            let indicator = '?';
+            switch (stat) {
+                case 'noready': indicator = '-'; break;
+                case 'ready': indicator = 'Start'; break;
+                case 'running': indicator = '  ⌛'; break;
+                case 'done': indicator = '  ✅'; break;
+                default: console.warn('unknown stat:', stat);;
+            }
+            return indicator;
+        }
+
+        static drawCommandsDynamic(ctx, sb) {
+            // https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
+            const numberWithCommas = x => x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+            let row = 2; //========
+            ctx.fillStyle = '#222';
+            this.boxRect(ctx, row, 0, 8); // clear 1x8
+            ctx.fillStyle = '#cccccc'; //---- fg
+            ctx.font = '13px monospace';
+            this.boxText(ctx, row, 0, `Compute fractal with ${numberWithCommas(sb.maxIter)} triangles; 10 times per bench`);
+
+            row = 3; //========
+            ctx.fillStyle = '#222';
+            this.boxRect(ctx, row, 0, 2);
+            ctx.fillStyle = '#444444';
+            this.boxRect(ctx, row, 2, 1);
+            ctx.fillStyle = '#222';
+            this.boxRect(ctx, row, 3, 1+4); // clear 1x4 (paint area) also
+
+            ctx.font = '13px monospace';
+            ctx.fillStyle = '#cc6600'; //---- fg
+            this.boxText(ctx, row, 0, 'benchFernRust()');
+
+            ctx.fillStyle = '#cccccc'; //---- fg
+            this.boxText(ctx, row, 2, `${Demo.getIndicator(sb.rust)}`);
+
+            if (sb.resultRust) {
+                ctx.fillStyle = '#cccccc'; //---- fg
+                this.boxText(ctx, row, 3, `ave: ${sb.resultRust.ave.toFixed(3)} (s)  std: ${sb.resultRust.std.toFixed(3)} (s)`);
+            }
+
+            row = 4; //========
+            ctx.fillStyle = '#222';
+            this.boxRect(ctx, row, 0, 2);
+            ctx.fillStyle = '#444444';
+            this.boxRect(ctx, row, 2, 1);
+            ctx.fillStyle = '#222';
+            this.boxRect(ctx, row, 3, 1+4); // clear 1x4 (paint area) also
+
+            ctx.font = '13px monospace';
+            ctx.fillStyle = '#cccc00'; //---- fg
+            this.boxText(ctx, row, 0, 'benchFernJs()');
+
+            ctx.fillStyle = '#cccccc'; //---- fg
+            this.boxText(ctx, row, 2, `${Demo.getIndicator(sb.js)}`);
+
+            if (sb.resultJs) {
+                ctx.fillStyle = '#cccccc'; //---- fg
+                this.boxText(ctx, row, 3, `ave: ${sb.resultJs.ave.toFixed(3)} (s)  std: ${sb.resultJs.std.toFixed(3)} (s)`);
+            }
+
+            row = 6; //========
+            ctx.fillStyle = '#222';
+            this.boxRect(ctx, row, 0, 8); // clear 1x8
+            if (sb.resultRust || sb.resultJs) {
+                ctx.fillStyle = '#cccccc';
+                this.boxText(ctx, row, 2, 'ℹ️ Only the last computed fractal is shown');
+            }
+        }
+        static drawCommandsStatic(ctx) {
+            let row = 5; //========
+            ctx.fillStyle = '#444444';
+            this.boxRect(ctx, row, 2, 1);
+            ctx.fillStyle = '#cccccc'; //---- fg
+            ctx.font = '13px monospace';
+            this.boxText(ctx, row, 2, 'Reset');
+
+            row = 7; //========
+            ctx.fillStyle = '#444444';
+            this.boxRect(ctx, row, 0, 2);
+            ctx.fillStyle = '#cccccc'; //---- fg
+            this.boxText(ctx, row, 0, 'source code');
+        }
+
+        // impl
+        drawTitle(ctx) {
+            ctx.fillStyle = '#cccccc';
+            ctx.font = '18px monospace';
+            ctx.fillText('🦀rust-fern-bench', 16, 32+8);
+        }
+
+        // impl
+        drawCommands(ctx) {
+            Demo.drawCommandsStatic(ctx);
+        }
+
+        updateMarker(what, row, col, width=1) {
+            const marker = this.getMarker(
+                what.startsWith('cmd-') ? 'commandMarker' : 'invalid');
+            if (! marker) return;
+
+            // note: position is relative to the 'selector' group
+            marker.position.set(-2+0.25*col, 0.125+0.25*(3-row), 0.005);
+            marker.scale.set(width, 1, 1);
+            marker.visible = true;
+
+            if (what.startsWith('cmd-')) {
+                setTimeout(() => { marker.visible = false; }, 500);
+            }
+            this.render();
+        }
+
+        // impl
+        onLeftPlaneClicked(faceIndex) {
+            console.log('faceIndex:', faceIndex);
+            const _fn = (what, row, col, width) => {
+                this.onSelect(what);
+                this.updateMarker(what, row, col, width);
+            };
+            switch (faceIndex) {
+                case 52: case 53: _fn('cmd-bench-rust', 3, 5, 1); break;
+                case 68: case 69: _fn('cmd-bench-js', 4, 5, 1); break;
+                case 84: case 85: _fn('cmd-reset', 5, 5, 1); break;
+                case 112: case 113: case 114: case 115: _fn('cmd-src', 7, 2, 2); break;
+                default: console.log('@@ nop');
+            }
+        }
+
+        async onBench(mode) {
+            if (mode !== 'rust' && mode !== 'js') {
+                console.warn('onBench(): invalid mode:', mode);
+                return;
+            }
+
+            const sb = this.appData.statBench;
+
+            const modeAnother = mode === 'rust' ? 'js' : 'rust';
+            if (sb[modeAnother] === 'running') {
+                console.log('another bench is running; nop');
+                return;
+            }
+
+            if (sb[mode] === 'ready') {
+                sb[mode] = 'running';
+                this.updateView();
+
+                await this.appData.fnBench[mode]();
+                sb[mode] = 'done';
+                this.updateView();
+            }
+        }
+        onReset() {
+            // clear data and panel
+            const sb = this.appData.statBench;
+            sb.rust = 'ready';
+            sb.js = 'ready';
+            sb.resultRust = undefined;
+            sb.resultJs = undefined;
+            this.updateView();
+
+            // clear 3d viz stuff
+
+            let vizRust = this.scene.getObjectByName('viz-rust');
+            let vizJs = this.scene.getObjectByName('viz-js');
+            // console.log('(before) this.scene:', this.scene);
+            // console.log('vizRust:', vizRust);
+            // console.log('vizJs:', vizJs);
+
+            this.renderer.dispose();
+            if (vizRust) {
+                Threelet.freeScene(vizRust);
+                this.scene.remove(vizRust);
+                vizRust = null;
+            }
+            if (vizJs) {
+                Threelet.freeScene(vizJs);
+                this.scene.remove(vizJs);
+                vizJs = null;
+            }
+        }
+
+        onSelect(what) {
+            if (what.startsWith('cmd-')) {
+                const command = what.replace('cmd-', '');
+                switch (command) {
+                    case 'bench-rust': {
+                        console.log('bench-rust');
+                        this.onBench('rust');
+                        break;
+                    }
+                    case 'bench-js': {
+                        console.log('bench-js');
+                        this.onBench('js');
+                        break;
+                    }
+                    case 'reset': {
+                        console.log('reset');
+                        this.onReset();
+                        break;
+                    }
+                    case 'src': {
+                        // console.log('src');
+                        document.location.href = 'https://github.com/w3reality/threelet/tree/master/examples/rust-fern-bench';
+                        break;
+                    }
+                    default: console.log('@@ unknown command:', command);
+                }
+            } else {
+                console.log('@@ onSelect(): nop');
+            }
+        }
+    }
+
+    const demo = new Demo({
+        canvas: document.getElementById("demo"),
+        optAxes: false,
+        optVR: true,
+        // debugCube: true,
+        paintAreaColor: '#222',
+    });
+    demo.updateLoop(1); // 1 fps for GUI
+
+    </script>
+</body>
+</html>
