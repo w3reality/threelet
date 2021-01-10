@@ -6,8 +6,8 @@ mod utils;
 
 use std::fmt;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::Clamped;
-use web_sys::{console, CanvasRenderingContext2d, ImageData};
+//use wasm_bindgen::Clamped;
+use web_sys::{console, CanvasRenderingContext2d};//, ImageData};
 
 // use std::collections::HashMap;
 

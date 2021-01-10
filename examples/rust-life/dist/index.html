@@ -8,9 +8,6 @@
     <!--
     This is a derived work of
     https://github.com/rustwasm/wasm_game_of_life/blob/master/www/index.js
-    with the following changes:
-      * ...
-      * ...
     -->
     <div>
         <button id="play-pause"></button>
@@ -19,25 +16,26 @@
     </div>
 
     <script type="module">
-    //import Life from '../rust/pkg-es-pack/life.esm.js'; // !!!!!!!!
-    import Life from '../rust/pkg-es-pack/life.esm.dev.js'; // !!!!!!!!
+    import Life from './life.esm.js'; // prod
+    //====
+    //import Life from '../pkg-es-pack/life.esm.dev.js'; // dev
 
 (async () => { // main
     //====
 //    const life = await (new Life()).init(); // plain
-//    const life = await Life.new(); // sugar; preferred
+//    const life = await Life.create(); // sugar; preferred
     //==== in case needing the underlying `wasm` object
     const mod = new Life();
     const life = await mod.init();
     const wasm = mod.getWasm();
     console.log('@@ wasm:', wasm);
     console.log('@@ typeof wasm:', typeof wasm);
-    console.log('@@ wasm.hasOwnProperty(\'memory\'):', wasm.hasOwnProperty('memory'));
+    console.log('@@ typeof wasm.memory:', typeof wasm.memory);
     //====
 
-    life.greet('9999');
+    life.greet('This is WIP');
     const { Universe, Cell } = life;
-    if (1) { Universe.greet("expect OK"); } // OK; name shown
+    if (1) { Universe.greet("WIP, bye!"); } // OK shown
 
 return; // !!!! plain/sugar
 
