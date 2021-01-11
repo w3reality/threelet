@@ -1,8 +1,12 @@
-### Building wasm files
+### Build
 
-First, make sure the <a href="https://rustwasm.github.io/wasm-pack/installer/" target="_blank" rel="noopener">wasm-pack</a> command is
-installed in the system.  Then, build `<name>_bg.wasm` and `<name>.exports.js` (where `<name>` is the Rust crate's name) as follows:
+First, make sure the <a href="https://rustwasm.github.io/wasm-pack/installer/" target="_blank" rel="noopener">wasm-pack</a> command is installed in the system.  Then,
 
 ```sh
-$ make
+$ npm i
+$ make dist
 ```
+
+### Demo
+
+[Live](https://w3reality.github.io/threelet/examples/rust-canvas-hello/index.html)

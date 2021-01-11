@@ -15,6 +15,10 @@
     <script src="../../dist/threelet.min.js"></script>
 
     <script type="module">
+    //import Mod from './pkg-es-pack/canvas.esm.js'; // test
+    //====
+    import Mod from './canvas.esm.js'; // prod
+
     class Demo extends Threelet {
         // override
         onCreate(params) {
@@ -50,10 +54,7 @@
             this.plane = plane;
 
             (async () => {
-                // load wasm module
-                const mod = await Threelet.Utils.loadWasmBindgen(
-                    './canvas', await import(`./canvas.exports.js`));
-                console.log('canvas mod:', mod);
+                const mod = await Mod.create();
 
                 // draw via Rust
                 mod.draw(planeCanvasId);
