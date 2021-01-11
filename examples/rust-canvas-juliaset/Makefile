@@ -1,7 +1,24 @@
-all: juliaset
+all: build-release
 
-juliaset: juliaset.mk
-	make -f $<
+ESP = ../../node_modules/.bin/es-pack
+build-release:
+	make release && $(ESP) build --rustwasm -m esm
+build-dev:
+	make dev && $(ESP) build --rustwasm -m esm --dev
+
+NAME = juliaset
+dist:
+	make build-release
+	cp ./pkg-es-pack/$(NAME).esm.js .
+
+dev:
+	RUSTFLAGS="-Z macro-backtrace" wasm-pack build --dev --target no-modules
+release:
+	wasm-pack build --release --target no-modules
+test:
+	wasm-pack test --headless --chrome
 
 clean:
-	make -f juliaset.mk clean
+	rm -rf ./pkg/*
+
+.PHONY: dist

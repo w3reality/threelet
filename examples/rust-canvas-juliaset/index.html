@@ -15,6 +15,9 @@
     <script src="../templates/plane-app.js"></script>
 
     <script type="module">
+    //import Mod from './pkg-es-pack/juliaset.esm.js'; // test
+    //====
+    import Mod from './juliaset.esm.js'; // prod
 
     class Demo extends Threelet.PlaneApp {
         // override
@@ -29,10 +32,7 @@
                 im: this.imIni,
             };
             (async () => {
-                const mod = await Threelet.Utils.loadWasmBindgen(
-                    './julia_set', await import(`./julia_set.exports.js`));
-                console.log('juliaset mod:', mod);
-                this.jsetData.mod = mod;
+                this.jsetData.mod = await Mod.create();
                 this.updateJset();
             })();
         }
