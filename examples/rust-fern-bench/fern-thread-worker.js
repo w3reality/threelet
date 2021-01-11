@@ -3,8 +3,9 @@ importScripts('../deps/async-thread-worker.min.js');
 importScripts('../../dist/threelet.min.js');
 // importScripts('../../lib/threelet.js'); // dev
 
-importScripts('./fern.exports.js');
-// console.log('createBgExports:', createBgExports);
+//importScripts('./pkg-es-pack/fern.min.js'); // test
+//====
+importScripts('./fern.min.js'); // prod
 
 class FernThreadWorker extends AsyncThreadWorker.ThreadWorker {
     // override
@@ -20,10 +21,7 @@ class FernThreadWorker extends AsyncThreadWorker.ThreadWorker {
         switch (task) {
             case 'init': {
                 if (!this.mod) {
-                    const mod = await Threelet.Utils.loadWasmBindgen(
-                        './fern', createBgExports());
-                    console.log('mod, wasm:', mod, mod.wasm);
-                    this.mod = mod;
+                    this.mod = await Fern.create();
                     this.sendResponse(id, 'ok, init done.');
                 } else {
                     this.sendResponse(id, 'nop, already initialized!!');

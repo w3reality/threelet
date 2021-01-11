@@ -1,12 +1,24 @@
-all: wasm-compat
+all: build-release
 
-export CRATE_DIR=./fern
-export CRATE_NAME=fern
-export OUT_DIR=.
-export WASM_TOOLS_DIR=../wasm
-MAKE_TARGET=make -f $(WASM_TOOLS_DIR)/bindgen.mk $@
-wasm-compat:
-	$(MAKE_TARGET) 
+ESP = ../../node_modules/.bin/es-pack
+build-release:
+	make release && $(ESP) build --rustwasm -m umd
+build-dev:
+	make dev && $(ESP) build --rustwasm -m umd --dev
+
+NAME = fern
+dist:
+	make build-release
+	cp ./pkg-es-pack/$(NAME).min.js .
+
+dev:
+	RUSTFLAGS="-Z macro-backtrace" wasm-pack build --dev --target no-modules
+release:
+	wasm-pack build --release --target no-modules
+test:
+	wasm-pack test --headless --chrome
 
 clean:
-	$(MAKE_TARGET)
+	rm -rf ./pkg/*
+
+.PHONY: dist
