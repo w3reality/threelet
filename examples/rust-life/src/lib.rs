@@ -18,8 +18,6 @@ extern {
 
 #[wasm_bindgen]
 pub fn greet(name: &str) {
-    // NG; mod = await loadWasmBindgen(); and call by mod.wasm.greet('hoge');
-    // OK; mod = await loadWasmBindgen(); and call by mod.greet('hoge');
     // alert(&format!("Hello, {}!", name));
     console::log_2(&"name:".into(), &name.into());
 }

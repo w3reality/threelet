@@ -469,27 +469,6 @@ class Utils {
         }
     };
 
-
-    static loadWasmBindgen(name, jsImports) {
-        return new Promise(async (res, rej) => {
-            // https://rustwasm.github.io/docs/book/reference/deploying-to-production.html
-            // This approach is not the fastest like using WebAssembly.instantiateStreaming,
-            // but it can work around the application/wasm MIME Type requirement.
-            try {
-                // https://stackoverflow.com/questions/52239924/webassembly-instantiatestreaming-wrong-mime-type
-                const response = await fetch(`${name}_bg.wasm`);
-                const buffer = await response.arrayBuffer();
-                // https://stackoverflow.com/questions/48039547/webassembly-typeerror-webassembly-instantiation-imports-argument-must-be-pres
-                const obj = await WebAssembly.instantiate(
-                    buffer, {[`${name}.js`]: jsImports});
-                Object.assign(jsImports.wasm, obj.instance.exports);
-                res(jsImports);
-            } catch (e) {
-                rej(e);
-            }
-        });
-    }
-
     static createLogger(opts) {
         return new Logger(opts);
     }
