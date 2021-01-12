@@ -1,20 +1,60 @@
-THREE.ColladaLoader = function ( manager ) {
+import {
+	AmbientLight,
+	AnimationClip,
+	Bone,
+	BufferGeometry,
+	ClampToEdgeWrapping,
+	Color,
+	DirectionalLight,
+	DoubleSide,
+	Euler,
+	FileLoader,
+	Float32BufferAttribute,
+	Group,
+	Line,
+	LineBasicMaterial,
+	LineSegments,
+	Loader,
+	LoaderUtils,
+	MathUtils,
+	Matrix4,
+	Mesh,
+	MeshBasicMaterial,
+	MeshLambertMaterial,
+	MeshPhongMaterial,
+	OrthographicCamera,
+	PerspectiveCamera,
+	PointLight,
+	Quaternion,
+	QuaternionKeyframeTrack,
+	RepeatWrapping,
+	Scene,
+	Skeleton,
+	SkinnedMesh,
+	SpotLight,
+	TextureLoader,
+	Vector3,
+	VectorKeyframeTrack
+} from "../../../build/three.module.js";
+import { TGALoader } from "../loaders/TGALoader.js";
 
-	THREE.Loader.call( this, manager );
+var ColladaLoader = function ( manager ) {
+
+	Loader.call( this, manager );
 
 };
 
-THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.prototype ), {
+ColladaLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
 
-	constructor: THREE.ColladaLoader,
+	constructor: ColladaLoader,
 
 	load: function ( url, onLoad, onProgress, onError ) {
 
 		var scope = this;
 
-		var path = ( scope.path === '' ) ? THREE.LoaderUtils.extractUrlBase( url ) : scope.path;
+		var path = ( scope.path === '' ) ? LoaderUtils.extractUrlBase( url ) : scope.path;
 
-		var loader = new THREE.FileLoader( scope.manager );
+		var loader = new FileLoader( scope.manager );
 		loader.setPath( scope.path );
 		loader.setRequestHeader( scope.requestHeader );
 		loader.setWithCredentials( scope.withCredentials );
@@ -276,7 +316,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 				// since 'id' attributes can be optional, it's necessary to generate a UUID for unqiue assignment
 
-				library.animations[ xml.getAttribute( 'id' ) || THREE.MathUtils.generateUUID() ] = data;
+				library.animations[ xml.getAttribute( 'id' ) || MathUtils.generateUUID() ] = data;
 
 			}
 
@@ -513,9 +553,9 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 		}
 
-		var position = new THREE.Vector3();
-		var scale = new THREE.Vector3();
-		var quaternion = new THREE.Quaternion();
+		var position = new Vector3();
+		var scale = new Vector3();
+		var quaternion = new Quaternion();
 
 		function createKeyframeTracks( animation, tracks ) {
 
@@ -544,9 +584,9 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 			}
 
-			if ( positionData.length > 0 ) tracks.push( new THREE.VectorKeyframeTrack( name + '.position', times, positionData ) );
-			if ( quaternionData.length > 0 ) tracks.push( new THREE.QuaternionKeyframeTrack( name + '.quaternion', times, quaternionData ) );
-			if ( scaleData.length > 0 ) tracks.push( new THREE.VectorKeyframeTrack( name + '.scale', times, scaleData ) );
+			if ( positionData.length > 0 ) tracks.push( new VectorKeyframeTrack( name + '.position', times, positionData ) );
+			if ( quaternionData.length > 0 ) tracks.push( new QuaternionKeyframeTrack( name + '.quaternion', times, quaternionData ) );
+			if ( scaleData.length > 0 ) tracks.push( new VectorKeyframeTrack( name + '.scale', times, scaleData ) );
 
 			return tracks;
 
@@ -730,7 +770,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 			}
 
-			return new THREE.AnimationClip( name, duration, tracks );
+			return new AnimationClip( name, duration, tracks );
 
 		}
 
@@ -983,11 +1023,11 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 			if ( data.bindShapeMatrix ) {
 
-				build.bindMatrix = new THREE.Matrix4().fromArray( data.bindShapeMatrix ).transpose();
+				build.bindMatrix = new Matrix4().fromArray( data.bindShapeMatrix ).transpose();
 
 			} else {
 
-				build.bindMatrix = new THREE.Matrix4().identity();
+				build.bindMatrix = new Matrix4().identity();
 
 			}
 
@@ -996,7 +1036,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 			for ( i = 0, l = jointSource.array.length; i < l; i ++ ) {
 
 				var name = jointSource.array[ i ];
-				var boneInverse = new THREE.Matrix4().fromArray( inverseSource.array, i * inverseSource.stride ).transpose();
+				var boneInverse = new Matrix4().fromArray( inverseSource.array, i * inverseSource.stride ).transpose();
 
 				build.joints.push( { name: name, boneInverse: boneInverse } );
 
@@ -1499,15 +1539,15 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 				case 'phong':
 				case 'blinn':
-					material = new THREE.MeshPhongMaterial();
+					material = new MeshPhongMaterial();
 					break;
 
 				case 'lambert':
-					material = new THREE.MeshLambertMaterial();
+					material = new MeshLambertMaterial();
 					break;
 
 				default:
-					material = new THREE.MeshBasicMaterial();
+					material = new MeshBasicMaterial();
 					break;
 
 			}
@@ -1549,16 +1589,16 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 							var technique = extra.technique;
 
-							texture.wrapS = technique.wrapU ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
-							texture.wrapT = technique.wrapV ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
+							texture.wrapS = technique.wrapU ? RepeatWrapping : ClampToEdgeWrapping;
+							texture.wrapT = technique.wrapV ? RepeatWrapping : ClampToEdgeWrapping;
 
 							texture.offset.set( technique.offsetU || 0, technique.offsetV || 0 );
 							texture.repeat.set( technique.repeatU || 1, technique.repeatV || 1 );
 
 						} else {
 
-							texture.wrapS = THREE.RepeatWrapping;
-							texture.wrapT = THREE.RepeatWrapping;
+							texture.wrapS = RepeatWrapping;
+							texture.wrapT = RepeatWrapping;
 
 						}
 
@@ -1686,7 +1726,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 			if ( extra !== undefined && extra.technique !== undefined && extra.technique.double_sided === 1 ) {
 
-				material.side = THREE.DoubleSide;
+				material.side = DoubleSide;
 
 			}
 
@@ -1808,7 +1848,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 			switch ( data.optics.technique ) {
 
 				case 'perspective':
-					camera = new THREE.PerspectiveCamera(
+					camera = new PerspectiveCamera(
 						data.optics.parameters.yfov,
 						data.optics.parameters.aspect_ratio,
 						data.optics.parameters.znear,
@@ -1827,7 +1867,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 					xmag *= 0.5;
 					ymag *= 0.5;
 
-					camera = new THREE.OrthographicCamera(
+					camera = new OrthographicCamera(
 						- xmag, xmag, ymag, - ymag, // left, right, top, bottom
 						data.optics.parameters.znear,
 						data.optics.parameters.zfar
@@ -1835,7 +1875,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 					break;
 
 				default:
-					camera = new THREE.PerspectiveCamera();
+					camera = new PerspectiveCamera();
 					break;
 
 			}
@@ -1930,7 +1970,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 					case 'color':
 						var array = parseFloats( child.textContent );
-						data.color = new THREE.Color().fromArray( array );
+						data.color = new Color().fromArray( array );
 						break;
 
 					case 'falloff_angle':
@@ -1957,19 +1997,19 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 			switch ( data.technique ) {
 
 				case 'directional':
-					light = new THREE.DirectionalLight();
+					light = new DirectionalLight();
 					break;
 
 				case 'point':
-					light = new THREE.PointLight();
+					light = new PointLight();
 					break;
 
 				case 'spot':
-					light = new THREE.SpotLight();
+					light = new SpotLight();
 					break;
 
 				case 'ambient':
-					light = new THREE.AmbientLight();
+					light = new AmbientLight();
 					break;
 
 			}
@@ -2248,7 +2288,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 			var skinIndex = { array: [], stride: 4 };
 			var skinWeight = { array: [], stride: 4 };
 
-			var geometry = new THREE.BufferGeometry();
+			var geometry = new BufferGeometry();
 
 			var materialKeys = [];
 
@@ -2418,14 +2458,14 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 			// build geometry
 
-			if ( position.array.length > 0 ) geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( position.array, position.stride ) );
-			if ( normal.array.length > 0 ) geometry.setAttribute( 'normal', new THREE.Float32BufferAttribute( normal.array, normal.stride ) );
-			if ( color.array.length > 0 ) geometry.setAttribute( 'color', new THREE.Float32BufferAttribute( color.array, color.stride ) );
-			if ( uv.array.length > 0 ) geometry.setAttribute( 'uv', new THREE.Float32BufferAttribute( uv.array, uv.stride ) );
-			if ( uv2.array.length > 0 ) geometry.setAttribute( 'uv2', new THREE.Float32BufferAttribute( uv2.array, uv2.stride ) );
+			if ( position.array.length > 0 ) geometry.setAttribute( 'position', new Float32BufferAttribute( position.array, position.stride ) );
+			if ( normal.array.length > 0 ) geometry.setAttribute( 'normal', new Float32BufferAttribute( normal.array, normal.stride ) );
+			if ( color.array.length > 0 ) geometry.setAttribute( 'color', new Float32BufferAttribute( color.array, color.stride ) );
+			if ( uv.array.length > 0 ) geometry.setAttribute( 'uv', new Float32BufferAttribute( uv.array, uv.stride ) );
+			if ( uv2.array.length > 0 ) geometry.setAttribute( 'uv2', new Float32BufferAttribute( uv2.array, uv2.stride ) );
 
-			if ( skinIndex.array.length > 0 ) geometry.setAttribute( 'skinIndex', new THREE.Float32BufferAttribute( skinIndex.array, skinIndex.stride ) );
-			if ( skinWeight.array.length > 0 ) geometry.setAttribute( 'skinWeight', new THREE.Float32BufferAttribute( skinWeight.array, skinWeight.stride ) );
+			if ( skinIndex.array.length > 0 ) geometry.setAttribute( 'skinIndex', new Float32BufferAttribute( skinIndex.array, skinIndex.stride ) );
+			if ( skinWeight.array.length > 0 ) geometry.setAttribute( 'skinWeight', new Float32BufferAttribute( skinWeight.array, skinWeight.stride ) );
 
 			build.data = geometry;
 			build.type = primitives[ 0 ].type;
@@ -2617,7 +2657,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 			var data = {
 				sid: xml.getAttribute( 'sid' ),
 				name: xml.getAttribute( 'name' ) || '',
-				axis: new THREE.Vector3(),
+				axis: new Vector3(),
 				limits: {
 					min: 0,
 					max: 0
@@ -2748,19 +2788,19 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 			switch ( data.type ) {
 
 				case 'matrix':
-					data.obj = new THREE.Matrix4();
+					data.obj = new Matrix4();
 					data.obj.fromArray( array ).transpose();
 					break;
 
 				case 'translate':
-					data.obj = new THREE.Vector3();
+					data.obj = new Vector3();
 					data.obj.fromArray( array );
 					break;
 
 				case 'rotate':
-					data.obj = new THREE.Vector3();
+					data.obj = new Vector3();
 					data.obj.fromArray( array );
-					data.angle = THREE.MathUtils.degToRad( array[ 3 ] );
+					data.angle = MathUtils.degToRad( array[ 3 ] );
 					break;
 
 			}
@@ -2973,7 +3013,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 			}
 
-			var m0 = new THREE.Matrix4();
+			var m0 = new Matrix4();
 
 			kinematics = {
 
@@ -3032,7 +3072,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 									switch ( joint.type ) {
 
 										case 'revolute':
-											matrix.multiply( m0.makeRotationAxis( axis, THREE.MathUtils.degToRad( value ) ) );
+											matrix.multiply( m0.makeRotationAxis( axis, MathUtils.degToRad( value ) ) );
 											break;
 
 										case 'prismatic':
@@ -3106,7 +3146,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 					case 'matrix':
 						var array = parseFloats( child.textContent );
-						var matrix = new THREE.Matrix4().fromArray( array ).transpose();
+						var matrix = new Matrix4().fromArray( array ).transpose();
 						transforms.push( {
 							sid: child.getAttribute( 'sid' ),
 							type: child.nodeName,
@@ -3117,7 +3157,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 					case 'translate':
 					case 'scale':
 						var array = parseFloats( child.textContent );
-						var vector = new THREE.Vector3().fromArray( array );
+						var vector = new Vector3().fromArray( array );
 						transforms.push( {
 							sid: child.getAttribute( 'sid' ),
 							type: child.nodeName,
@@ -3127,8 +3167,8 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 					case 'rotate':
 						var array = parseFloats( child.textContent );
-						var vector = new THREE.Vector3().fromArray( array );
-						var angle = THREE.MathUtils.degToRad( array[ 3 ] );
+						var vector = new Vector3().fromArray( array );
+						var angle = MathUtils.degToRad( array[ 3 ] );
 						transforms.push( {
 							sid: child.getAttribute( 'sid' ),
 							type: child.nodeName,
@@ -3167,8 +3207,8 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 		}
 
-		var matrix = new THREE.Matrix4();
-		var vector = new THREE.Vector3();
+		var matrix = new Matrix4();
+		var vector = new Vector3();
 
 		function parseNode( xml ) {
 
@@ -3177,7 +3217,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 				type: xml.getAttribute( 'type' ),
 				id: xml.getAttribute( 'id' ),
 				sid: xml.getAttribute( 'sid' ),
-				matrix: new THREE.Matrix4(),
+				matrix: new Matrix4(),
 				nodes: [],
 				instanceCameras: [],
 				instanceControllers: [],
@@ -3235,7 +3275,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 					case 'rotate':
 						var array = parseFloats( child.textContent );
-						var angle = THREE.MathUtils.degToRad( array[ 3 ] );
+						var angle = MathUtils.degToRad( array[ 3 ] );
 						data.matrix.multiply( matrix.makeRotationAxis( vector.fromArray( array ), angle ) );
 						data.transforms[ child.getAttribute( 'sid' ) ] = child.nodeName;
 						break;
@@ -3412,7 +3452,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 			}
 
-			return new THREE.Skeleton( bones, boneInverses );
+			return new Skeleton( bones, boneInverses );
 
 		}
 
@@ -3449,7 +3489,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 						// and weights defined for it. But we still have to add the bone to the sorted bone list in order to
 						// ensure a correct animation of the model.
 
-						boneInverse = new THREE.Matrix4();
+						boneInverse = new Matrix4();
 
 					}
 
@@ -3577,7 +3617,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 			} else {
 
-				object = ( type === 'JOINT' ) ? new THREE.Bone() : new THREE.Group();
+				object = ( type === 'JOINT' ) ? new Bone() : new Group();
 
 				for ( var i = 0; i < objects.length; i ++ ) {
 
@@ -3595,7 +3635,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 		}
 
-		var fallbackMaterial = new THREE.MeshBasicMaterial( { color: 0xff00ff } );
+		var fallbackMaterial = new MeshBasicMaterial( { color: 0xff00ff } );
 
 		function resolveMaterialBinding( keys, instanceMaterials ) {
 
@@ -3638,11 +3678,11 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 					if ( type === 'lines' || type === 'linestrips' ) {
 
-						materials.push( new THREE.LineBasicMaterial() );
+						materials.push( new LineBasicMaterial() );
 
 					} else {
 
-						materials.push( new THREE.MeshPhongMaterial() );
+						materials.push( new MeshPhongMaterial() );
 
 					}
 
@@ -3673,22 +3713,22 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 				switch ( type ) {
 
 					case 'lines':
-						object = new THREE.LineSegments( geometry.data, material );
+						object = new LineSegments( geometry.data, material );
 						break;
 
 					case 'linestrips':
-						object = new THREE.Line( geometry.data, material );
+						object = new Line( geometry.data, material );
 						break;
 
 					case 'triangles':
 					case 'polylist':
 						if ( skinning ) {
 
-							object = new THREE.SkinnedMesh( geometry.data, material );
+							object = new SkinnedMesh( geometry.data, material );
 
 						} else {
 
-							object = new THREE.Mesh( geometry.data, material );
+							object = new Mesh( geometry.data, material );
 
 						}
 
@@ -3741,7 +3781,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 		function buildVisualScene( data ) {
 
-			var group = new THREE.Group();
+			var group = new Group();
 			group.name = data.name;
 
 			var children = data.children;
@@ -3803,7 +3843,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 					}
 
-					animations.push( new THREE.AnimationClip( 'default', - 1, tracks ) );
+					animations.push( new AnimationClip( 'default', - 1, tracks ) );
 
 				}
 
@@ -3850,7 +3890,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 		if ( text.length === 0 ) {
 
-			return { scene: new THREE.Scene() };
+			return { scene: new Scene() };
 
 		}
 
@@ -3888,14 +3928,14 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 		console.log( 'THREE.ColladaLoader: File version', version );
 
 		var asset = parseAsset( getElementsByTagName( collada, 'asset' )[ 0 ] );
-		var textureLoader = new THREE.TextureLoader( this.manager );
+		var textureLoader = new TextureLoader( this.manager );
 		textureLoader.setPath( this.resourcePath || path ).setCrossOrigin( this.crossOrigin );
 
 		var tgaLoader;
 
-		if ( THREE.TGALoader ) {
+		if ( TGALoader ) {
 
-			tgaLoader = new THREE.TGALoader( this.manager );
+			tgaLoader = new TGALoader( this.manager );
 			tgaLoader.setPath( this.resourcePath || path );
 
 		}
@@ -3958,7 +3998,7 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 
 		if ( asset.upAxis === 'Z_UP' ) {
 
-			scene.quaternion.setFromEuler( new THREE.Euler( - Math.PI / 2, 0, 0 ) );
+			scene.quaternion.setFromEuler( new Euler( - Math.PI / 2, 0, 0 ) );
 
 		}
 
@@ -3974,3 +4014,5 @@ THREE.ColladaLoader.prototype = Object.assign( Object.create( THREE.Loader.proto
 	}
 
 } );
+
+export { ColladaLoader };

@@ -7,17 +7,18 @@ const __version = pkg.version;
 import 'regenerator-runtime/runtime.js';
 
 import * as THREE from 'three';
+import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
+import { ARButton } from 'three/examples/jsm/webxr/ARButton.js';
+
 import VRControlHelper from './VRControlHelper.js';
 import SkyHelper from './SkyHelper.js';
 import Utils from './Utils.js';
 
-import { VRButton } from './deps/VRButton.js';
-import { ARButton } from './deps/ARButton.js';
 
 class Threelet {
     constructor(params) {
         this.version = __version;
-        Utils.Logger._consoleLog(`Threelet ${__version} with THREE r${THREE.REVISION}`);
+        console.info(`Threelet ${__version} with THREE r${THREE.REVISION}`);
 
         const defaults = {
             canvas: null,
@@ -539,7 +540,7 @@ class Threelet {
         } else {
             console.error('@@ on(): unsupported eventName:', eventName);
             if (eventName.startsWith('vr-')) {
-                Utils.Logger._consoleLog(`${eventName} is deprecated; use 'xr-' instead`);
+                console.info(`${eventName} is deprecated; use 'xr-' instead`);
             }
         }
     }
@@ -579,7 +580,7 @@ class Threelet {
                 // console.log("mouseup: drag");
                 this._callIfDefined('mouse-drag-end', coords);
             } else {
-                // console.log("mouseup: click");
+                console.log("mouseup: click");
                 if (e.button === 0) {
                     // console.log('@@ mouse click left:', ...coords);
                     this._callIfDefined('mouse-click-left', coords);

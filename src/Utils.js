@@ -17,12 +17,6 @@ class Logger {
         this._last = performance.now()/1000;
     }
 
-    static _consoleLog(...args) {
-        // for eluding uglify
-        const _console = console;
-        _console.log.apply(_console, args);
-    }
-
     log(...args) {
         const now = performance.now()/1000;
         const splits = now - this._last;
@@ -32,13 +26,13 @@ class Logger {
 
         this._last = now;
         if (! this._mute) {
-            Logger._consoleLog(`==== ${now.toFixed(3)} +${splits.toFixed(3)} ====`, ...args);
+            console.info(`==== ${now.toFixed(3)} +${splits.toFixed(3)} ====`, ...args);
         }
     }
     grep(query) {
         const idxs = this.arg0s.reduce((acc, val, idx) => {
             if (typeof val !== 'string') {
-                Logger._consoleLog('grep(): warning: not a string');
+                console.info('grep(): warning: not a string');
                 return acc;
             } else if (val.includes(query)) {
                 acc.push(idx);
@@ -120,10 +114,24 @@ class Utils {
 
     //======== begin 3D model utils ========
 
-    // <script src="../deps/ColladaLoader.js"></script>
-    static loadCollada(path, cb=null) {
+    static loadGLTF(GLTFLoader, path, file, cb=null) {
+        const loader = new GLTFLoader().setPath(path);
+        const filter = gltf => {
+            console.log('@@ gltf:', gltf);
+            const object = gltf.scene;
+            object.traverse(node => {
+                // if (node.isMesh) {
+                //     node.material.envMap = envMap;
+                // }
+            });
+            return [object, gltf];
+        };
+        return Utils.fetchModelData(loader, file, filter, cb);
+    }
+
+    static loadCollada(ColladaLoader, path, cb=null) {
         // https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_collada_skinning.html
-        const loader = new THREE.ColladaLoader();
+        const loader = new ColladaLoader();
         const filter = collada => {
             const object = collada.scene;
             console.log('@@ object:', object);
@@ -140,11 +148,9 @@ class Utils {
         return Utils.fetchModelData(loader, path, filter, cb);
     }
 
-    // <script src="../deps/inflate.min.js"></script>
-    // <script src="../deps/FBXLoader.js"></script>
-    static loadFBX(path, cb=null) {
+    static loadFBX(FBXLoader, path, cb=null) {
         // https://github.com/mrdoob/three.js/blob/master/examples/webgl_loader_fbx.html
-        const loader = new THREE.FBXLoader();
+        const loader = new FBXLoader();
         const filter = object => {
             console.log('@@ object:', object);
             object.traverse(node => {
@@ -156,22 +162,6 @@ class Utils {
             return [object, object];
         };
         return Utils.fetchModelData(loader, path, filter, cb);
-    }
-
-    // <script src="../deps/GLTFLoader.js"></script>
-    static loadGLTF(path, file, cb=null) {
-        const loader = new THREE.GLTFLoader().setPath(path);
-        const filter = gltf => {
-            console.log('@@ gltf:', gltf);
-            const object = gltf.scene;
-            object.traverse(node => {
-                // if (node.isMesh) {
-                //     node.material.envMap = envMap;
-                // }
-            });
-            return [object, gltf];
-        };
-        return Utils.fetchModelData(loader, file, filter, cb);
     }
 
     // filter: raw => [object, raw]
@@ -201,12 +191,7 @@ class Utils {
             }
         }
         console.log('@@ actions:', actions);
-        return { // modelData
-            object: object,
-            mixer: mixer,
-            actions: actions,
-            raw: raw,
-        };
+        return { object, mixer, actions, raw }; // modelData
     }
 
     //======== end 3D model utils ========

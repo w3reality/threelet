@@ -29,7 +29,8 @@
     <script src="../deps/Sky.js"></script>
     <script src="../deps/GLTFLoader.js"></script>
 
-    <script src="../../dist/threelet.min.js"></script>
+    <!-- <script src="../../dist/threelet.min.js"></script> -->
+    <script src="../../target/threelet.js"></script>
     <!-- ==== prod/dev ==== -->
     <script type="module">
     // import Threelet from '../../src/index.js';
@@ -59,7 +60,7 @@
             this.keyLast = 'invalid';
             // this.updateModel('forest'); // default for dev
 
-            this.on('mouse-click', (x, y) => {
+            this.on('pointer-click', (x, y) => {
                 const plane = this.getPlane();
                 if (! plane) return;
 
@@ -126,7 +127,8 @@
         }
 
         async loadModel(key) {
-            const data = await Threelet.Utils.loadGLTF(
+            const data = await Threelet.Utils.loadGLTF(THREE.GLTFLoader, // !!!! TODO
+            // const data = await Threelet.Utils.loadGLTF(GLTFLoader,
                 this.paths[key], 'scene.gltf');
             // console.log('@@ data:', data);
             const obj = data.object;
