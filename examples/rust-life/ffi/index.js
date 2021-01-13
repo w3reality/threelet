@@ -1,9 +1,11 @@
 
+const run = life => new Main().run(life);
+
 class Main {
-    static create() { return new Main(); }
     constructor() {
         console.info('constructor(): hi');
     }
+
     async run(life) {
         const { Universe, Cell } = life;
 
@@ -55,7 +57,7 @@ class Main {
             return row * width + column;
         };
         const drawCells = (useDelta=true) => {
-            if (0) { // draw directly in Rust
+            if (1) { // draw directly in Rust
                 //---- bench for 1000 frames (bench without rAF restriction !!!!)
                 // empty return; (baseline): 522 ms
                 // direct universe.draw_cells(): ???? ms
@@ -234,4 +236,4 @@ class Main {
     }
 }
 
-export { Main };
+export { run };

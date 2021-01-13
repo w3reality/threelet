@@ -22,8 +22,9 @@
     // import Life from '../pkg-es-pack/life.esm.js';
     import Life from '../pkg-es-pack/life.esm.dev.js'; // dev
 
-    const { Main } = Life.ffi;
-    Life.create().then(life => new Main().run(life));
+    Life.create()
+        .then(life => life.app(life, Life.ffi))
+        .catch(err => console.error(err));
     </script>
 </body>
 </html>
