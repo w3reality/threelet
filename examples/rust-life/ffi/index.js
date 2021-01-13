@@ -4,19 +4,8 @@ class Main {
     constructor() {
         console.info('constructor(): hi');
     }
-    async run(life, wasm) {
-        // const life = await (new Life()).init(); // plain
-        // const life = await Life.create(); // sugar; preferred
-        //====
-        console.log('@@ wasm:', wasm);
-        console.log('@@ typeof wasm:', typeof wasm);
-        console.log('@@ typeof wasm.memory:', typeof wasm.memory);
-
+    async run(life) {
         const { Universe, Cell } = life;
-        const memory = wasm.memory;
-
-        // return; // !!!! !!!!
-        //========
 
         // TODO what would be the perf difference when using the canvas via wasm??
         //   https://github.com/rustwasm/wasm-bindgen/tree/master/examples/canvas
@@ -79,10 +68,8 @@ class Main {
             if (useDelta) { // delta version
                 // universe.dump_cells(); // debug
 
-                const deltaAlive = new Uint32Array(memory.buffer,
-                    universe.delta_alive_ptr(), universe.delta_alive_size());
-                const deltaDead = new Uint32Array(memory.buffer,
-                    universe.delta_dead_ptr(), universe.delta_dead_size());
+                const deltaAlive = universe.delta_alive();
+                const deltaDead = universe.delta_dead();
                 // console.log('delta:', deltaAlive, deltaDead);
 
                 ctx.fillStyle = ALIVE_COLOR;
@@ -95,9 +82,7 @@ class Main {
                     _fillCell(ctx, Math.floor(idx/width), idx % width);
                 }
             } else { // orig version
-                const cellsPtr = universe.cells();
-                // console.log('cellsPtr:', cellsPtr);
-                const cells = new Uint8Array(memory.buffer, cellsPtr, width * height);
+                const cells = universe.cells();
 
                 // Alive cells.
                 ctx.fillStyle = ALIVE_COLOR;

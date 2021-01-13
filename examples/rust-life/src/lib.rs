@@ -5,6 +5,7 @@ extern crate web_sys;
 mod utils;
 
 use std::fmt;
+use std::mem;
 use wasm_bindgen::prelude::*;
 //use wasm_bindgen::Clamped;
 use web_sys::{console, CanvasRenderingContext2d};//, ImageData};
@@ -417,12 +418,28 @@ impl Universe {
         }
     }
 
-    pub fn cells(&self) -> *const Cell {
+    pub fn cells(&self) -> js_sys::Uint8Array {
         if self.devmode {
             self.dump_cells();
         }
 
-        self.cells.as_ptr()
+        // https://github.com/rustwasm/wasm_game_of_life/pull/53
+        unsafe {
+            let u8_cells = mem::transmute::<&Vec<Cell>, &Vec<u8>>(&self.cells);
+            js_sys::Uint8Array::view(&u8_cells)
+        }
+    }
+    pub fn delta_alive(&self) -> js_sys::Uint32Array {
+        unsafe {
+            let delta = mem::transmute::<&Vec<u32>, &Vec<u32>>(&self.delta_alive);
+            js_sys::Uint32Array::view(&delta)
+        }
+    }
+    pub fn delta_dead(&self) -> js_sys::Uint32Array {
+        unsafe {
+            let delta = mem::transmute::<&Vec<u32>, &Vec<u32>>(&self.delta_dead);
+            js_sys::Uint32Array::view(&delta)
+        }
     }
 
     pub fn dump_cells(&self) {
@@ -430,10 +447,6 @@ impl Universe {
             &self.cells.iter().map(|&cell| cell as u8).collect(), self.width);
         console::log_2(&"cells:".into(), &dump.into());
     }
-    pub fn delta_alive_ptr(&self) -> *const u32 { self.delta_alive.as_ptr() }
-    pub fn delta_alive_size(&self) -> u32 { self.delta_alive.len() as u32 }
-    pub fn delta_dead_ptr(&self) -> *const u32 { self.delta_dead.as_ptr() }
-    pub fn delta_dead_size(&self) -> u32 { self.delta_dead.len() as u32 }
 
     pub fn width(&self) -> u32 { self.width }
     pub fn height(&self) -> u32 { self.height }

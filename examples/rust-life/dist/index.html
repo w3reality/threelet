@@ -22,8 +22,8 @@
     // import Life from '../pkg-es-pack/life.esm.js';
     import Life from '../pkg-es-pack/life.esm.dev.js'; // dev
 
-    const mod = new Life();
-    mod.init().then(life => (new Life.ffi.Main()).run(life, mod.getWasm()));
+    const { Main } = Life.ffi;
+    Life.create().then(life => new Main().run(life));
     </script>
 </body>
 </html>
