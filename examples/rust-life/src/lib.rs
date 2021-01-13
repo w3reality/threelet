@@ -16,12 +16,6 @@ extern {
     fn alert(s: &str);
 }
 
-#[wasm_bindgen]
-pub fn greet(name: &str) {
-    // alert(&format!("Hello, {}!", name));
-    console::log_2(&"name:".into(), &name.into());
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -36,11 +30,7 @@ mod tests {
 
     #[test]
     fn another() {
-        //panic!("Make this test fail");
-        // assert!(1 == 0);
-        // let _x: () = &greet2("aa"); // found type `&std::string::String`
-        // let _x: () = "aa"; // found type `&'static str`
-        // let _x: &str = "aa"; // ok
+        // panic!("Make this test fail");
         assert_eq!(&greet2("aa"), "aa");
     }
 }
@@ -191,10 +181,6 @@ impl Universe {
 /// Public methods, exported to JavaScript.
 #[wasm_bindgen]
 impl Universe {
-    pub fn greet(name: &str) {
-        alert(&format!("Universe::greet(): Hello, {}!", name)); // OK; name shown
-    }
-
     fn _dump_vec<T>(vec: &Vec<T>, width: u32) -> String
         where T: std::string::ToString
     {

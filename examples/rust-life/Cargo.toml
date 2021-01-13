@@ -1,7 +1,7 @@
 [package]
 name = "life"
 version = "0.1.0"
-authors = ["Nick Fitzgerald <fitzgen@gmail.com>"]
+authors = ["The threelet Developers", "Nick Fitzgerald <fitzgen@gmail.com>"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
