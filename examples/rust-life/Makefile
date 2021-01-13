@@ -1,15 +1,12 @@
 all: build-release
 
 ESP = ../../node_modules/.bin/es-pack
+dist:
+	make release && $(ESP) build --rustwasm -m esm -d ./dist
 build-release:
 	make release && $(ESP) build --rustwasm -m esm
 build-dev:
 	make dev && $(ESP) build --rustwasm -m esm --dev
-
-NAME = life
-dist:
-	make build-release
-	mkdir -p dist && cp ./pkg-es-pack/$(NAME).esm.js ./dist/
 
 dev:
 	RUSTFLAGS="-Z macro-backtrace" wasm-pack build --dev --target no-modules
