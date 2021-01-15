@@ -42,124 +42,123 @@ interactive VR app
     </div>
 
     <script src="../deps/stats.min.js"></script>
-    <script src="../deps/three.min.js"></script>
-    <script src="../deps/ColladaLoader.js"></script>
-    <script src="../deps/OrbitControls.js"></script>
-    <script src="../deps/Sky.js"></script>
 
-    <script src="../../dist/threelet.min.js"></script>
-    <!-- ==== prod/dev ==== -->
     <script type="module">
-    // import Threelet from '../../src/index.js';
+    import { OrbitControls } from '../deps/three/examples/jsm/controls/OrbitControls.js';
+    import { Sky } from '../deps/three/examples/jsm/objects/Sky.js';
+    import { ColladaLoader } from '../deps/three/examples/jsm/loaders/ColladaLoader.js';
 
-    const overlayDiv = document.getElementById('overlay');
-    //overlayDiv.style.display = 'none'; // debug
+    (async () => {
+        const THREE = await import('../deps/three/build/three.module.js');
+        window.THREE = THREE;
 
-    const scene = new THREE.Scene();
-    const threelet = new Threelet({
-        canvas: document.getElementById("canvas"),
-        optScene: scene,
-        optAxes: false,
-        optVR: true,
-        optVRAppendButtonTo: overlayDiv,
-        optARAppendButtonTo: overlayDiv,
-        optCameraPosition: [0, 0.7, 2],
-    });
+        const Threelet = (await import('../../dist/threelet.esm.js')).default;
+        // const Threelet = (await import('../../target/threelet.esm.dev.js')).default;
 
-    threelet.setup('mod-controls', THREE.OrbitControls);
-    threelet.setup('mod-sky', THREE.Sky);
+        const overlayDiv = document.getElementById('overlay');
+        //overlayDiv.style.display = 'none'; // debug
 
-    //
+        const scene = new THREE.Scene();
+        const threelet = new Threelet({
+            canvas: document.getElementById("canvas"),
+            optScene: scene,
+            optAxes: false,
+            optVR: true,
+            optVRAppendButtonTo: overlayDiv,
+            optARAppendButtonTo: overlayDiv,
+            optCameraPosition: [0, 0.7, 2],
+        });
 
-    threelet.scene.add(Threelet.Utils.createTestHemisphereLight());
-    threelet.scene.add(Threelet.Utils.createTestDirectionalLight());
-    threelet.scene.add(new THREE.GridHelper(10, 20));
+        threelet.setup('mod-controls', OrbitControls);
+        threelet.setup('mod-sky', Sky);
 
-    threelet.enableInteractiveGroup('drag');
-    const group = threelet.getInteractiveGroup();
-    const testObjs = Threelet.Utils.createTestObjects();
-    testObjs.forEach(obj => group.add(obj));
-    threelet.scene.add(group);
+        //
 
-    const base = new THREE.Mesh(
-        new THREE.BoxGeometry(1.5, 0.1, 1.5),
-        new THREE.MeshStandardMaterial({
-            color: Math.random() * 0xffffff,
-            roughness: 0.7,
-            metalness: 0.0}));
-    base.position.set(2, -0.05, -2);
-    base.rotation.y = -Math.PI/4;
-    base.name = 'base';
-    group.add(base); // make the base interactive in VR
+        threelet.scene.add(Threelet.Utils.createTestHemisphereLight());
+        threelet.scene.add(Threelet.Utils.createTestDirectionalLight());
+        threelet.scene.add(new THREE.GridHelper(10, 20));
 
-    let avatar = null;
-    let mixer = null;
-    Threelet.Utils.loadCollada('./media/stormtrooper.dae', data => {
-        data.object.scale.set(0.4, 0.4, 0.4);
-        avatar = data.object;
-        mixer = data.mixer;
-    });
+        threelet.enableInteractiveGroup('drag');
+        const group = threelet.getInteractiveGroup();
+        const testObjs = Threelet.Utils.createTestObjects();
+        testObjs.forEach(obj => group.add(obj));
+        threelet.scene.add(group);
 
-    //
+        const base = new THREE.Mesh(
+            new THREE.BoxGeometry(1.5, 0.1, 1.5),
+            new THREE.MeshStandardMaterial({
+                color: Math.random() * 0xffffff,
+                roughness: 0.7,
+                metalness: 0.0}));
+        base.position.set(2, -0.05, -2);
+        base.rotation.y = -Math.PI/4;
+        base.name = 'base';
+        group.add(base); // make the base interactive in VR
 
-    const updateBase = () => {
-        if (! avatar) return; // still loading??
+        const { mixer, object: avatar } = await Threelet.Utils.loadCollada(
+            ColladaLoader, './media/stormtrooper.dae');
+        avatar.scale.set(0.4, 0.4, 0.4);
 
-        if (! avatar.parent) { // first time
-            console.log('@@ adding avatar to the scene');
-            threelet.scene.add(avatar);
-        }
+        //
 
-        // (re-)spawn
-        avatar.visible = base.visible = false;
-        setTimeout(() => {
-            console.log('@@ hi threre!!');
-            const [px, pz] = [4*Math.random()-2, 2*Math.random()-4];
-            base.position.x = px;
-            base.position.z = pz;
-            base.rotation.y = Math.atan(px/pz);
-            avatar.position.set(...base.position.toArray());
-            avatar.rotation.set(Math.PI/2, Math.PI, base.rotation.y); // kludge
+        const updateBase = () => {
+            if (! avatar) return; // still loading??
 
-            avatar.visible = base.visible = true;
-        }, 1000);
-    };
+            if (! avatar.parent) { // first time
+                console.log('@@ adding avatar to the scene');
+                threelet.scene.add(avatar);
+            }
 
-    threelet.on('pointer-click', (x, y) => {
-        // console.log('@@ click:', x, y);
+            // (re-)spawn
+            avatar.visible = base.visible = false;
+            setTimeout(() => {
+                console.log('@@ hi threre!!');
+                const [px, pz] = [4*Math.random()-2, 2*Math.random()-4];
+                base.position.x = px;
+                base.position.z = pz;
+                base.rotation.y = Math.atan(px/pz);
+                avatar.position.set(...base.position.toArray());
+                avatar.rotation.set(Math.PI/2, Math.PI, base.rotation.y); // kludge
 
-        // note: raycasting to SkinnedMesh seems not easy...
-        // https://github.com/mrdoob/three.js/pull/8953
-        // so using the base box instead
-        const isec = threelet.raycastFromMouse(x, y, [base, ...testObjs], false);
-        console.log('@@ isec:', isec);
-        if (isec && isec.object.name === 'base') updateBase();
-    });
-    threelet.on('xr-trigger-press-start', i => {
-        const isects = threelet.raycastFromController(
-            i, [base, ...testObjs], false);
+                avatar.visible = base.visible = true;
+            }, 1000);
+        };
 
-        console.log('@@ isects.length:', isects.length);
-        if (isects.length > 0 && isects[0].object.name === 'base') updateBase();
-    });
+        threelet.on('pointer-click', (x, y) => {
+            // console.log('@@ click:', x, y);
 
-    //
+            // note: raycasting to SkinnedMesh seems not easy...
+            // https://github.com/mrdoob/three.js/pull/8953
+            // so using the base box instead
+            const isec = threelet.raycastFromMouse(x, y, [base, ...testObjs], false);
+            console.log('@@ isec:', isec);
+            if (isec && isec.object.name === 'base') updateBase();
+        });
+        threelet.on('xr-trigger-press-start', i => {
+            const isects = threelet.raycastFromController(
+                i, [base, ...testObjs], false);
 
-    threelet.update = (t, dt) => {
-        // console.log('t, dt:', t, dt);
-        const py = 0.4 * Math.sin(t) + 0.5;
-        base.position.y = py;
+            console.log('@@ isects.length:', isects.length);
+            if (isects.length > 0 && isects[0].object.name === 'base') updateBase();
+        });
 
-        if (mixer !== null) {
-            mixer.update(dt);
-            avatar.position.y = py;
-        }
-    };
+        //
 
-    const fps = 30;
-    threelet.updateLoop(fps);
-    threelet.render(); // first time for the case of fps === 0
+        threelet.update = (t, dt) => {
+            // console.log('t, dt:', t, dt);
+            const py = 0.4 * Math.sin(t) + 0.5;
+            base.position.y = py;
 
+            if (mixer !== null) {
+                mixer.update(dt);
+                avatar.position.y = py;
+            }
+        };
+
+        const fps = 30;
+        threelet.updateLoop(fps);
+        threelet.render(); // first time for the case of fps === 0
+    })();
     </script>
 </body>
 </html>

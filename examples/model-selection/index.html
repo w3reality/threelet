@@ -22,237 +22,235 @@
         </div>
     </div>
 
-
     <script src="../deps/stats.min.js"></script>
-    <script src="../deps/three.min.js"></script>
-    <script src="../deps/OrbitControls.js"></script>
-    <script src="../deps/Sky.js"></script>
-    <script src="../deps/GLTFLoader.js"></script>
 
-    <!-- <script src="../../dist/threelet.min.js"></script> -->
-    <script src="../../target/threelet.js"></script>
-    <!-- ==== prod/dev ==== -->
     <script type="module">
-    // import Threelet from '../../src/index.js';
+    import { OrbitControls } from '../deps/three/examples/jsm/controls/OrbitControls.js';
+    import { Sky } from '../deps/three/examples/jsm/objects/Sky.js';
+    import { GLTFLoader } from '../deps/three/examples/jsm/loaders/GLTFLoader.js';
 
-    class Viewer extends Threelet {
-        onCreate(params) {
-            this.setup('mod-controls', THREE.OrbitControls);
-            this.setup('mod-stats', window.Stats, {panelType: 0}); // 0: fps, 1: ms, 2: mb, 3+: custom
-            this.setup('mod-sky', THREE.Sky);
+    (async () => {
+        const THREE = await import('../deps/three/build/three.module.js');
+        window.THREE = THREE;
 
-            this.selector = Viewer.createSelector();
-            const group = this.getInteractiveGroup();
-            group.add(this.selector); // for ray not passing ghrough the selector surface
-            this.scene.add(group);
-            if (Threelet.isVrSupported()) group.position.z -= 2.5;
+        const Threelet = (await import('../../dist/threelet.esm.js')).default;
+        // const Threelet = (await import('../../target/threelet.esm.dev.js')).default;
 
-            this.scene.add(Threelet.Utils.createTestHemisphereLight());
-            this.scene.add(Threelet.Utils.createTestDirectionalLight());
-            this.scene.add(new THREE.GridHelper(10, 20));
+        class Viewer extends Threelet {
+            onCreate(params) {
+                this.setup('mod-controls', OrbitControls);
+                this.setup('mod-stats', window.Stats, {panelType: 0}); // 0: fps, 1: ms, 2: mb, 3+: custom
+                this.setup('mod-sky', Sky);
 
-            this.paths = {
-                stormtrooper: '../media/dancing-stormtrooper/',
-                mora: '../media/welcome-to-mora-animated-gltf/',
-                stylized: '../media/stylized-hand-painted-scene/',
-                forest: '../media/forest-house/',
-            };
-            this.keyLast = 'invalid';
-            // this.updateModel('forest'); // default for dev
+                this.selector = Viewer.createSelector();
+                const group = this.getInteractiveGroup();
+                group.add(this.selector); // for ray not passing ghrough the selector surface
+                this.scene.add(group);
+                if (Threelet.isVrSupported()) group.position.z -= 2.5;
 
-            this.on('pointer-click', (x, y) => {
-                const plane = this.getPlane();
-                if (! plane) return;
+                this.scene.add(Threelet.Utils.createTestHemisphereLight());
+                this.scene.add(Threelet.Utils.createTestDirectionalLight());
+                this.scene.add(new THREE.GridHelper(10, 20));
 
-                const isec = this.raycastFromMouse(x, y, [plane], false);
-                console.log('@@ isec:', isec);
-                if (isec) {
-                    // console.log('@@ isec.faceIndex:', isec.faceIndex);
-                    this.onPlaneClicked(isec.faceIndex);
-                }
-            });
+                this.paths = {
+                    stormtrooper: '../media/dancing-stormtrooper/',
+                    mora: '../media/welcome-to-mora-animated-gltf/',
+                    stylized: '../media/stylized-hand-painted-scene/',
+                    forest: '../media/forest-house/',
+                };
+                this.keyLast = 'invalid';
+                // this.updateModel('forest'); // default for dev
 
-            this._planeClickStart = [-1, -1]; // faceIndex per controller i
-            this.on('xr-trigger-press-start', i => {
-                const plane = this.getPlane();
-                if (! plane) return;
+                this.on('pointer-click', (x, y) => {
+                    const plane = this.getPlane();
+                    if (! plane) return;
 
-                const isect = this.raycastFromController(i, [plane], false)[0];
-                if (isect) {
-                    console.log('@@ click-start');
-                    this._planeClickStart[i] = isect.faceIndex;
-                } else {
+                    const isec = this.raycastFromMouse(x, y, [plane], false);
+                    console.log('@@ isec:', isec);
+                    if (isec) {
+                        // console.log('@@ isec.faceIndex:', isec.faceIndex);
+                        this.onPlaneClicked(isec.faceIndex);
+                    }
+                });
+
+                this._planeClickStart = [-1, -1]; // faceIndex per controller i
+                this.on('xr-trigger-press-start', i => {
+                    const plane = this.getPlane();
+                    if (! plane) return;
+
+                    const isect = this.raycastFromController(i, [plane], false)[0];
+                    if (isect) {
+                        console.log('@@ click-start');
+                        this._planeClickStart[i] = isect.faceIndex;
+                    } else {
+                        this._planeClickStart[i] = -1;
+                    }
+                });
+                this.on('xr-trigger-press-end', i => {
+                    const plane = this.getPlane();
+                    if (! plane) return;
+
+                    const isect = this.raycastFromController(i, [plane], false)[0];
+                    if (isect) {
+                        const faceIndex = isect.faceIndex;
+                        console.log('@@ click-end; faceIndex:', faceIndex);
+                        if (Math.floor(faceIndex/2) ===
+                            Math.floor(this._planeClickStart[i]/2)) {
+                            console.log('@@ click fulfilled for faceIndex:', faceIndex);
+                            this.onPlaneClicked(faceIndex);
+                        }
+                    }
                     this._planeClickStart[i] = -1;
-                }
-            });
-            this.on('xr-trigger-press-end', i => {
-                const plane = this.getPlane();
-                if (! plane) return;
+                });
 
-                const isect = this.raycastFromController(i, [plane], false)[0];
-                if (isect) {
-                    const faceIndex = isect.faceIndex;
-                    console.log('@@ click-end; faceIndex:', faceIndex);
-                    if (Math.floor(faceIndex/2) ===
-                        Math.floor(this._planeClickStart[i]/2)) {
-                        console.log('@@ click fulfilled for faceIndex:', faceIndex);
-                        this.onPlaneClicked(faceIndex);
+
+                this.mixer = null;
+                this.update = (t, dt) => {
+                    if (this.mixer) this.mixer.update(dt);
+                };
+
+                this.updateLoop(20);
+                // this.updateLoop(1); // debug
+            }
+
+            getPlane() {
+                return this.selector.getObjectByName('thumbnails');
+            }
+
+            onPlaneClicked(faceIndex) {
+                switch (faceIndex) {
+                    case 0: case 1: this.updateModel('stormtrooper'); break;
+                    case 2: case 3: this.updateModel('mora'); break;
+                    case 4: case 5: this.updateModel('stylized'); break;
+                    case 6: case 7: this.updateModel('forest'); break;
+                    default: console.log('@@ woops');
+                }
+            }
+
+            async loadModel(key) {
+                const { mixer, object: obj } = await Threelet.Utils.loadGLTF(GLTFLoader,
+                    this.paths[key], 'scene.gltf');
+                obj.name = key;
+                obj.userData.mixer = mixer;
+
+                const dz = Threelet.isVrSupported() ? -2.5 : 0;
+                switch (key) {
+                    case 'stormtrooper':
+                        obj.position.set(0, 0, 1+dz);
+                        obj.scale.set(0.3, 0.3, 0.3);
+                        break;
+                    case 'mora':
+                        obj.position.set(0, 0.2, 1+dz);
+                        obj.scale.set(0.2, 0.2, 0.2);
+                        break;
+                    case 'stylized':
+                        obj.position.set(-5, -3, -3+dz);
+                        obj.rotation.set(0, Math.PI, 0);
+                        obj.scale.set(0.1, 0.1, 0.1);
+                        break;
+                    case 'forest':
+                        obj.position.set(0, 0.1, -5.5+dz);
+                        break;
+                    default: // nop
+                }
+
+                this.scene.add(obj);
+                return obj;
+            }
+
+            async updateModel(key) {
+                // console.log('@@ updateModel(): key:', key);
+                if (key === this.keyLast) return;
+
+                Viewer.updateCredits(key);
+                this.updateMarker(key);
+
+                const objLast = this.scene.getObjectByName(this.keyLast);
+                // console.log('objLast:', objLast);
+                if (objLast) objLast.visible = false;
+
+                this.keyLast = key;
+
+                let obj = this.scene.getObjectByName(key);
+                if (obj) {
+                    obj.visible = true;
+                } else {
+                    console.log('@@ calling loadModel() for ', key);
+                    obj = await this.loadModel(key);
+                }
+                this.mixer = obj.userData.mixer;
+
+                // now, make sure only the model corresponding to the 'key' is visible
+                for (name of Object.keys(this.paths)) {
+                    const obj = this.scene.getObjectByName(name);
+                    if (obj) obj.visible = obj.name === key;
+                }
+            }
+
+            updateMarker(key) {
+                const marker = this.selector.getObjectByName('marker');
+                if (! marker) return;
+
+                let markerPos = null;
+                switch (key) {
+                    case 'stormtrooper': markerPos = [-1, 0.05, 0.01]; break;
+                    case 'mora': markerPos = [-1+2, 0.05, 0.01]; break;
+                    case 'stylized': markerPos = [-1, 0.05-1, 0.01]; break;
+                    case 'forest': markerPos = [-1+2, 0.05-1, 0.01]; break;
+                    default: return; // woops
+                }
+                marker.visible = true;
+                marker.position.set(...markerPos);
+                this.render();
+            }
+
+            static updateCredits(key) {
+                const divInfo = document.getElementById('info');
+                divInfo.style.display = 'inherit';
+                for (let div of divInfo.children) {
+                    div.style.display = 'none';
+                    if (div.id === `info-${key}`) {
+                        div.style.display = 'inherit';
                     }
                 }
-                this._planeClickStart[i] = -1;
-            });
+            }
 
+            static createSelector() {
+                const selector = new THREE.Group();
+                selector.position.set(0, 1, -0.4);
+                selector.rotation.x = -Math.PI * 0.3;
 
-            this.mixer = null;
-            this.update = (t, dt) => {
-                if (this.mixer) this.mixer.update(dt);
-            };
+                const markerCanvas = document.createElement('canvas');
+                markerCanvas.width = 256;
+                markerCanvas.height = 128;
+                const ctx = markerCanvas.getContext('2d');
+                ctx.fillStyle = '#cc0';
+                ctx.fillRect(0, 0, markerCanvas.width, markerCanvas.height);
+                const marker = Threelet.Utils.createCanvasPlane(markerCanvas, 2, 0.1);
+                marker.position.set(-1, 0.05, 0.01);
+                marker.name = 'marker';
+                marker.visible = false;
+                selector.add(marker);
 
-            this.updateLoop(20);
-            // this.updateLoop(1); // debug
-        }
+                let plane = null;
+                Threelet.Utils.createCanvasFromImage('../media/img/selection-512x256.jpg', (can) => {
+                    plane = Threelet.Utils.createCanvasPlane(can, 4, 2, 2, 2);
+                    plane.material.transparent = true;
+                    plane.material.opacity = 0.9;
+                    plane.name = 'thumbnails';
+                    selector.add(plane);
+                });
 
-        getPlane() {
-            return this.selector.getObjectByName('thumbnails');
-        }
-
-        onPlaneClicked(faceIndex) {
-            switch (faceIndex) {
-                case 0: case 1: this.updateModel('stormtrooper'); break;
-                case 2: case 3: this.updateModel('mora'); break;
-                case 4: case 5: this.updateModel('stylized'); break;
-                case 6: case 7: this.updateModel('forest'); break;
-                default: console.log('@@ woops');
+                return selector;
             }
         }
 
-        async loadModel(key) {
-            const data = await Threelet.Utils.loadGLTF(THREE.GLTFLoader, // !!!! TODO
-            // const data = await Threelet.Utils.loadGLTF(GLTFLoader,
-                this.paths[key], 'scene.gltf');
-            // console.log('@@ data:', data);
-            const obj = data.object;
-            obj.name = key;
-            obj.userData.mixer = data.mixer;
-
-            const dz = Threelet.isVrSupported() ? -2.5 : 0;
-            switch (key) {
-                case 'stormtrooper':
-                    obj.position.set(0, 0, 1+dz);
-                    obj.scale.set(0.3, 0.3, 0.3);
-                    break;
-                case 'mora':
-                    obj.position.set(0, 0.2, 1+dz);
-                    obj.scale.set(0.2, 0.2, 0.2);
-                    break;
-                case 'stylized':
-                    obj.position.set(-5, -3, -3+dz);
-                    obj.rotation.set(0, Math.PI, 0);
-                    obj.scale.set(0.1, 0.1, 0.1);
-                    break;
-                case 'forest':
-                    obj.position.set(0, 0.1, -5.5+dz);
-                    break;
-                default: // nop
-            }
-
-            this.scene.add(obj);
-            return obj;
-        }
-
-        async updateModel(key) {
-            // console.log('@@ updateModel(): key:', key);
-            if (key === this.keyLast) return;
-
-            Viewer.updateCredits(key);
-            this.updateMarker(key);
-
-            const objLast = this.scene.getObjectByName(this.keyLast);
-            // console.log('objLast:', objLast);
-            if (objLast) objLast.visible = false;
-
-            this.keyLast = key;
-
-            let obj = this.scene.getObjectByName(key);
-            if (obj) {
-                obj.visible = true;
-            } else {
-                console.log('@@ calling loadModel() for ', key);
-                obj = await this.loadModel(key);
-            }
-            this.mixer = obj.userData.mixer;
-
-            // now, make sure only the model corresponding to the 'key' is visible
-            for (name of Object.keys(this.paths)) {
-                const obj = this.scene.getObjectByName(name);
-                if (obj) obj.visible = obj.name === key;
-            }
-        }
-
-        updateMarker(key) {
-            const marker = this.selector.getObjectByName('marker');
-            if (! marker) return;
-
-            let markerPos = null;
-            switch (key) {
-                case 'stormtrooper': markerPos = [-1, 0.05, 0.01]; break;
-                case 'mora': markerPos = [-1+2, 0.05, 0.01]; break;
-                case 'stylized': markerPos = [-1, 0.05-1, 0.01]; break;
-                case 'forest': markerPos = [-1+2, 0.05-1, 0.01]; break;
-                default: return; // woops
-            }
-            marker.visible = true;
-            marker.position.set(...markerPos);
-            this.render();
-        }
-
-        static updateCredits(key) {
-            const divInfo = document.getElementById('info');
-            divInfo.style.display = 'inherit';
-            for (let div of divInfo.children) {
-                div.style.display = 'none';
-                if (div.id === `info-${key}`) {
-                    div.style.display = 'inherit';
-                }
-            }
-        }
-
-        static createSelector() {
-            const selector = new THREE.Group();
-            selector.position.set(0, 1, -0.4);
-            selector.rotation.x = -Math.PI * 0.3;
-
-            const markerCanvas = document.createElement('canvas');
-            markerCanvas.width = 256;
-            markerCanvas.height = 128;
-            const ctx = markerCanvas.getContext('2d');
-            ctx.fillStyle = '#cc0';
-            ctx.fillRect(0, 0, markerCanvas.width, markerCanvas.height);
-            const marker = Threelet.Utils.createCanvasPlane(markerCanvas, 2, 0.1);
-            marker.position.set(-1, 0.05, 0.01);
-            marker.name = 'marker';
-            marker.visible = false;
-            selector.add(marker);
-
-            let plane = null;
-            Threelet.Utils.createCanvasFromImage('../media/img/selection-512x256.jpg', (can) => {
-                plane = Threelet.Utils.createCanvasPlane(can, 4, 2, 2, 2);
-                plane.material.transparent = true;
-                plane.material.opacity = 0.9;
-                plane.name = 'thumbnails';
-                selector.add(plane);
-            });
-
-            return selector;
-        }
-    }
-
-    const viewer = new Viewer({
-        canvas: document.getElementById("canvasViewer"),
-        optAxes: false,
-        optVR: true,
-    });
-
+        const viewer = new Viewer({
+            canvas: document.getElementById("canvasViewer"),
+            optAxes: false,
+            optVR: true,
+        });
+    })();
     </script>
 </body>
 </html>

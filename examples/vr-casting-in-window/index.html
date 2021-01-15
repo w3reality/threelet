@@ -41,7 +41,8 @@
                 this.scene.add(Threelet.Utils.createTestDirectionalLight());
 
                 let mixer = null;
-                Threelet.Utils.loadGLTF(GLTFLoader, '../media/dancing-stormtrooper/', 'scene.gltf', data => {
+                Threelet.Utils.loadGLTF(GLTFLoader,
+                    '../media/dancing-stormtrooper/', 'scene.gltf', data => {
                     console.log('@@ data:', data);
                     mixer = data.mixer;
                     const obj = data.object;
@@ -107,7 +108,8 @@
                 this.scene.add(Threelet.Utils.createTestDirectionalLight());
 
                 let mixer = null;
-                Threelet.Utils.loadGLTF(GLTFLoader, '../media/stylized-hand-painted-scene/', 'scene.gltf', data => {
+                Threelet.Utils.loadGLTF(GLTFLoader,
+                    '../media/stylized-hand-painted-scene/', 'scene.gltf', data => {
                     console.log('@@ data:', data);
                     mixer = data.mixer;
                     const obj = data.object;
