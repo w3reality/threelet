@@ -292,14 +292,13 @@ animation loading:
 [example](https://w3reality.github.io/threelet/examples/animation-hello/index.html) | [source](https://github.com/w3reality/threelet/tree/master/examples/animation-hello/index.html)
 
 ```js
-// <script src="../deps/GLTFLoader.js"></script>
+// Using 'three/examples/jsm/loaders/GLTFLoader.js'
 const data = await Threelet.Utils.loadGLTF(GLTFLoader, path, file);
 
-// <script src="../deps/inflate.min.js"></script>
-// <script src="../deps/FBXLoader.js"></script>
+// Using 'three/examples/jsm/loaders/FBXLoader.js'
 const data = await Threelet.Utils.loadFBX(FBXLoader, path);
 
-// <script src="../deps/ColladaLoader.js"></script>
+// Using 'three/examples/jsm/loaders/ColladaLoader.js'
 const data = await Threelet.Utils.loadCollada(ColladaLoader, path);
 ```
 
