@@ -293,14 +293,14 @@ animation loading:
 
 ```js
 // <script src="../deps/GLTFLoader.js"></script>
-const data = await Threelet.Utils.loadGLTF(path, file);
+const data = await Threelet.Utils.loadGLTF(GLTFLoader, path, file);
 
 // <script src="../deps/inflate.min.js"></script>
 // <script src="../deps/FBXLoader.js"></script>
-const data = await Threelet.Utils.loadFBX(path);
+const data = await Threelet.Utils.loadFBX(FBXLoader, path);
 
 // <script src="../deps/ColladaLoader.js"></script>
-const data = await Threelet.Utils.loadCollada(path);
+const data = await Threelet.Utils.loadCollada(ColladaLoader, path);
 ```
 
 creating test THREE objects (used in the examples for shortcuts):
