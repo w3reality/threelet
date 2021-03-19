@@ -71,7 +71,6 @@ class VRControlHelper {
         const triggerLoop = new THREE.LineLoop(
             new THREE.CircleGeometry(0.0125, 64),
             new THREE.LineBasicMaterial({color: 0xcccccc}));
-        triggerLoop.geometry.vertices.shift(); // remove the center vertex
         triggerLoop.position.set(0, 0, - this.controllerArmLength - 0.05);
 
         const triggerCircle = new THREE.Mesh(
@@ -85,14 +84,12 @@ class VRControlHelper {
         const padLoop = new THREE.LineLoop(
             new THREE.CircleGeometry(0.025, 64),
             new THREE.LineBasicMaterial({color: 0xcccccc}));
-        padLoop.geometry.vertices.shift(); // remove the center vertex
         padLoop.position.set(0, 0.0125, - this.controllerArmLength - 0.025);
         padLoop.rotation.x = Math.PI/2;
 
         const padLoopTouch = new THREE.LineLoop(
             new THREE.CircleGeometry(0.005, 64),
             new THREE.LineBasicMaterial({color: 0x00cccc}));
-        padLoopTouch.geometry.vertices.shift(); // remove the center vertex
         padLoopTouch.position.set(0, 0.0125, - this.controllerArmLength - 0.025);
         padLoopTouch.rotation.x = Math.PI/2;
         padLoopTouch.visible = false;
