@@ -2,7 +2,7 @@
 
 [![npm][npm-badge]][npm-url]
 [![MIT licensed][mit-badge]][mit-url]
-<!--[![CI][actions-badge]][actions-url]-->
+[![CI][actions-badge]][actions-url]
 
 [npm-badge]: https://img.shields.io/npm/v/threelet.svg
 [npm-url]: https://www.npmjs.com/package/threelet
@@ -11,8 +11,7 @@
 [actions-badge]: https://github.com/w3reality/threelet/workflows/CI/badge.svg
 [actions-url]: https://github.com/w3reality/threelet/actions
 
-
-**threelet** is a [three.js](https://github.com/mrdoob/three.js/) based framework for rapidly developing 3D/WebXR apps all at once!
+**threelet** is a [three.js](https://github.com/mrdoob/three.js/) based component for rapidly developing 3D/WebXR apps all at once!
 
 Using threelet\'s built-in features, developers who have a minimal knowledge of three.js can immediately start writing interactive 3D apps with less code.
 
