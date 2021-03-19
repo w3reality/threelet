@@ -1,6 +1,3 @@
-// Threelet - https://github.com/w3reality/threelet
-// 3D/WebXR app framework based on three.js (MIT License)
-
 import pkg from '../package.json';
 const __version = pkg.version;
 
