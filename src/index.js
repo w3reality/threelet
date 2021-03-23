@@ -98,10 +98,16 @@ class Threelet {
             'mouse-click-middle',
             'mouse-click-right',
             'mouse-drag-end',
-            'pointer-down',
+            'pointer-down', // alias of 'pointer-down-left'
+            'pointer-down-left',
+            'pointer-down-middle',
+            'pointer-down-right',
             'pointer-move',
             'pointer-up',
-            'pointer-click',
+            'pointer-click', // alias of 'pointer-click-left'
+            'pointer-click-left',
+            'pointer-click-middle',
+            'pointer-click-right',
             'pointer-drag-end',
             'touch-start',
             'touch-move',
@@ -116,11 +122,12 @@ class Threelet {
             'xr-trigger-press-end',
         ];
 
+        this._initCursorListeners(this.renderer.domElement, 'mouse'); // legacy support
+        this._initCursorListeners(this.renderer.domElement, 'pointer');
         this._initTouchListeners(this.renderer.domElement);
-        this._initPointerListeners(this.renderer.domElement);
 
         //======== FIXME ?? - Oculus Go's desktop mode, OrbitControls breaks mouse events...
-        this._initMouseListeners(this.renderer.domElement);
+        // this._initMouseListeners(this.renderer.domElement);
         //======== approach below is this too hackish and still not sure how to trigger
         // // kludge for mouse events and overlay;
         // canvas.style.display = 'block'; // https://stackoverflow.com/questions/8600393/there-is-a-4px-gap-below-canvas-video-audio-elements-in-html5
@@ -530,6 +537,8 @@ class Threelet {
             // aliases
             if (eventName === 'mouse-down') eventName = 'mouse-down-left';
             if (eventName === 'mouse-click') eventName = 'mouse-click-left';
+            if (eventName === 'pointer-down') eventName = 'pointer-down-left';
+            if (eventName === 'pointer-click') eventName = 'pointer-click-left';
 
             const listeners = eventName.startsWith('xr-') ?
                 this._vrcHelper._eventListeners : this._eventListeners;
@@ -545,77 +554,41 @@ class Threelet {
         const fn = this._eventListeners[name];
         if (fn) fn(...coords);
     }
-    _initMouseListeners(canvas) {
+
+    _initCursorListeners(canvas, type) { // `type`: either 'mouse' or 'pointer'
         // https://stackoverflow.com/questions/6042202/how-to-distinguish-mouse-click-and-drag
         let isDragging = false;
-        canvas.addEventListener("mousedown", e => {
+        canvas.addEventListener(`${type}down`, e => {
             isDragging = false;
             const coords = Threelet.getInputCoords(e, canvas);
-            // console.log('@@ mouse down:', ...coords);
             if (e.button === 0) {
-                this._callIfDefined('mouse-down-left', coords);
+                this._callIfDefined(`${type}-down-left`, coords);
             } else if (e.button === 1) {
-                this._callIfDefined('mouse-down-middle', coords);
+                this._callIfDefined(`${type}-down-middle`, coords);
             } else if (e.button === 2) {
-                this._callIfDefined('mouse-down-right', coords);
+                this._callIfDefined(`${type}-down-right`, coords);
             }
         }, false);
-        canvas.addEventListener("mousemove", e => {
+        canvas.addEventListener(`${type}move`, e => {
             isDragging = true;
             const coords = Threelet.getInputCoords(e, canvas);
-            // console.log('@@ mouse move:', ...coords);
-            this._callIfDefined('mouse-move', coords);
+            this._callIfDefined(`${type}-move`, coords);
         }, false);
-        canvas.addEventListener("mouseup", e => {
-            // console.log('e:', e);
+        canvas.addEventListener(`${type}up`, e => {
             const coords = Threelet.getInputCoords(e, canvas);
-
-            // console.log('@@ mouse up:', ...coords);
-            this._callIfDefined('mouse-up', coords);
+            this._callIfDefined(`${type}-up`, coords);
 
             if (isDragging) {
-                // console.log("mouseup: drag");
-                this._callIfDefined('mouse-drag-end', coords);
+                this._callIfDefined(`${type}-drag-end`, coords);
             } else {
-                console.log("mouseup: click");
+                console.log(`${type}up: click`);
                 if (e.button === 0) {
-                    // console.log('@@ mouse click left:', ...coords);
-                    this._callIfDefined('mouse-click-left', coords);
+                    this._callIfDefined(`${type}-click-left`, coords);
                 } else if (e.button === 1) {
-                    this._callIfDefined('mouse-click-middle', coords);
+                    this._callIfDefined(`${type}-click-middle`, coords);
                 } else if (e.button === 2) {
-                    // console.log('@@ mouse click right:', ...coords);
-                    this._callIfDefined('mouse-click-right', coords);
+                    this._callIfDefined(`${type}-click-right`, coords);
                 }
-            }
-        }, false);
-    }
-    _initPointerListeners(canvas) {
-        let isDragging = false;
-        canvas.addEventListener("pointerdown", e => {
-            isDragging = false;
-            const coords = Threelet.getInputCoords(e, canvas);
-            // console.log('@@ pointer down:', ...coords);
-            this._callIfDefined('pointer-down', coords);
-        }, false);
-        canvas.addEventListener("pointermove", e => {
-            isDragging = true;
-            const coords = Threelet.getInputCoords(e, canvas);
-            // console.log('@@ pointer move:', ...coords);
-            this._callIfDefined('pointer-move', coords);
-        }, false);
-        canvas.addEventListener("pointerup", e => {
-            const coords = Threelet.getInputCoords(e, canvas);
-
-            // console.log('@@ pointer up:', ...coords);
-            this._callIfDefined('pointer-up', coords);
-
-            if (isDragging) {
-                console.log("pointerup: drag");
-                this._callIfDefined('pointer-drag-end', coords);
-            } else {
-                console.log("pointerup: click");
-                this._callIfDefined('pointer-click', coords);
             }
         }, false);
     }

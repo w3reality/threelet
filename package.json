@@ -1,6 +1,6 @@
 {
     "name": "threelet",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "Portable 3D/WebXR component based on three.js",
     "main": "dist/threelet.min.js",
     "directories": {
