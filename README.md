@@ -19,7 +19,7 @@ Some notable features include:
 
 - built-in render loop manager (with auto VR context switching),
 - function interface `.update = (t, dt) => {}` for programming temporal 3D scenes, and
-- input device abstraction: mouse/xr-controller event listeners.
+- input device abstraction: mouse/pointer/xr-controller event listeners.
 
 ## Demos
 
@@ -216,6 +216,13 @@ threelet.setupMouseInterface({
     onDragEnd: (mx, my) => { /* ... */ },
 });
 
+threelet.setupPointerInterface({
+    onClick: (mx, my) => { /* ... */ },
+    onDrag: (mx, my) => { /* ... */ },
+    onDragStart: (mx, my) => { /* ... */ },
+    onDragEnd: (mx, my) => { /* ... */ },
+});
+
 threelet.setupTouchInterface({
     onClick: (mx, my) => { /* ... */ },
     onDrag: (mx, my) => { /* ... */ },
@@ -226,7 +233,7 @@ threelet.setupTouchInterface({
 
 ### Low-level event listeners
 
-setting mouse listeners:
+setting mouse/pointer/touch listeners:
 
 [example](https://w3reality.github.io/threelet/examples/model-selection/index.html) | [source](https://github.com/w3reality/threelet/tree/master/examples/model-selection/index.html)
 
@@ -237,13 +244,25 @@ threelet.on('mouse-click', (mx, my) => { /* ... */ }); // alias of 'mouse-click-
 threelet.on('mouse-click-left', (mx, my) => { /* ... */ });
 threelet.on('mouse-click-middle', (mx, my) => { /* ... */ });
 threelet.on('mouse-click-right', (mx, my) => { /* ... */ });
-threelet.on('mouse-down', (mx, my) => { /* ... */ });  // alias of 'mouse-down-left'
+threelet.on('mouse-down', (mx, my) => { /* ... */ }); // alias of 'mouse-down-left'
 threelet.on('mouse-down-left', (mx, my) => { /* ... */ });
 threelet.on('mouse-down-middle', (mx, my) => { /* ... */ });
 threelet.on('mouse-down-right', (mx, my) => { /* ... */ });
 threelet.on('mouse-move', (mx, my) => { /* ... */ });
 threelet.on('mouse-up', (mx, my) => { /* ... */ });
 threelet.on('mouse-drag-end', (mx, my) => { /* ... */ });
+
+threelet.on('pointer-click', (mx, my) => { /* ... */ }); // alias of 'pointer-click-left'
+threelet.on('pointer-click-left', (mx, my) => { /* ... */ });
+threelet.on('pointer-click-middle', (mx, my) => { /* ... */ });
+threelet.on('pointer-click-right', (mx, my) => { /* ... */ });
+threelet.on('pointer-down', (mx, my) => { /* ... */ }); // alias of 'pointer-down-left'
+threelet.on('pointer-down-left', (mx, my) => { /* ... */ });
+threelet.on('pointer-down-middle', (mx, my) => { /* ... */ });
+threelet.on('pointer-down-right', (mx, my) => { /* ... */ });
+threelet.on('pointer-move', (mx, my) => { /* ... */ });
+threelet.on('pointer-up', (mx, my) => { /* ... */ });
+threelet.on('pointer-drag-end', (mx, my) => { /* ... */ });
 
 threelet.on('touch-start', (mx, my) => { /* ... */ });
 threelet.on('touch-move', (mx, my) => { /* ... */ });
