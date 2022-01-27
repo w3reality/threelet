@@ -34,6 +34,6 @@
     "devDependencies": {
         "es-pack-js": "0.5.2",
         "regenerator": "^0.14.2",
-        "three": "^0.125.0"
+        "three": "^0.137.0"
     }
 }
