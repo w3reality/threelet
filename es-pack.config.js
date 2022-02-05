@@ -6,6 +6,9 @@ module.exports = {
         webpackConfig.externals = {'three': 'THREE'};
     },
     onVerify: (preloadJs, units) => {
+        // Due to the `navigator` symbol being bundled, skip all node-verify
+        units.node = null;
+
         const pathUpper = path.resolve(__dirname, './node_modules/THREE');
         if (!fs.existsSync(pathUpper)) { // can be true on linux (case-sensitive fs)
             // ├── node_modules
@@ -13,7 +16,6 @@ module.exports = {
             try { fs.symlinkSync('./three', pathUpper); } catch (_) {}
         }
 
-        preloadJs.node = path.resolve(__dirname, './tests/node/preload.js');
         preloadJs.browser = path.resolve(__dirname, './node_modules/three/build/three.min.js');
     },
 };
