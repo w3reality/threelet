@@ -7,14 +7,20 @@
 <body>
     <canvas id="canvas" style="width: 100%; height: 100%;"></canvas>
 
-    <script src="../deps/three.min.js"></script>
-    <script src="../deps/OrbitControls.js"></script>
-    <script src="../../dist/threelet.min.js"></script>
-    <script>
+    <script async src="../deps/es-module-shims.js"></script>
+    <script type="importmap-shim" src="../deps/importmap.js"></script>
+    <script type="module-shim">
+import * as THREE from 'three';
+import { OrbitControls } from 'orbit-controls';
+
+window.THREE = THREE;
+(async () => {
+    const Threelet = (await import('../../dist/threelet.esm.js')).default;
+
     class App extends Threelet {
         // override
         onCreate(params) {
-            this.setup('mod-controls', THREE.OrbitControls);
+            this.setup('mod-controls', OrbitControls);
 
             this.scene.add(new THREE.GridHelper(10, 20));
 
@@ -39,6 +45,7 @@
         canvas: document.getElementById("canvas"),
         optVR: true,
     });
+})();
     </script>
 </body>
 </html>

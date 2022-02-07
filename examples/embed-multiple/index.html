@@ -33,33 +33,36 @@
         </div>
     </div>
 
-    <script src="../deps/stats.min.js"></script>
-    <script src="../deps/three.min.js"></script>
-    <script src="../deps/OrbitControls.js"></script>
+    <script async src="../deps/es-module-shims.js"></script>
+    <script type="importmap-shim" src="../deps/importmap.js"></script>
+    <script type="module-shim">
+import * as THREE from 'three';
+import Stats from 'stats';
+import { OrbitControls } from 'orbit-controls';
 
-    <script src="../../dist/threelet.min.js"></script>
-    <!-- ==== prod/dev ==== -->
-    <script type="module">
-    // import Threelet from '../../src/index.js';
+window.THREE = THREE;
+(async () => {
+    const Threelet = (await import('../../dist/threelet.esm.js')).default;
 
     for (let i of [0, 1, 2, 3]) {
         const optVR = i % 2 === 1;
         const threelet = new Threelet({width: 380, height: 260, optVR});
         document.getElementById(`viewer${i}`).appendChild(threelet.domElement);
 
-        threelet.setup('mod-controls', THREE.OrbitControls);
+        threelet.setup('mod-controls', OrbitControls);
 
         const cube = Threelet.Utils.createTestCube([0.4, 0.1, 0.4], 0xff00ff);
         threelet.scene.add(cube);
         if (i < 2) {
-            threelet.setup('mod-stats', window.Stats, {panelType: 1});
+            threelet.setup('mod-stats', Stats, {panelType: 1});
             threelet.render(); // first time
         } else {
-            threelet.setup('mod-stats', window.Stats, {panelType: 0});
+            threelet.setup('mod-stats', Stats, {panelType: 0});
             threelet.update = (t, dt) => { cube.position.set(Math.cos(t), 0.5, Math.sin(t)-1.5); };
             threelet.updateLoop(4); // loop with the spcified FPS
         }
     }
+})();
     </script>
 </body>
 </html>

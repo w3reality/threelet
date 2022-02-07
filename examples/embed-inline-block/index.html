@@ -15,21 +15,23 @@
         This <span id="viewer"></span> is an inline-block element.
     </div>
 
-    <script src="../deps/three.min.js"></script>
-    <script src="../deps/OrbitControls.js"></script>
-    <script src="../deps/stats.min.js"></script>
-    <script src="../deps/Sky.js"></script>
+    <script async src="../deps/es-module-shims.js"></script>
+    <script type="importmap-shim" src="../deps/importmap.js"></script>
+    <script type="module-shim">
+import * as THREE from 'three';
+import Stats from 'stats';
+import { OrbitControls } from 'orbit-controls';
+import { Sky } from 'sky';
 
-    <script src="../../dist/threelet.min.js"></script>
-    <!-- <script src="../../lib/threelet.js"></script> -->
-    <!-- ==== prod/dev ==== -->
-    <script type="module">
-    // import Threelet from '../../src/index.js';
+window.THREE = THREE;
+(async () => {
+    const Threelet = (await import('../../dist/threelet.esm.js')).default;
+    // const Threelet = (await import('../../target/threelet.esm.dev.js')).default;
 
     const threelet = new Threelet({width: 480, height: 320, optVR: true});
-    threelet.setup('mod-controls', THREE.OrbitControls);
-    threelet.setup('mod-sky', THREE.Sky);
-    threelet.setup('mod-stats', window.Stats, {panelType: 0});
+    threelet.setup('mod-controls', OrbitControls);
+    threelet.setup('mod-sky', Sky);
+    threelet.setup('mod-stats', Stats, {panelType: 0});
     document.getElementById('viewer').appendChild(threelet.domElement);
 
     threelet.scene.add(Threelet.Utils.createTestHemisphereLight());
@@ -43,6 +45,7 @@
     };
 
     threelet.updateLoop(10); // loop with the spcified FPS
+})();
     </script>
 </body>
 </html>

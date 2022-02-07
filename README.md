@@ -74,9 +74,9 @@ $ npm i threelet
 ```html
 <canvas id="canvas" style="width: 100%; height: 100%;"></canvas>
 
-<script src="../deps/three.min.js"></script>
-<script src="../deps/OrbitControls.js"></script>
-<script src="../deps/stats.min.js"></script>
+<script src="../deps/three/build/three.min.js"></script>
+<script src="../deps/three/examples/js/controls/OrbitControls.js"></script>
+<script src="../deps/three/examples/js/libs/stats.min.js"></script>
 
 <script src="../../dist/threelet.min.js"></script>
 

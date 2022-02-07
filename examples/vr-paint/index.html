@@ -7,17 +7,19 @@
 <body>
     <canvas id="viewer" style="width: 100%; height: 100%;"></canvas>
 
-    <script src="../deps/stats.min.js"></script>
-    <script src="../deps/three.min.js"></script>
-    <script src="../deps/OrbitControls.js"></script>
-    <script src="../deps/Sky.js"></script>
     <script src="../deps/signature_pad.min.js"></script>
 
-    <script src="../../dist/threelet.min.js"></script>
-    <!-- ==== prod/dev ==== -->
-    <script type="module">
-    // import Threelet from '../../src/index.js';
+    <script async src="../deps/es-module-shims.js"></script>
+    <script type="importmap-shim" src="../deps/importmap.js"></script>
+    <script type="module-shim">
+import * as THREE from 'three';
+import Stats from 'stats';
+import { OrbitControls } from 'orbit-controls';
+import { Sky } from 'sky';
 
+window.THREE = THREE;
+(async () => {
+    const Threelet = (await import('../../dist/threelet.esm.js')).default;
 
     const __webColors = [ // https://en.wikipedia.org/wiki/Web_colors
         'FFFFFF', 'C0C0C0', '808080', '000000', 'FF0000', '800000', 'FFFF00', '808000',
@@ -26,12 +28,12 @@
 
     class Viewer extends Threelet {
         onCreate(params) {
-            const controls = this.setup('mod-controls', THREE.OrbitControls);
+            const controls = this.setup('mod-controls', OrbitControls);
             controls.enableRotate = false;
             // controls.enablePan = false;
 
-            this.setup('mod-stats', window.Stats, {panelType: 0}); // 0: fps, 1: ms, 2: mb, 3+: custom
-            this.setup('mod-sky', THREE.Sky);
+            this.setup('mod-stats', Stats, {panelType: 0}); // 0: fps, 1: ms, 2: mb, 3+: custom
+            this.setup('mod-sky', Sky);
 
             const _planeCanvas = Viewer.createPlaneCanvas();
             this.selector = Viewer.createSelector(_planeCanvas);
@@ -445,7 +447,7 @@
         optVR: true,
     });
     if (! Threelet.isVrSupported()) { viewer.camera.position.z = 2; }
-
+})();
     </script>
 </body>
 </html>

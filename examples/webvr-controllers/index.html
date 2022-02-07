@@ -25,15 +25,18 @@ WebXR controller state visualizer
         </p>
     </div>
 
-    <script src="../deps/stats.min.js"></script>
-    <script src="../deps/three.min.js"></script>
-    <script src="../deps/OrbitControls.js"></script>
+    <script async src="../deps/es-module-shims.js"></script>
+    <script type="importmap-shim" src="../deps/importmap.js"></script>
+    <script type="module-shim">
+import * as THREE from 'three';
+import Stats from 'stats';
+import { OrbitControls } from 'orbit-controls';
+import { Sky } from 'sky';
 
-    <script src="../../dist/threelet.min.js"></script>
-    <!-- <script src="../../lib/threelet.js"></script> -->
-    <!-- ==== prod/dev ==== -->
-    <script type="module">
-    // import Threelet from '../../src/index.js';
+window.THREE = THREE;
+(async () => {
+    const Threelet = (await import('../../dist/threelet.esm.js')).default;
+    // const Threelet = (await import('../../target/threelet.esm.dev.js')).default;
 
     const scene = new THREE.Scene();
     const threelet = new Threelet({
@@ -43,8 +46,8 @@ WebXR controller state visualizer
         optCameraPosition: [0, 1, 1.2],
     });
 
-    threelet.setup('mod-controls', THREE.OrbitControls);
-    threelet.setup('mod-stats', window.Stats, {panelType: 1}); // 0: fps, 1: ms, 2: mb, 3+: custom
+    threelet.setup('mod-controls', OrbitControls);
+    threelet.setup('mod-stats', Stats, {panelType: 1}); // 0: fps, 1: ms, 2: mb, 3+: custom
 
 
     const vrTouchpadTouching = [false, false];
@@ -155,7 +158,7 @@ WebXR controller state visualizer
     // first time
     threelet.update();
     threelet.render();
-
+})();
     </script>
 </body>
 </html>

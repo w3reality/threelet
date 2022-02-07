@@ -6,8 +6,14 @@
 </head>
 <body>
     <div>
-        Hybrid apps with WebXR buttons.
-        <a href="https://github.com/w3reality/threelet/tree/master/examples/embed-multiple-buttons/index.html">source code</a>
+        <p>
+            Hybrid apps with WebXR buttons.
+            <a href="https://github.com/w3reality/threelet/tree/master/examples/embed-multiple-buttons/index.html">source code</a>
+        </p>
+        <p>
+            To test VR/AR on Desktop browsers, use the WebXR Emulator Extension (<a href="https://addons.mozilla.org/en-US/firefox/addon/webxr-api-emulator/">Firefox</a>, <a href="https://chrome.google.com/webstore/detail/webxr-api-emulator/mjddjgeghkdijejnciaefnkjmkafnnje?hl=en">Chrome</a>).
+            (To enter AR, select "Samsung Galaxy S8+ (AR)" under the "WebXR" tab inside Inspector, reload the page, and click the "START AR" button.)
+        </p>
     </div>
     <hr />
     <style>div.ib { display: inline-block; }</style>
@@ -33,13 +39,15 @@
         </div>
     </div>
 
-    <script src="../deps/three.min.js"></script>
-    <script src="../deps/OrbitControls.js"></script>
+    <script async src="../deps/es-module-shims.js"></script>
+    <script type="importmap-shim" src="../deps/importmap.js"></script>
+    <script type="module-shim">
+import * as THREE from 'three';
+import { OrbitControls } from 'orbit-controls';
 
-    <script src="../../dist/threelet.min.js"></script>
-    <!-- ==== prod/dev ==== -->
-    <script type="module">
-    // import Threelet from '../../src/index.js';
+window.THREE = THREE;
+(async () => {
+    const Threelet = (await import('../../dist/threelet.esm.js')).default;
 
     for (let i of [0, 1, 2, 3]) {
         const threelet = new Threelet({
@@ -51,7 +59,7 @@
         });
 
         document.getElementById(`viewer${i}`).appendChild(threelet.domElement);
-        threelet.setup('mod-controls', THREE.OrbitControls);
+        threelet.setup('mod-controls', OrbitControls);
 
         const cube = Threelet.Utils.createTestCube([0.6, 0.2, 0.6], 0x00cccc);
         threelet.scene.add(cube);
@@ -61,6 +69,7 @@
         };
         threelet.updateLoop(4); // loop with the spcified FPS
     }
+})();
     </script>
 </body>
 </html>

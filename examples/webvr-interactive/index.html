@@ -41,17 +41,17 @@ interactive VR app
         </div>
     </div>
 
-    <script src="../deps/stats.min.js"></script>
+    <script async src="../deps/es-module-shims.js"></script>
+    <script type="importmap-shim" src="../deps/importmap.js"></script>
+    <script type="module-shim">
+    import * as THREE from 'three';
+    import Stats from 'stats';
+    import { OrbitControls } from 'orbit-controls';
+    import { Sky } from 'sky';
+    import { ColladaLoader } from 'collada-loader';
 
-    <script type="module">
-    import { OrbitControls } from '../deps/three/examples/jsm/controls/OrbitControls.js';
-    import { Sky } from '../deps/three/examples/jsm/objects/Sky.js';
-    import { ColladaLoader } from '../deps/three/examples/jsm/loaders/ColladaLoader.js';
-
+    window.THREE = THREE;
     (async () => {
-        const THREE = await import('../deps/three/build/three.module.js');
-        window.THREE = THREE;
-
         const Threelet = (await import('../../dist/threelet.esm.js')).default;
         // const Threelet = (await import('../../target/threelet.esm.dev.js')).default;
 
