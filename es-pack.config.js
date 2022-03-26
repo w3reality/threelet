@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 
 module.exports = {
-    onBundle: (webpackConfig) => {
+    onBundle: (webpackConfig, webpack) => {
         webpackConfig.externals = {'three': 'THREE'};
     },
     onVerify: (preloadJs, units) => {
