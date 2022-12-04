@@ -1,6 +1,6 @@
 {
     "name": "threelet",
-    "version": "1.1.3-dev.2",
+    "version": "1.1.3-dev.3",
     "description": "Portable 3D/WebXR component based on three.js",
     "main": "dist/threelet.min.js",
     "directories": {
@@ -32,7 +32,7 @@
     "homepage": "https://github.com/w3reality/threelet",
     "dependencies": {},
     "devDependencies": {
-        "es-pack-js": "0.5.10",
+        "es-pack-js": "0.5.11",
         "regenerator": "^0.14.2",
         "three": "^0.137.0"
     }
